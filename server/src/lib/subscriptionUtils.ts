@@ -16,21 +16,23 @@ export interface SubscriptionInfo {
 }
 
 export function getTierInfo(planName: string): TierInfo {
-  if (planName === "free") {
+  const normalizedPlanName = planName.trim().toLowerCase();
+
+  if (normalizedPlanName === "free") {
     return {
       tier: "Free",
       monthsAllowed: 6,
     };
   }
 
-  if (planName.startsWith("standard")) {
+  if (normalizedPlanName.startsWith("standard")) {
     return {
       tier: "Standard",
       monthsAllowed: 24,
     };
   }
 
-  if (planName.startsWith("pro")) {
+  if (normalizedPlanName.startsWith("pro")) {
     return {
       tier: "Pro",
       monthsAllowed: 60,
