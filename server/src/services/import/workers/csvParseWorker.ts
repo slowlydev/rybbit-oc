@@ -7,8 +7,8 @@ import { r2Storage } from "../../storage/r2StorageService.js";
 import { CSV_PARSE_QUEUE, CsvParseJob, DATA_INSERT_QUEUE, DataInsertJob } from "./jobs.js";
 import { UmamiEvent, umamiHeaders } from "../mappings/umami.js";
 import { updateImportStatus } from "../importStatusManager.js";
-import { ImportLimiter } from "../importLimiter.js";
 import { deleteImportFile } from "../utils.js";
+import { ImportQuotaTracker } from "../importQuotaChecker.js";
 
 const getImportDataHeaders = (platform: string) => {
   switch (platform) {
@@ -92,7 +92,7 @@ export async function registerCsvParseWorker() {
     let processingTimeout: NodeJS.Timeout | null = null;
 
     try {
-      const quotaTracker = await ImportLimiter.createQuotaTracker(organization);
+      const quotaTracker = await ImportQuotaTracker.create(organization);
 
       const chunkSize = 5000;
       const MAX_ROWS = 10_000_000; // 10 million rows max

@@ -1,11 +1,37 @@
 import { DateTime } from "luxon";
 import { clickhouse } from "../../db/clickhouse/clickhouse.js";
 import { db } from "../../db/postgres/postgres.js";
-import { sites } from "../../db/postgres/schema.js";
+import { sites, organization } from "../../db/postgres/schema.js";
 import { eq } from "drizzle-orm";
 import { processResults } from "../../api/analytics/utils.js";
-import { getOrganizationSubscriptionInfo } from "../../lib/subUtils.js";
+import { getBestSubscription, type SubscriptionInfo } from "../../lib/subscriptionUtils.js";
 import { IS_CLOUD } from "../../lib/const.js";
+
+/**
+ * Get the number of months of historical data allowed for import based on subscription tier
+ */
+function getHistoricalWindowMonths(subscription: SubscriptionInfo): number {
+  // Free tier: 6 months
+  if (subscription.source === "free") {
+    return 6;
+  }
+
+  // AppSumo: treat as Standard tier (24 months)
+  if (subscription.source === "appsumo") {
+    return 24;
+  }
+
+  // Stripe: check if pro or standard
+  if (subscription.source === "stripe") {
+    if (subscription.planName.startsWith("pro")) {
+      return 60; // Pro tier: 60 months
+    }
+    return 24; // Standard tier: 24 months
+  }
+
+  // Default to free tier
+  return 6;
+}
 
 export class ImportQuotaTracker {
   private monthlyUsage: Map<string, number>;
@@ -30,13 +56,20 @@ export class ImportQuotaTracker {
       return new ImportQuotaTracker(new Map(), Infinity, Infinity, "190001");
     }
 
-    const subscriptionInfo = await getOrganizationSubscriptionInfo(organizationId);
-    if (!subscriptionInfo) {
-      throw new Error(`No subscription found for organization ${organizationId}`);
+    const [org] = await db
+      .select({ stripeCustomerId: organization.stripeCustomerId })
+      .from(organization)
+      .where(eq(organization.id, organizationId))
+      .limit(1);
+
+    if (!org) {
+      throw new Error(`Organization ${organizationId} not found`);
     }
 
-    const monthlyLimit = subscriptionInfo.eventLimit;
-    const historicalWindowMonths = subscriptionInfo.tierInfo.monthsAllowed;
+    const subscription = await getBestSubscription(organizationId, org.stripeCustomerId);
+
+    const monthlyLimit = subscription.eventLimit;
+    const historicalWindowMonths = getHistoricalWindowMonths(subscription);
 
     const oldestAllowedDate = DateTime.utc().minus({ months: historicalWindowMonths }).startOf("month");
     const oldestAllowedMonth = oldestAllowedDate.toFormat("yyyyMM");

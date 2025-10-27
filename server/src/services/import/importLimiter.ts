@@ -2,7 +2,6 @@ import { IS_CLOUD } from "../../lib/const.js";
 import { db } from "../../db/postgres/postgres.js";
 import { and, count, eq, inArray } from "drizzle-orm";
 import { importStatus, sites } from "../../db/postgres/schema.js";
-import { ImportQuotaTracker } from "./importQuotaChecker.js";
 import type { InsertImportStatus } from "./importStatusManager.js";
 
 export class ImportLimiter {
@@ -96,9 +95,5 @@ export class ImportLimiter {
       await tx.insert(importStatus).values(data);
       return { success: true };
     });
-  }
-
-  static async createQuotaTracker(organizationId: string): Promise<ImportQuotaTracker> {
-    return ImportQuotaTracker.create(organizationId);
   }
 }
