@@ -34,15 +34,6 @@ export function CustomHeader() {
             <Link href="/blog" className="text-sm font-base text-neutral-400 hover:text-white transition-colors">
               Blog
             </Link>
-            <a
-              href="https://demo.rybbit.com/21"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-base text-neutral-400 hover:text-white transition-colors"
-              onClick={() => trackAdEvent("demo", { location: "header" })}
-            >
-              Demo
-            </a>
           </div>
         </div>
 
