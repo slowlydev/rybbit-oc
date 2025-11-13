@@ -25,13 +25,6 @@ interface UmamiEvent {
   created_at: string;
 }
 
-
-export interface ImportProgress {
-  importedEvents: number;
-  skippedEvents: number;
-  invalidEvents: number;
-}
-
 export class CsvParser {
   private aborted = false;
   private siteId: number = 0;
@@ -45,14 +38,6 @@ export class CsvParser {
   private isProcessing = false;
   private parsingComplete = false;
 
-  // Track cumulative counts
-  private totalImported = 0;
-  private totalSkipped = 0;
-  private totalInvalid = 0;
-
-  // Callback for progress updates
-  private onProgress?: (progress: ImportProgress) => void;
-
   startImport(
     file: File,
     siteId: number,
@@ -60,12 +45,10 @@ export class CsvParser {
     platform: "umami",
     earliestAllowedDate: string,
     latestAllowedDate: string,
-    onProgress?: (progress: ImportProgress) => void
   ): void {
     this.siteId = siteId;
     this.importId = importId;
     this.platform = platform;
-    this.onProgress = onProgress;
 
     this.earliestAllowedDate = DateTime.fromFormat(earliestAllowedDate, "yyyy-MM-dd", { zone: "utc" }).startOf("day");
     this.latestAllowedDate = DateTime.fromFormat(latestAllowedDate, "yyyy-MM-dd", { zone: "utc" }).endOf("day");
@@ -193,31 +176,13 @@ export class CsvParser {
     }
 
     try {
-      const data = await authedFetch<{
-        imported: number;
-        skipped: number;
-        invalid: number;
-      }>(`/api/batch-import-events/${this.siteId}/${this.importId}`, undefined, {
+      await authedFetch(`/api/batch-import-events/${this.siteId}/${this.importId}`, undefined, {
         method: "POST",
         data: {
           events,
           isLastBatch,
         },
       });
-
-      // Update cumulative counts
-      this.totalImported += data.imported;
-      this.totalSkipped += data.skipped;
-      this.totalInvalid += data.invalid;
-
-      // Notify progress callback if provided
-      if (this.onProgress) {
-        this.onProgress({
-          importedEvents: this.totalImported,
-          skippedEvents: this.totalSkipped,
-          invalidEvents: this.totalInvalid,
-        });
-      }
     } catch (error) {
       console.error("Error uploading chunk:", error);
       this.aborted = true;

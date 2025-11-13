@@ -16,7 +16,7 @@ const batchImportRequestSchema = z
       importId: z.string().uuid(),
     }),
     body: z.object({
-      events: z.array(UmamiImportMapper.umamiEventKeyOnlySchema).min(1).max(10000),
+      events: z.array(UmamiImportMapper.umamiEventKeyOnlySchema).min(1),
       isLastBatch: z.boolean().optional(),
     }),
   })
@@ -47,7 +47,6 @@ export async function batchImportEvents(request: FastifyRequest<BatchImportReque
       return reply.status(403).send({ error: "Forbidden" });
     }
 
-    // Verify import exists
     const importRecord = await getImportById(importId);
     if (!importRecord) {
       return reply.status(404).send({ error: "Import not found" });
@@ -57,13 +56,9 @@ export async function batchImportEvents(request: FastifyRequest<BatchImportReque
       return reply.status(400).send({ error: "Import does not belong to this site" });
     }
 
-    // Check if import is already completed
     if (importRecord.completedAt) {
       return reply.status(400).send({ error: "Import already completed" });
     }
-
-    // Platform is set during import creation
-    const platform = importRecord.platform;
 
     const [siteRecord] = await db
       .select({ organizationId: sites.organizationId })
@@ -76,14 +71,11 @@ export async function batchImportEvents(request: FastifyRequest<BatchImportReque
     }
 
     try {
-      // Get cached quota tracker from singleton (much faster!)
       const quotaTracker = await importQuotaManager.getTracker(siteRecord.organizationId);
 
-      // Transform events (validate and convert to internal format)
       const transformedEvents = UmamiImportMapper.transform(events, site, importId);
       const invalidEventCount = events.length - transformedEvents.length;
 
-      // Filter events through quota checker
       const eventsWithinQuota = [];
       let skippedDueToQuota = 0;
 
@@ -95,7 +87,6 @@ export async function batchImportEvents(request: FastifyRequest<BatchImportReque
         }
       }
 
-      // Insert events to ClickHouse (even if 0 events, we still need to track progress)
       if (eventsWithinQuota.length > 0) {
         await clickhouse.insert({
           table: "events",
@@ -104,21 +95,14 @@ export async function batchImportEvents(request: FastifyRequest<BatchImportReque
         });
       }
 
-      // Update import progress
       await updateImportProgress(importId, eventsWithinQuota.length, skippedDueToQuota, invalidEventCount);
 
-      // If this is the last batch, mark import as completed
       if (isLastBatch) {
         await completeImport(importId);
         importQuotaManager.completeImport(siteRecord.organizationId);
       }
 
-      // Return counts to client
-      return reply.send({
-        imported: eventsWithinQuota.length,
-        skipped: skippedDueToQuota,
-        invalid: invalidEventCount,
-      });
+      return reply.send();
     } catch (insertError) {
       const errorMessage = insertError instanceof Error ? insertError.message : "Unknown error";
       console.error("Failed to insert events:", errorMessage);
