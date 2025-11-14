@@ -295,7 +295,7 @@ function FeatureGrid({ title, description, features, bgClassName = "" }: Feature
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {features.map((feature, index) => (
-            <div key={index} className="bg-neutral-100/50 dark:bg-neutral-800/20 rounded-lg p-5 transition-colors">
+            <div key={index} className="bg-neutral-200/50 dark:bg-neutral-800/20 rounded-lg p-5 transition-colors">
               <div>
                 <h3 className="font-semibold mb-2 flex items-center gap-2">
                   <div className="text-neutral-600 dark:text-neutral-400">{feature.icon}</div>
