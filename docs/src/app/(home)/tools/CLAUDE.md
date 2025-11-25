@@ -80,23 +80,30 @@ For tools that are identical across platforms but with different branding (e.g.,
 ```
 /docs/src/app/(home)/tools/
   components/
-    YourToolComponent.tsx      # Shared tool logic
-    platform-configs.ts        # Platform metadata
-  (your-tool-group)/           # Route group (parentheses = hidden from URL)
+    ToolPageLayout.tsx         # Shared layout (used by all tools)
+    ToolCTA.tsx                # Shared CTA component
+  (social-media-tools)/        # Route group (parentheses = hidden from URL)
+    components/
+      YourToolComponent.tsx    # Tool-specific components
+      platform-configs.ts      # Platform metadata
     [slug]/                    # Dynamic route
       page.tsx                 # Single page for all platforms
 ```
 
-**Example:** Font generators (19 platforms, 1 file)
+**Example:** Social media tools (font generators, bio generators, etc.)
 
 ```
 /tools/
   components/
-    FontGeneratorTool.tsx      # Shared font transformation logic
-    platform-configs.ts        # All 19 platform configs
-  (font-generators)/           # Route group
+    ToolPageLayout.tsx         # Shared by ALL tools
+    ToolCTA.tsx
+  (social-media-tools)/        # Route group
+    components/
+      FontGeneratorTool.tsx    # Font transformation logic
+      BioGenerator.tsx         # Bio generation logic
+      platform-configs.ts      # Platform configs for each tool type
     [slug]/
-      page.tsx                 # Generates all 19 routes at build time
+      page.tsx                 # Generates all platform routes at build time
 ```
 
 ## Step-by-Step
@@ -104,7 +111,7 @@ For tools that are identical across platforms but with different branding (e.g.,
 ### 1. Create Shared Tool Component
 
 ```tsx
-// components/YourToolComponent.tsx
+// (social-media-tools)/components/YourToolComponent.tsx
 "use client";
 
 interface YourToolProps {
@@ -121,7 +128,7 @@ export function YourTool({ platformName, platformSpecificOption }: YourToolProps
 ### 2. Create Platform Config
 
 ```tsx
-// components/platform-configs.ts
+// (social-media-tools)/components/platform-configs.ts
 export interface PlatformConfig {
   id: string;
   name: string;
@@ -156,10 +163,10 @@ export const platformList = Object.values(platformConfigs);
 Create a **single** dynamic route that handles all platforms:
 
 ```tsx
-// (your-tool-group)/[slug]/page.tsx
+// (social-media-tools)/[slug]/page.tsx
 import { ToolPageLayout } from "../../components/ToolPageLayout";
-import { YourTool } from "../../components/YourToolComponent";
-import { platformConfigs, platformList } from "../../components/platform-configs";
+import { YourTool } from "../components/YourToolComponent";
+import { platformConfigs, platformList } from "../components/platform-configs";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -239,7 +246,7 @@ export default async function PlatformToolPage({ params }: PageProps) {
 
 ```tsx
 // page.tsx
-import { platformList } from "./components/platform-configs";
+import { platformList } from "./(social-media-tools)/components/platform-configs";
 
 const yourTools = platformList.map(platform => ({
   href: `/tools/${platform.id}-tool-name`,
@@ -273,7 +280,7 @@ const allTools: Tool[] = [
 - Next.js 15+ requires awaiting `params`: `const { slug } = await params`
 
 **Route Groups:**
-- `(your-tool-group)/` organizes files without affecting URLs
+- `(social-media-tools)/` organizes files without affecting URLs
 - URLs remain `/tools/platform-tool-name` (route group doesn't appear)
 
 **Next.js Limitations:**

@@ -1,34 +1,34 @@
 import { ToolPageLayout } from "../../components/ToolPageLayout";
-import { FontGeneratorTool } from "../../components/FontGeneratorTool";
-import AICommentForm from "../../components/AICommentForm";
-import PageNameGenerator from "../../components/PageNameGenerator";
-import PostGenerator from "../../components/PostGenerator";
-import UsernameGenerator from "../../components/UsernameGenerator";
-import ImageResizer from "../../components/ImageResizer";
-import { HashtagGenerator } from "../../components/HashtagGenerator";
-import { CharacterCounter } from "../../components/CharacterCounter";
-import { BioGenerator } from "../../components/BioGenerator";
-import { platformConfigs, platformList } from "../../components/platform-configs";
-import { commentPlatformConfigs, commentPlatformList } from "../../components/comment-platform-configs";
-import { pageNamePlatformConfigs, pageNamePlatformList } from "../../components/page-name-platform-configs";
+import { FontGeneratorTool } from "../components/FontGeneratorTool";
+import AICommentForm from "../components/AICommentForm";
+import PageNameGenerator from "../components/PageNameGenerator";
+import PostGenerator from "../components/PostGenerator";
+import UsernameGenerator from "../components/UsernameGenerator";
+import ImageResizer from "../components/ImageResizer";
+import { HashtagGenerator } from "../components/HashtagGenerator";
+import { CharacterCounter } from "../components/CharacterCounter";
+import { BioGenerator } from "../components/BioGenerator";
+import { platformConfigs, platformList } from "../components/platform-configs";
+import { commentPlatformConfigs, commentPlatformList } from "../components/comment-platform-configs";
+import { pageNamePlatformConfigs, pageNamePlatformList } from "../components/page-name-platform-configs";
 import {
   postGeneratorPlatformConfigs,
   postGeneratorPlatformList,
-} from "../../components/post-generator-platform-configs";
+} from "../components/post-generator-platform-configs";
 import {
   usernameGeneratorPlatformConfigs,
   usernameGeneratorPlatformList,
-} from "../../components/username-generator-platform-configs";
+} from "../components/username-generator-platform-configs";
 import {
   hashtagGeneratorPlatformConfigs,
   hashtagGeneratorPlatformList,
-} from "../../components/hashtag-generator-platform-configs";
+} from "../components/hashtag-generator-platform-configs";
 import {
   characterCounterPlatformConfigs,
   characterCounterPlatformList,
-} from "../../components/character-counter-platform-configs";
-import { bioGeneratorPlatformConfigs, bioGeneratorPlatformList } from "../../components/bio-generator-platform-configs";
-import { imageResizerPlatformConfigs, imageResizerPlatformList } from "../../components/image-resizer-platform-configs";
+} from "../components/character-counter-platform-configs";
+import { bioGeneratorPlatformConfigs, bioGeneratorPlatformList } from "../components/bio-generator-platform-configs";
+import { imageResizerPlatformConfigs, imageResizerPlatformList } from "../components/image-resizer-platform-configs";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Hash, Type, User } from "lucide-react";

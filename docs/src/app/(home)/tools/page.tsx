@@ -22,15 +22,15 @@ import {
   Briefcase,
   Zap,
 } from "lucide-react";
-import { platformList } from "./components/platform-configs";
-import { commentPlatformList } from "./components/comment-platform-configs";
-import { pageNamePlatformList } from "./components/page-name-platform-configs";
-import { postGeneratorPlatformList } from "./components/post-generator-platform-configs";
-import { usernameGeneratorPlatformList } from "./components/username-generator-platform-configs";
-import { hashtagGeneratorPlatformList } from "./components/hashtag-generator-platform-configs";
-import { characterCounterPlatformList } from "./components/character-counter-platform-configs";
-import { bioGeneratorPlatformList } from "./components/bio-generator-platform-configs";
-import { imageResizerPlatformList } from "./components/image-resizer-platform-configs";
+import { platformList } from "./(social-media-tools)/components/platform-configs";
+import { commentPlatformList } from "./(social-media-tools)/components/comment-platform-configs";
+import { pageNamePlatformList } from "./(social-media-tools)/components/page-name-platform-configs";
+import { postGeneratorPlatformList } from "./(social-media-tools)/components/post-generator-platform-configs";
+import { usernameGeneratorPlatformList } from "./(social-media-tools)/components/username-generator-platform-configs";
+import { hashtagGeneratorPlatformList } from "./(social-media-tools)/components/hashtag-generator-platform-configs";
+import { characterCounterPlatformList } from "./(social-media-tools)/components/character-counter-platform-configs";
+import { bioGeneratorPlatformList } from "./(social-media-tools)/components/bio-generator-platform-configs";
+import { imageResizerPlatformList } from "./(social-media-tools)/components/image-resizer-platform-configs";
 import {
   SiDiscord,
   SiX,
