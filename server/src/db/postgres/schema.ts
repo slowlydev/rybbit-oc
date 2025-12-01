@@ -64,9 +64,7 @@ export const sites = pgTable("sites", {
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
   createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
-  organizationId: text("organization_id")
-      .notNull()
-      .references(() => organization.id),
+  organizationId: text("organization_id").references(() => organization.id),
   public: boolean().default(false),
   saltUserIds: boolean().default(false),
   blockBots: boolean().default(true).notNull(),

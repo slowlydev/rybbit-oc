@@ -136,22 +136,22 @@ class SiteConfig {
   /**
    * Add a new site
    */
-  // async addSite(config: Omit<SiteConfigData, "siteId">): Promise<void> {
-  //   try {
-  //     await db.insert(sites).values({
-  //       id: config.id,
-  //       name: "", // This would need to be provided
-  //       domain: config.domain,
-  //       public: config.public,
-  //       saltUserIds: config.saltUserIds,
-  //       blockBots: config.blockBots,
-  //       excludedIPs: config.excludedIPs,
-  //       createdBy: "", // This would need to be provided
-  //     });
-  //   } catch (error) {
-  //     logger.error(error as Error, `Error adding site`);
-  //   }
-  // }
+  async addSite(config: Omit<SiteConfigData, "siteId">): Promise<void> {
+    try {
+      await db.insert(sites).values({
+        id: config.id,
+        name: "", // This would need to be provided
+        domain: config.domain,
+        public: config.public,
+        saltUserIds: config.saltUserIds,
+        blockBots: config.blockBots,
+        excludedIPs: config.excludedIPs,
+        createdBy: "", // This would need to be provided
+      });
+    } catch (error) {
+      logger.error(error as Error, `Error adding site`);
+    }
+  }
 
   /**
    * Remove a site
