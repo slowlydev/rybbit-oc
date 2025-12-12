@@ -105,14 +105,16 @@ function SidebarContent() {
           href={getTabPath("goals")}
           icon={<Target className="w-4 h-4" />}
         />
-        <div className="hidden md:block">
-          <SidebarComponents.Item
-            label="API Playground"
-            active={isActiveTab("api-playground")}
-            href={getTabPath("api-playground")}
-            icon={<Code className="w-4 h-4" />}
-          />
-        </div>
+        {IS_CLOUD && (
+          <div className="hidden md:block">
+            <SidebarComponents.Item
+              label="API Playground"
+              active={isActiveTab("api-playground")}
+              href={getTabPath("api-playground")}
+              icon={<Code className="w-4 h-4" />}
+            />
+          </div>
+        )}
         <SidebarComponents.SectionHeader>Product Analytics</SidebarComponents.SectionHeader>
         <div className="hidden md:block">
           {!subscription?.planName?.startsWith("appsumo") && !isSubscriptionLoading && (
