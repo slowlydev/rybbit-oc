@@ -54,6 +54,9 @@ const getSiteLimit = (subscription: SubscriptionData | undefined) => {
   if (subscription?.planName === "appsumo-5") {
     return 100;
   }
+  if (subscription?.planName === "appsumo-5") {
+    return Infinity;
+  }
   return FREE_SITE_LIMIT;
 };
 

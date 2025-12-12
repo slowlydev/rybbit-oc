@@ -34,9 +34,10 @@ const getMemberLimit = (subscription: SubscriptionData | undefined) => {
   if (subscription?.planName.includes("standard")) return STANDARD_TEAM_LIMIT;
   if (subscription?.planName === "appsumo-1") return 1;
   if (subscription?.planName === "appsumo-2") return 3;
-  if (subscription?.planName === "appsumo-3") return Infinity;
-  if (subscription?.planName === "appsumo-4") return Infinity;
-  if (subscription?.planName === "appsumo-5") return Infinity;
+  if (subscription?.planName === "appsumo-3") return 10;
+  if (subscription?.planName === "appsumo-4") return 25;
+  if (subscription?.planName === "appsumo-5") return 50;
+  if (subscription?.planName === "appsumo-6") return Infinity;
   return 1;
 };
 
