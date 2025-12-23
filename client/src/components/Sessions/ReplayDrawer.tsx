@@ -68,10 +68,10 @@ export function ReplayDrawer({ sessionId, open, onOpenChange }: ReplayDrawerProp
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <VisuallyHidden>
-        <DrawerTitle>Session Replay</DrawerTitle>
-      </VisuallyHidden>
       <DrawerContent className="h-[90vh]">
+        <VisuallyHidden>
+          <DrawerTitle>Session Replay</DrawerTitle>
+        </VisuallyHidden>
         <div className="flex gap-2 p-2 h-[97%]">
           {/* Player */}
           <div ref={containerRef} className="relative flex-1" style={{ height: "calc(90vh - 40px)" }}>

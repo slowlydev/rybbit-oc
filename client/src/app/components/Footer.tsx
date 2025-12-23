@@ -19,7 +19,7 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <Image src="/rybbit-text.svg" alt="Rybbit" width={120} height={27} className="dark:invert-0 invert" />
-            {IS_CLOUD && (
+            {!IS_CLOUD && (
               <div className="space-y-3">
                 <div className="text-sm text-neutral-600 dark:text-neutral-200">
                   Liking Rybbit? Consider sponsoring the project!
@@ -36,7 +36,7 @@ export function Footer() {
               </div>
             )}
             {/* Social Media Links */}
-            {/* <div className="flex gap-4">
+            <div className="flex gap-4">
               <a
                 href="https://github.com/rybbit-io/rybbit"
                 target="_blank"
@@ -70,7 +70,7 @@ export function Footer() {
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
               </a>
-            </div> */}
+            </div>
           </div>
 
           {/* Resources */}
