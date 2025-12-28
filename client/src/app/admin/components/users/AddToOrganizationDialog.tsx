@@ -17,8 +17,8 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert } from "@/components/ui/alert";
-import { useAddUserToOrganization } from "@/api/admin/organizations";
-import { useAdminOrganizations } from "@/api/admin/getAdminOrganizations";
+import { useAddUserToOrganization } from "@/api/admin/hooks/useOrganizations";
+import { useAdminOrganizations } from "@/api/admin/hooks/useAdminOrganizations";
 import { cn } from "@/lib/utils";
 
 interface AddToOrganizationDialogProps {

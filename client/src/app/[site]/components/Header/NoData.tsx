@@ -24,7 +24,7 @@ import {
   SiMintlify,
 } from "@icons-pack/react-simple-icons";
 import React from "react";
-import { useGetSite, useSiteHasData } from "../../../../api/admin/sites";
+import { useGetSite, useSiteHasData } from "../../../../api/admin/hooks/useSites";
 import { CodeSnippet } from "../../../../components/CodeSnippet";
 import { Alert } from "../../../../components/ui/alert";
 import { useStore } from "../../../../lib/store";

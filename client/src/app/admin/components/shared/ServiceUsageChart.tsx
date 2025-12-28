@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetAdminServiceEventCount } from "@/api/admin/useGetAdminServiceEventCount";
+import { useGetAdminServiceEventCount } from "@/api/admin/hooks/useAdminServiceEventCount";
 import { timeZone, userLocale } from "@/lib/dateTimeUtils";
 import { useNivoTheme } from "@/lib/nivo";
 import { formatter } from "@/lib/utils";

@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth";
 import { useStripeSubscription } from "@/lib/subscription/useStripeSubscription";
-import { USER_ORGANIZATIONS_QUERY_KEY } from "../../../../../api/admin/organizations";
+import { USER_ORGANIZATIONS_QUERY_KEY } from "../../../../../api/admin/hooks/useOrganizations";
 import { Organization } from "../page";
 
 interface DeleteOrganizationDialogProps {

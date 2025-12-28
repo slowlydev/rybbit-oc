@@ -3,7 +3,7 @@
 import { useStore } from "@/lib/store";
 import { Expand } from "lucide-react";
 import { useState } from "react";
-import { useGetSite } from "../../../../../api/admin/sites";
+import { useGetSite } from "../../../../../api/admin/hooks/useSites";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../components/ui/basic-tabs";
 import { Button } from "../../../../../components/ui/button";
 import { Card, CardContent } from "../../../../../components/ui/card";

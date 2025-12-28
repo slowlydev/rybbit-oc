@@ -20,7 +20,7 @@ import {
 } from "@tanstack/react-table";
 import { Monitor, Smartphone, Tablet, SquareArrowOutUpRight } from "lucide-react";
 import { useMemo, useState, useCallback } from "react";
-import { useGetSite } from "../../../../api/admin/sites";
+import { useGetSite } from "../../../../api/admin/hooks/useSites";
 import { useGetPerformanceByDimension } from "../../../../api/analytics/hooks/performance/useGetPerformanceByDimension";
 import { PerformanceByDimensionItem } from "../../../../api/analytics/endpoints";
 import { Pagination } from "../../../../components/pagination";

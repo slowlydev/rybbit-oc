@@ -1,7 +1,7 @@
 import { ArrowRight, Crown, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import React, { ReactNode, useMemo, useRef, useEffect, useState } from "react";
-import { useCurrentSite } from "../api/admin/sites";
+import { useCurrentSite } from "../api/admin/hooks/useSites";
 import { DEFAULT_EVENT_LIMIT } from "../lib/subscription/constants";
 import { Button } from "./ui/button";
 import { authClient } from "../lib/auth";

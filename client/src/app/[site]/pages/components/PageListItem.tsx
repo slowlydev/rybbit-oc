@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetSite } from "@/api/admin/sites";
+import { useGetSite } from "@/api/admin/hooks/useSites";
 import { useGetOverviewBucketed } from "@/api/analytics/hooks/useGetOverviewBucketed";
 import { MetricResponse } from "@/api/analytics/endpoints";
 import { usePageMetadata } from "@/api/usePageMetadata";

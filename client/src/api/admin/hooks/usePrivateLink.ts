@@ -1,23 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { authedFetch } from "../utils";
-
-interface PrivateLinkConfigResponse {
-  privateLinkKey: string | null;
-}
-
-interface UpdatePrivateLinkConfigResponse {
-  privateLinkKey: string | null;
-}
+import {
+  getPrivateLinkConfig,
+  generatePrivateLinkKey,
+  revokePrivateLinkKey,
+} from "../endpoints";
 
 // Get API config
 export const useGetPrivateLinkConfig = (siteId: number) => {
   return useQuery({
     queryKey: ["privateLinkConfig", siteId],
     queryFn: async () => {
-      const response = await authedFetch<{
-        success: boolean;
-        data: PrivateLinkConfigResponse;
-      }>(`/sites/${siteId}/private-link-config`);
+      const response = await getPrivateLinkConfig(siteId);
       return response.data;
     },
     enabled: !!siteId,
@@ -30,17 +23,7 @@ export const useGeneratePrivateLinkKey = () => {
 
   return useMutation({
     mutationFn: async (siteId: number) => {
-      const response = await authedFetch<{
-        success: boolean;
-        data: UpdatePrivateLinkConfigResponse;
-      }>(
-        `/sites/${siteId}/private-link-config`,
-        {},
-        {
-          method: "POST",
-          data: { action: "generate_private_link_key" },
-        }
-      );
+      const response = await generatePrivateLinkKey(siteId);
       return response.data;
     },
     onSuccess: (_, siteId) => {
@@ -55,17 +38,7 @@ export const useRevokePrivateLinkKey = () => {
 
   return useMutation({
     mutationFn: async (siteId: number) => {
-      const response = await authedFetch<{
-        success: boolean;
-        data: UpdatePrivateLinkConfigResponse;
-      }>(
-        `/sites/${siteId}/private-link-config`,
-        {},
-        {
-          method: "POST",
-          data: { action: "revoke_private_link_key" },
-        }
-      );
+      const response = await revokePrivateLinkKey(siteId);
       return response.data;
     },
     onSuccess: (_, siteId) => {

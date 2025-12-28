@@ -21,7 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-import { deleteSite, SiteResponse, updateSiteConfig, useGetSitesFromOrg } from "@/api/admin/sites";
+import { deleteSite, updateSiteConfig, SiteResponse } from "@/api/admin/endpoints";
+import { useGetSitesFromOrg } from "@/api/admin/hooks/useSites";
 import { normalizeDomain } from "@/lib/utils";
 import { IPExclusionManager } from "./IPExclusionManager";
 import { CountryExclusionManager } from "./CountryExclusionManager";

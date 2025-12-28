@@ -7,8 +7,8 @@ import { authClient } from "../../../../lib/auth";
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useOrganizationMembers } from "../../../../api/admin/auth";
-import { useOrganizationInvitations } from "../../../../api/admin/organizations";
+import { useOrganizationMembers } from "../../../../api/admin/hooks/useOrganizationMembers";
+import { useOrganizationInvitations } from "../../../../api/admin/hooks/useOrganizations";
 import { NoOrganization } from "../../../../components/NoOrganization";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { useGetSite } from "../../../api/admin/sites";
+import { useGetSite } from "../../../api/admin/hooks/useSites";
 import { DisabledOverlay } from "../../../components/DisabledOverlay";
 import { useSetPageTitle } from "../../../hooks/useSetPageTitle";
 import { timeZone } from "../../../lib/dateTimeUtils";

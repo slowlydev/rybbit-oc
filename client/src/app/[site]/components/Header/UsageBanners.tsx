@@ -1,6 +1,6 @@
 import { AlertTriangle, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useCurrentSite } from "../../../../api/admin/sites";
+import { useCurrentSite } from "../../../../api/admin/hooks/useSites";
 import { Button } from "../../../../components/ui/button";
 
 export function UsageBanners() {

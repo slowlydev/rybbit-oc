@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
 import React, { Suspense, useEffect, useState } from "react";
-import { addSite } from "../../api/admin/sites";
+import { addSite } from "../../api/admin/endpoints";
 import { RybbitLogo, RybbitTextLogo } from "../../components/RybbitLogo";
 import { SpinningGlobe } from "../../components/SpinningGlobe";
 import { useSetPageTitle } from "../../hooks/useSetPageTitle";

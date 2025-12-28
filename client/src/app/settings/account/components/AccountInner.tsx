@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useUpdateAccountSettings } from "../../../../api/admin/accountSettings";
+import { useUpdateAccountSettings } from "../../../../api/admin/hooks/useAccountSettings";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { Input } from "../../../../components/ui/input";

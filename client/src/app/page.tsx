@@ -1,9 +1,9 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { useState } from "react";
-import { useUserOrganizations } from "../api/admin/organizations";
-import { useGetSitesFromOrg } from "../api/admin/sites";
+import { useEffect, useState } from "react";
+import { useUserOrganizations } from "../api/admin/hooks/useOrganizations";
+import { useGetSitesFromOrg } from "../api/admin/hooks/useSites";
 import { CreateOrganizationDialog } from "../components/CreateOrganizationDialog";
 import { DateSelector } from "../components/DateSelector/DateSelector";
 import { NoOrganization } from "../components/NoOrganization";
@@ -50,6 +50,10 @@ export default function Home() {
 
   const [createOrgDialogOpen, setCreateOrgDialogOpen] = useState(false);
 
+  // Track hydration to avoid mismatch with date-dependent disabled states
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
+
   // Handle successful organization creation
   const handleOrganizationCreated = () => {
     refetchOrganizations();
@@ -78,7 +82,7 @@ export default function Home() {
               variant="secondary"
               size="icon"
               onClick={goForward}
-              disabled={!canGoForward(time)}
+              disabled={!isMounted || !canGoForward(time)}
               className="rounded-l-none -ml-px h-8 w-8"
             >
               <ChevronRight />

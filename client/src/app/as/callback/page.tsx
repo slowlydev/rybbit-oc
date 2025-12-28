@@ -12,7 +12,7 @@ import { ArrowRight, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
-import { addSite } from "../../../api/admin/sites";
+import { addSite } from "../../../api/admin/endpoints";
 import { RybbitTextLogo } from "../../../components/RybbitLogo";
 import { useSetPageTitle } from "../../../hooks/useSetPageTitle";
 import { authClient } from "../../../lib/auth";

@@ -5,7 +5,7 @@ import {
   useGeneratePrivateLinkKey,
   useGetPrivateLinkConfig,
   useRevokePrivateLinkKey,
-} from "../../../../api/admin/privateLink";
+} from "../../../../api/admin/hooks/usePrivateLink";
 import { Button } from "../../../../components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu";
 import { Input } from "../../../../components/ui/input";

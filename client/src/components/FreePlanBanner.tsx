@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useCurrentSite } from "../api/admin/sites";
+import { useCurrentSite } from "../api/admin/hooks/useSites";
 import { DEFAULT_EVENT_LIMIT } from "../lib/subscription/constants";
 import { Button } from "./ui/button";
 

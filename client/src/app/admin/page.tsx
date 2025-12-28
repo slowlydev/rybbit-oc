@@ -10,7 +10,7 @@ import { AdminLayout } from "./components/shared/AdminLayout";
 import { AppSidebar } from "../../components/AppSidebar";
 
 import { usePathname } from "next/navigation";
-import { useGetSite } from "../../api/admin/sites";
+import { useGetSite } from "../../api/admin/hooks/useSites";
 import { Button } from "../../components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../../components/ui/sheet";
 

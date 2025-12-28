@@ -15,7 +15,7 @@ import { AlertCircle, Building2 } from "lucide-react";
 import { authClient } from "../lib/auth";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { USER_ORGANIZATIONS_QUERY_KEY } from "../api/admin/organizations";
+import { USER_ORGANIZATIONS_QUERY_KEY } from "../api/admin/hooks/useOrganizations";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 interface CreateOrganizationDialogProps {

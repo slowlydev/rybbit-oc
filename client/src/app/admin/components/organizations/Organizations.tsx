@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useAdminOrganizations } from "@/api/admin/getAdminOrganizations";
+import { useAdminOrganizations } from "@/api/admin/hooks/useAdminOrganizations";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateTime } from "luxon";

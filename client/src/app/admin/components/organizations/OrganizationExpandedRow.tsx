@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { AdminOrganizationData } from "@/api/admin/getAdminOrganizations";
+import { AdminOrganizationData } from "@/api/admin/endpoints";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { formatter } from "@/lib/utils";

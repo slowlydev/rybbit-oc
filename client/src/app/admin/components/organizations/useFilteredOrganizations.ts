@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { AdminOrganizationData } from "@/api/admin/getAdminOrganizations";
+import { AdminOrganizationData } from "@/api/admin/endpoints";
 import { TierOption } from "./OrganizationFilters";
 
 interface FilterOptions {

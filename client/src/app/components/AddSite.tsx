@@ -4,7 +4,8 @@ import { AlertCircle, AppWindow, Plus } from "lucide-react";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { addSite, useGetSitesFromOrg } from "../../api/admin/sites";
+import { addSite } from "../../api/admin/endpoints";
+import { useGetSitesFromOrg } from "../../api/admin/hooks/useSites";
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 import {
   Dialog,

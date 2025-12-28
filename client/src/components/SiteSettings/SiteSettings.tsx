@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/responsive-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { useUserOrganizations } from "@/api/admin/organizations";
-import { SiteResponse, useGetSite } from "@/api/admin/sites";
+import { useUserOrganizations } from "@/api/admin/hooks/useOrganizations";
+import { SiteResponse } from "@/api/admin/endpoints";
+import { useGetSite } from "@/api/admin/hooks/useSites";
 import { ImportManager } from "./ImportManager";
 import { ScriptBuilder } from "./ScriptBuilder";
 import { SiteConfiguration } from "./SiteConfiguration";

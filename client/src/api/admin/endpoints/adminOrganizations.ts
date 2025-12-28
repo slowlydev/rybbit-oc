@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { authedFetch } from "../utils";
+import { authedFetch } from "../../utils";
 
 export interface AdminOrganizationData {
   id: string;
@@ -33,13 +32,6 @@ export interface AdminOrganizationData {
   }[];
 }
 
-async function getAdminOrganizations() {
+export function getAdminOrganizations() {
   return authedFetch<AdminOrganizationData[]>("/admin/organizations");
-}
-
-export function useAdminOrganizations() {
-  return useQuery<AdminOrganizationData[]>({
-    queryKey: ["admin-organizations"],
-    queryFn: getAdminOrganizations,
-  });
 }

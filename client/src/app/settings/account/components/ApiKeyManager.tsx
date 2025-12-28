@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
 import { Label } from "../../../../components/ui/label";
 import { DateTime } from "luxon";
-import { useListApiKeys, useCreateApiKey, useDeleteApiKey } from "../../../../api/admin/userApiKeys";
+import { useListApiKeys, useCreateApiKey, useDeleteApiKey } from "../../../../api/admin/hooks/useUserApiKeys";
 
 export function ApiKeyManager() {
   const [apiKeyName, setApiKeyName] = useState("");

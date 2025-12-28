@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { authedFetch } from "../utils";
+import { authedFetch } from "../../utils";
 
 export interface AdminSiteData {
   siteId: number;
@@ -15,13 +14,6 @@ export interface AdminSiteData {
   };
 }
 
-async function getAdminSites() {
+export function getAdminSites() {
   return authedFetch<AdminSiteData[]>("/admin/sites");
-}
-
-export function useAdminSites() {
-  return useQuery<AdminSiteData[]>({
-    queryKey: ["admin-sites"],
-    queryFn: getAdminSites,
-  });
 }

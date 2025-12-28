@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useAdminSites, AdminSiteData } from "@/api/admin/getAdminSites";
+import { useAdminSites } from "@/api/admin/hooks/useAdminSites";
+import { AdminSiteData } from "@/api/admin/endpoints";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";

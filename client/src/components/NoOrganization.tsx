@@ -1,6 +1,6 @@
 import { Building, Plus } from "lucide-react";
 import { useState } from "react";
-import { useUserOrganizations } from "../api/admin/organizations";
+import { useUserOrganizations } from "../api/admin/hooks/useOrganizations";
 import { CreateOrganizationDialog } from "./CreateOrganizationDialog";
 import { Button } from "./ui/button";
 import { Card, CardDescription, CardTitle } from "./ui/card";

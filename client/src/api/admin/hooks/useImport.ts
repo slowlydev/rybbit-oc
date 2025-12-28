@@ -1,28 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { authedFetch } from "@/api/utils";
-import { APIResponse } from "@/api/types";
 import { ImportPlatform } from "@/types/import";
-import { useCurrentSite } from "./sites";
 import { DEFAULT_EVENT_LIMIT } from "@/lib/subscription/constants";
 import { IS_CLOUD } from "@/lib/const";
-
-interface GetSiteImportsResponse {
-  importId: string;
-  platform: ImportPlatform;
-  importedEvents: number;
-  skippedEvents: number;
-  invalidEvents: number;
-  startedAt: string;
-  completedAt: string | null;
-}
-
-interface CreateSiteImportResponse {
-  importId: string;
-  allowedDateRange: {
-    earliestAllowedDate: string;
-    latestAllowedDate: string;
-  };
-}
+import { getSiteImports, createSiteImport, deleteSiteImport } from "../endpoints";
+import { useCurrentSite } from "./useSites";
 
 export function useGetSiteImports(site: number) {
   const { subscription } = useCurrentSite();
@@ -31,7 +12,7 @@ export function useGetSiteImports(site: number) {
 
   return useQuery({
     queryKey: ["get-site-imports", site],
-    queryFn: async () => await authedFetch<APIResponse<GetSiteImportsResponse[]>>(`/sites/${site}/imports`),
+    queryFn: async () => await getSiteImports(site),
     refetchInterval: data => {
       const hasActiveImports = data.state.data?.data.some(imp => imp.completedAt === null);
       return hasActiveImports ? 5000 : false;
@@ -47,10 +28,7 @@ export function useCreateSiteImport(site: number) {
 
   return useMutation({
     mutationFn: async (data: { platform: ImportPlatform }) => {
-      return await authedFetch<APIResponse<CreateSiteImportResponse>>(`/sites/${site}/imports`, undefined, {
-        method: "POST",
-        data,
-      });
+      return await createSiteImport(site, data);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -66,9 +44,7 @@ export function useDeleteSiteImport(site: number) {
 
   return useMutation({
     mutationFn: async (importId: string) => {
-      return await authedFetch(`/sites/${site}/imports/${importId}`, undefined, {
-        method: "DELETE",
-      });
+      return await deleteSiteImport(site, importId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({

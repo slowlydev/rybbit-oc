@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
-import { useGetSite } from "../../../../api/admin/sites";
+import { useGetSite } from "../../../../api/admin/hooks/useSites";
 import { Sidebar as SidebarComponents } from "../../../../components/sidebar/Sidebar";
 import { SiteSettings } from "../../../../components/SiteSettings/SiteSettings";
 import { authClient } from "../../../../lib/auth";

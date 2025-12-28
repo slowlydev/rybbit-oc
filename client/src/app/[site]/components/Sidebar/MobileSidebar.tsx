@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useGetSite } from "../../../../api/admin/sites";
+import { useGetSite } from "../../../../api/admin/hooks/useSites";
 import { Sidebar } from "./Sidebar";
 import { Button } from "../../../../components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../../../../components/ui/sheet";

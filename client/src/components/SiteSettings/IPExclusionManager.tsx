@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { useGetExcludedIPs, useUpdateExcludedIPs } from "@/api/admin/excludedIPs";
+import { useGetExcludedIPs, useUpdateExcludedIPs } from "@/api/admin/hooks/useExcludedIPs";
 import { validateIPPattern } from "@/lib/ipValidation";
 
 interface IPExclusionManagerProps {

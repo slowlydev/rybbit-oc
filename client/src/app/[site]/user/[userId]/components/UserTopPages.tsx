@@ -1,6 +1,6 @@
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { useGetSite } from "../../../../../api/admin/sites";
+import { useGetSite } from "../../../../../api/admin/hooks/useSites";
 import { TabsContent, TabsList, TabsTrigger } from "../../../../../components/ui/basic-tabs";
 import { Card, CardContent } from "../../../../../components/ui/card";
 import { Tabs } from "../../../../../components/ui/tabs";

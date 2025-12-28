@@ -1,22 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { authedFetch } from "../utils";
-import { authClient } from "../../lib/auth";
+import { authClient } from "../../../lib/auth";
+import {
+  getUserOrganizations,
+  addUserToOrganization,
+  USER_ORGANIZATIONS_QUERY_KEY,
+  AddUserToOrganizationInput,
+  RemoveUserFromOrganizationInput,
+} from "../endpoints";
 
-type UserOrganization = {
-  id: string;
-  name: string;
-  slug: string;
-  logo: string | null;
-  createdAt: string;
-  metadata: string | null;
-  role: string;
-};
-
-function getUserOrganizations(): Promise<UserOrganization[]> {
-  return authedFetch("/user/organizations");
-}
-
-export const USER_ORGANIZATIONS_QUERY_KEY = "userOrganizations";
+export { USER_ORGANIZATIONS_QUERY_KEY } from "../endpoints";
 
 export function useUserOrganizations() {
   return useQuery({
@@ -44,25 +36,13 @@ export function useOrganizationInvitations(organizationId: string) {
   });
 }
 
-interface AddUserToOrganizationInput {
-  email: string;
-  role: string;
-  organizationId: string;
-}
-
 export function useAddUserToOrganization() {
   const queryClient = useQueryClient();
 
   return useMutation<{ message: string }, Error, AddUserToOrganizationInput>({
-    mutationFn: async ({ email, role, organizationId }: AddUserToOrganizationInput) => {
+    mutationFn: async (input: AddUserToOrganizationInput) => {
       try {
-        return await authedFetch<{ message: string }>(`/organizations/${organizationId}/members`, undefined, {
-          method: "POST",
-          data: {
-            email,
-            role,
-          },
-        });
+        return await addUserToOrganization(input);
       } catch (error) {
         throw new Error(error instanceof Error ? error.message : "Failed to add user to organization");
       }
@@ -73,11 +53,6 @@ export function useAddUserToOrganization() {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
   });
-}
-
-interface RemoveUserFromOrganizationInput {
-  memberIdOrEmail: string;
-  organizationId: string;
 }
 
 export function useRemoveUserFromOrganization() {
@@ -101,4 +76,3 @@ export function useRemoveUserFromOrganization() {
     },
   });
 }
-

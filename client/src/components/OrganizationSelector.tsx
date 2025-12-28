@@ -2,7 +2,7 @@ import { Building2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { authClient } from "../lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { useUserOrganizations } from "../api/admin/organizations";
+import { useUserOrganizations } from "../api/admin/hooks/useOrganizations";
 
 export function OrganizationSelector() {
   const { data: organizations, isLoading: isLoadingOrganizations } = useUserOrganizations();

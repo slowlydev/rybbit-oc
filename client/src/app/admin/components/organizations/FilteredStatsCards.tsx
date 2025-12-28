@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { AdminOrganizationData } from "@/api/admin/getAdminOrganizations";
+import { AdminOrganizationData } from "@/api/admin/endpoints";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, Activity, Zap, Clock } from "lucide-react";
 

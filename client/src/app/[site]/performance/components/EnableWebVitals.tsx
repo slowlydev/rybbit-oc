@@ -3,7 +3,8 @@
 import { Gauge } from "lucide-react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { updateSiteConfig, useGetSite } from "../../../../api/admin/sites";
+import { updateSiteConfig } from "../../../../api/admin/endpoints";
+import { useGetSite } from "../../../../api/admin/hooks/useSites";
 import { Alert, AlertDescription, AlertTitle } from "../../../../components/ui/alert";
 import { Button } from "../../../../components/ui/button";
 

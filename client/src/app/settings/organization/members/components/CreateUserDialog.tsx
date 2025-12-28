@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { Alert } from "../../../../../components/ui/alert";
 import { authClient } from "../../../../../lib/auth";
 import { validateEmail } from "../../../../../lib/auth-utils";
-import { useAddUserToOrganization } from "../../../../../api/admin/organizations";
+import { useAddUserToOrganization } from "../../../../../api/admin/hooks/useOrganizations";
 
 interface CreateUserDialogProps {
   organizationId: string;

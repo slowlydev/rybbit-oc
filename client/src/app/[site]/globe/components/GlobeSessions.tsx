@@ -3,7 +3,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
-import { useCurrentSite } from "../../../../api/admin/sites";
+import { useCurrentSite } from "../../../../api/admin/hooks/useSites";
 import { useGetSessionsInfinite } from "../../../../api/analytics/hooks/useGetUserSessions";
 import { GetSessionsResponse } from "../../../../api/analytics/endpoints";
 import { Avatar, generateName } from "../../../../components/Avatar";
