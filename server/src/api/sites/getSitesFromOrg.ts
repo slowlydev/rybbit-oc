@@ -2,7 +2,7 @@ import { eq, and } from "drizzle-orm";
 import { FastifyRequest, FastifyReply } from "fastify";
 import { clickhouse } from "../../db/clickhouse/clickhouse.js";
 import { db } from "../../db/postgres/postgres.js";
-import { sites, member, organization } from "../../db/postgres/schema.js";
+import { sites, member, organization, memberSiteAccess } from "../../db/postgres/schema.js";
 import { IS_CLOUD, DEFAULT_EVENT_LIMIT } from "../../lib/const.js";
 import { processResults } from "../analytics/utils/utils.js";
 import { getSubscriptionInner } from "../stripe/getSubscription.js";
@@ -21,7 +21,7 @@ export async function getSitesFromOrg(
     const userId = req.user?.id;
 
     // Run all database queries concurrently
-    const [memberCheck, sitesData, orgInfo] = await Promise.all([
+    const [memberCheck, allSitesData, orgInfo] = await Promise.all([
       userId
         ? db
             .select()
@@ -32,6 +32,21 @@ export async function getSitesFromOrg(
       db.select().from(sites).where(eq(sites.organizationId, organizationId)),
       db.select().from(organization).where(eq(organization.id, organizationId)).limit(1),
     ]);
+
+    // Filter sites based on member's access restrictions
+    let sitesData = allSitesData;
+    const memberRecord = memberCheck[0];
+
+    if (memberRecord?.role === "member" && memberRecord.hasRestrictedSiteAccess) {
+      // Get the sites this member has access to
+      const accessibleSites = await db
+        .select({ siteId: memberSiteAccess.siteId })
+        .from(memberSiteAccess)
+        .where(eq(memberSiteAccess.memberId, memberRecord.id));
+
+      const accessibleSiteIds = new Set(accessibleSites.map(s => s.siteId));
+      sitesData = allSitesData.filter(site => accessibleSiteIds.has(site.siteId));
+    }
 
     // Query session counts for the sites
     const sessionCountMap = new Map<number, number>();
@@ -80,7 +95,7 @@ export async function getSitesFromOrg(
     const enhancedSitesData = sitesData.map(site => ({
       ...site,
       sessionsLast24Hours: sessionCountMap.get(site.siteId) || 0,
-      isOwner: memberCheck[0]?.role !== "member",
+      isOwner: memberRecord?.role !== "member",
     }));
 
     // Sort by sessions descending

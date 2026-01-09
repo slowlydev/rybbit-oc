@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 import { getTimezone } from "../../../../lib/store";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
+import { Badge } from "../../../../components/ui/badge";
 import { authClient } from "../../../../lib/auth";
 
 import { useEffect, useState } from "react";
@@ -18,7 +19,9 @@ import { CreateUserDialog } from "./components/CreateUserDialog";
 import { DeleteOrganizationDialog } from "./components/DeleteOrganizationDialog";
 import { Invitations } from "./components/Invitations";
 import { InviteMemberDialog } from "./components/InviteMemberDialog";
+import { MemberSiteAccessDialog } from "./components/MemberSiteAccessDialog";
 import { RemoveMemberDialog } from "./components/RemoveMemberDialog";
+import { GetOrganizationMembersResponse } from "../../../../api/admin/endpoints/auth";
 
 // Types for our component
 export type Organization = {
@@ -38,11 +41,16 @@ export type Member = {
     id: string;
     name: string | null;
     email: string;
-    image: string | null;
+  };
+  siteAccess?: {
+    hasRestrictedSiteAccess: boolean;
+    siteIds: number[];
   };
 };
 
 // Organization Component with Members Table
+type MemberData = GetOrganizationMembersResponse["data"][0];
+
 function Organization({
   org,
 }: {
@@ -55,6 +63,7 @@ function Organization({
 }) {
   const [name, setName] = useState(org.name);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [selectedMemberForAccess, setSelectedMemberForAccess] = useState<MemberData | null>(null);
 
   useEffect(() => {
     setName(org.name);
@@ -158,6 +167,7 @@ function Organization({
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Site Access</TableHead>
                 <TableHead>Joined</TableHead>
                 {isOwner && <TableHead className="w-12">Actions</TableHead>}
               </TableRow>
@@ -177,6 +187,9 @@ function Organization({
                       <div className="h-4 bg-muted animate-pulse rounded w-16"></div>
                     </TableCell>
                     <TableCell>
+                      <div className="h-4 bg-muted animate-pulse rounded w-16"></div>
+                    </TableCell>
+                    <TableCell>
                       <div className="h-4 bg-muted animate-pulse rounded w-20"></div>
                     </TableCell>
                     {isOwner && (
@@ -188,11 +201,26 @@ function Organization({
                 ))
               ) : (
                 <>
-                  {members?.data?.map((member: any) => (
+                  {members?.data?.map((member: MemberData) => (
                     <TableRow key={member.id}>
                       <TableCell>{member.user?.name || "—"}</TableCell>
                       <TableCell>{member.user?.email}</TableCell>
                       <TableCell className="capitalize">{member.role}</TableCell>
+                      <TableCell>
+                        {member.role === "member" ? (
+                          <Badge
+                            variant={member.siteAccess?.hasRestrictedSiteAccess ? "default" : "secondary"}
+                            className={isAdmin ? "cursor-pointer hover:opacity-80" : ""}
+                            onClick={() => isAdmin && setSelectedMemberForAccess(member)}
+                          >
+                            {member.siteAccess?.hasRestrictedSiteAccess
+                              ? `${member.siteAccess.siteIds.length} site${member.siteAccess.siteIds.length !== 1 ? "s" : ""}`
+                              : "All sites"}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">All sites</Badge>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {DateTime.fromSQL(member.createdAt, { zone: "utc" })
                           .setZone(getTimezone())
@@ -209,7 +237,7 @@ function Organization({
                   ))}
                   {(!members?.data || members.data.length === 0) && (
                     <TableRow>
-                      <TableCell colSpan={isOwner ? 5 : 4} className="text-center py-6 text-muted-foreground">
+                      <TableCell colSpan={isOwner ? 6 : 5} className="text-center py-6 text-muted-foreground">
                         No members found
                       </TableCell>
                     </TableRow>
@@ -218,6 +246,14 @@ function Organization({
               )}
             </TableBody>
           </Table>
+
+          {/* Member Site Access Dialog */}
+          <MemberSiteAccessDialog
+            member={selectedMemberForAccess}
+            open={!!selectedMemberForAccess}
+            onClose={() => setSelectedMemberForAccess(null)}
+            onSuccess={handleRefresh}
+          />
         </CardContent>
       </Card>
 

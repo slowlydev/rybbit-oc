@@ -2,12 +2,12 @@ import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { admin, captcha, emailOTP, organization, apiKey } from "better-auth/plugins";
 import dotenv from "dotenv";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import pg from "pg";
 
 import { db } from "../db/postgres/postgres.js";
 import * as schema from "../db/postgres/schema.js";
-import { user } from "../db/postgres/schema.js";
+import { invitation, member, memberSiteAccess, user } from "../db/postgres/schema.js";
 import { DISABLE_SIGNUP, IS_CLOUD } from "./const.js";
 import { sendEmail, sendInvitationEmail, sendWelcomeEmail } from "./email/email.js";
 
@@ -17,16 +17,14 @@ const pluginList = [
   admin(),
   apiKey(),
   organization({
-    // Allow users to create organizations
     allowUserToCreateOrganization: true,
-    // Set the creator role to owner
     creatorRole: "owner",
-    sendInvitationEmail: async invitation => {
-      const inviteLink = `${process.env.BASE_URL}/invitation?invitationId=${invitation.invitation.id}&organization=${invitation.organization.name}&inviterEmail=${invitation.inviter.user.email}`;
+    sendInvitationEmail: async invitationData => {
+      const inviteLink = `${process.env.BASE_URL}/invitation?invitationId=${invitationData.invitation.id}&organization=${invitationData.organization.name}&inviterEmail=${invitationData.inviter.user.email}`;
       await sendInvitationEmail(
-        invitation.email,
-        invitation.inviter.user.email,
-        invitation.organization.name,
+        invitationData.email,
+        invitationData.inviter.user.email,
+        invitationData.organization.name,
         inviteLink
       );
     },
@@ -205,6 +203,68 @@ export const auth = betterAuth({
         const newSession = ctx.context.newSession;
         if (newSession) {
           sendWelcomeEmail(newSession.user.email, newSession.user.name);
+        }
+      }
+
+      // Handle invitation acceptance - copy site access from invitation to member
+      if (ctx.path === "/organization/accept-invitation") {
+        try {
+          const body = ctx.body as { invitationId?: string } | null;
+          const invitationId = body?.invitationId;
+
+          if (invitationId) {
+            // Query the invitation to get site access settings and org/email info
+            const invitationRecord = await db
+              .select({
+                organizationId: invitation.organizationId,
+                email: invitation.email,
+                hasRestrictedSiteAccess: invitation.hasRestrictedSiteAccess,
+                siteIds: invitation.siteIds,
+              })
+              .from(invitation)
+              .where(eq(invitation.id, invitationId))
+              .limit(1);
+
+            if (invitationRecord.length > 0) {
+              const { organizationId, email, hasRestrictedSiteAccess, siteIds } = invitationRecord[0];
+
+              if (hasRestrictedSiteAccess) {
+                // Find the user by email
+                const userRecord = await db.select({ id: user.id }).from(user).where(eq(user.email, email)).limit(1);
+
+                if (userRecord.length > 0) {
+                  await db.transaction(async tx => {
+                    // Find the member by organizationId + userId
+                    const memberRecord = await tx
+                      .select({ id: member.id })
+                      .from(member)
+                      .where(and(eq(member.organizationId, organizationId), eq(member.userId, userRecord[0].id)))
+                      .limit(1);
+
+                    if (memberRecord.length > 0) {
+                      const memberId = memberRecord[0].id;
+
+                      // Update member with hasRestrictedSiteAccess
+                      await tx.update(member).set({ hasRestrictedSiteAccess: true }).where(eq(member.id, memberId));
+
+                      // Insert site access entries
+                      const siteIdArray = (siteIds || []) as number[];
+                      if (siteIdArray.length > 0) {
+                        await tx.insert(memberSiteAccess).values(
+                          siteIdArray.map(siteId => ({
+                            memberId: memberId,
+                            siteId: siteId,
+                          }))
+                        );
+                      }
+                    }
+                  });
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error copying site access from invitation to member:", error);
         }
       }
     }),

@@ -2,7 +2,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { FastifyRequest } from "fastify";
 import NodeCache from "node-cache";
 import { db } from "../db/postgres/postgres.js";
-import { member, sites, user } from "../db/postgres/schema.js";
+import { member, memberSiteAccess, sites, user } from "../db/postgres/schema.js";
 import { auth } from "./auth.js";
 import { siteConfig } from "./siteConfig.js";
 import { logger } from "./logger/logger.js";
@@ -66,7 +66,12 @@ export async function getSitesUserHasAccessTo(req: FastifyRequest, adminOnly = f
       const [isAdmin, memberRecords] = await Promise.all([
         getIsUserAdmin(req),
         db
-          .select({ organizationId: member.organizationId, role: member.role })
+          .select({
+            id: member.id,
+            organizationId: member.organizationId,
+            role: member.role,
+            hasRestrictedSiteAccess: member.hasRestrictedSiteAccess,
+          })
           .from(member)
           .where(eq(member.userId, userId)),
       ]);
@@ -80,15 +85,65 @@ export async function getSitesUserHasAccessTo(req: FastifyRequest, adminOnly = f
         return [];
       }
 
-      // Extract organization IDs
-      const organizationIds = memberRecords
-        .filter(record => !adminOnly || record.role !== "member")
-        .map(record => record.organizationId);
+      // Separate members by access type
+      // 1. Admin/owner members - full access to their orgs
+      // 2. Unrestricted members - full access to their orgs
+      // 3. Restricted members - only access to specific sites via member_site_access
+      const fullAccessOrgIds: string[] = [];
+      const restrictedMemberIds: string[] = [];
 
-      // Get sites for these organizations
-      const siteRecords = await db.select().from(sites).where(inArray(sites.organizationId, organizationIds));
+      for (const record of memberRecords) {
+        // If adminOnly is true, skip members with "member" role
+        if (adminOnly && record.role === "member") {
+          continue;
+        }
 
-      return siteRecords;
+        // Admin/owner roles always have full access
+        if (record.role === "admin" || record.role === "owner") {
+          fullAccessOrgIds.push(record.organizationId);
+        }
+        // Member role with hasRestrictedSiteAccess = true - only specific sites
+        else if (record.role === "member" && record.hasRestrictedSiteAccess) {
+          restrictedMemberIds.push(record.id);
+        }
+        // Member role with hasRestrictedSiteAccess = false - full org access
+        else {
+          fullAccessOrgIds.push(record.organizationId);
+        }
+      }
+
+      // Fetch sites in parallel
+      const [orgSites, restrictedSites] = await Promise.all([
+        // Get all sites from orgs with full access
+        fullAccessOrgIds.length > 0
+          ? db.select().from(sites).where(inArray(sites.organizationId, fullAccessOrgIds))
+          : Promise.resolve([]),
+        // Get specific sites for restricted members
+        restrictedMemberIds.length > 0
+          ? (async () => {
+              const siteAccess = await db
+                .select({ siteId: memberSiteAccess.siteId })
+                .from(memberSiteAccess)
+                .where(inArray(memberSiteAccess.memberId, restrictedMemberIds));
+              const siteIds = siteAccess.map(s => s.siteId);
+              if (siteIds.length === 0) return [];
+              return db.select().from(sites).where(inArray(sites.siteId, siteIds));
+            })()
+          : Promise.resolve([]),
+      ]);
+
+      // Combine and dedupe by siteId
+      const siteMap = new Map<number, (typeof orgSites)[0]>();
+      for (const site of orgSites) {
+        siteMap.set(site.siteId, site);
+      }
+      for (const site of restrictedSites) {
+        if (!siteMap.has(site.siteId)) {
+          siteMap.set(site.siteId, site);
+        }
+      }
+
+      return Array.from(siteMap.values());
     } catch (error) {
       console.error("Error getting sites user has access to:", error);
       // Remove from cache on error so it can be retried
@@ -101,6 +156,12 @@ export async function getSitesUserHasAccessTo(req: FastifyRequest, adminOnly = f
   sitesAccessCache.set(cacheKey, promise);
 
   return promise;
+}
+
+// Cache invalidation helper - call this when member site access changes
+export function invalidateSitesAccessCache(userId: string) {
+  sitesAccessCache.del(`${userId}:true`);
+  sitesAccessCache.del(`${userId}:false`);
 }
 
 export async function checkApiKey(req: FastifyRequest, options: { organizationId?: string; siteId?: string | number }) {

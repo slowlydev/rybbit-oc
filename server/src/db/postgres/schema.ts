@@ -149,6 +149,8 @@ export const member = pgTable("member", {
     .references(() => user.id, { onDelete: "cascade" }),
   role: text().notNull(),
   createdAt: timestamp({ mode: "string" }).notNull(),
+  // Site access restriction: false = all sites (default), true = only sites in member_site_access
+  hasRestrictedSiteAccess: boolean("has_restricted_site_access").default(false).notNull(),
 });
 
 // Invitation table (BetterAuth)
@@ -162,7 +164,32 @@ export const invitation = pgTable("invitation", {
   role: text().notNull(),
   status: text().notNull(),
   expiresAt: timestamp({ mode: "string" }).notNull(),
+  // Site access restriction for the invited member
+  hasRestrictedSiteAccess: boolean("has_restricted_site_access").default(false).notNull(),
+  siteIds: jsonb("site_ids").default([]).$type<number[]>(), // Array of site IDs to grant access to
 });
+
+// Member site access junction table - stores which sites a member has access to
+// Only used when member.hasRestrictedSiteAccess = true
+export const memberSiteAccess = pgTable(
+  "member_site_access",
+  {
+    id: serial("id").primaryKey().notNull(),
+    memberId: text("member_id")
+      .notNull()
+      .references(() => member.id, { onDelete: "cascade" }),
+    siteId: integer("site_id")
+      .notNull()
+      .references(() => sites.siteId, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
+  },
+  (table) => [
+    unique("member_site_access_unique").on(table.memberId, table.siteId),
+    index("member_site_access_member_idx").on(table.memberId),
+    index("member_site_access_site_idx").on(table.siteId),
+  ]
+);
 
 // Session table (BetterAuth)
 export const session = pgTable(
