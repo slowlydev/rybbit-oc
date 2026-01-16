@@ -75,10 +75,10 @@ export function ExportButton() {
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleExportPdf} disabled={isExportingPdf}>
+        {/* <DropdownMenuItem onClick={handleExportPdf} disabled={isExportingPdf}>
           <FileText className="h-4 w-4 mr-2" />
           {isExportingPdf ? "Generating PDF..." : "Export as PDF Report"}
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem onClick={handleExportCsv} disabled={isExportingCsv}>
           <FileArchive className="h-4 w-4 mr-2" />
           {isExportingCsv ? "Exporting..." : "Export as CSV (ZIP)"}
