@@ -7,7 +7,6 @@ export type FeatureItem = { feature: string; included?: boolean } | string;
 export interface PricingCardProps {
   title: string;
   description: string;
-  priceDisplay: React.ReactNode;
   buttonText?: string;
   buttonVariant?: "default" | "primary";
   features: FeatureItem[];
@@ -17,12 +16,15 @@ export interface PricingCardProps {
   customButton?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
+  isCustomTier?: boolean;
+  monthlyPrice?: number;
+  annualPrice?: number;
+  isAnnual?: boolean;
 }
 
 export function PricingCard({
   title,
   description,
-  priceDisplay,
   buttonText,
   buttonVariant = "primary",
   features,
@@ -32,6 +34,10 @@ export function PricingCard({
   customButton,
   onClick,
   disabled,
+  isCustomTier = false,
+  monthlyPrice,
+  annualPrice,
+  isAnnual = false,
 }: PricingCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const isFree = variant === "free";
@@ -67,7 +73,18 @@ export function PricingCard({
             </div>
 
             {/* Price display */}
-            <div className="mb-6">{priceDisplay}</div>
+            <div className="mb-6 space-y-1">
+              <div>{isCustomTier ? <div className="text-3xl font-bold">Custom
+              </div> : <div>
+                <span className="text-3xl font-bold">
+                  ${isAnnual ? Math.round(annualPrice! / 12) : monthlyPrice}
+                </span>
+                <span className="ml-1 pb-1 text-neutral-600 dark:text-neutral-400">/month</span>
+              </div>}</div>
+              <div className="text-xs">
+                <span className="text-xs text-neutral-600 dark:text-neutral-400">billed {isAnnual ? `annually at $${annualPrice}` : "monthly"}</span>
+              </div>
+            </div>
 
             {customButton ? (
               customButton

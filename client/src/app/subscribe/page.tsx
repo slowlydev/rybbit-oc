@@ -36,7 +36,6 @@ function SubscribeContent() {
       <StandardPage>
         <div className="container mx-auto py-12 px-4">
           <PricingHeader />
-
           {/* Pricing Card */}
           <PricingCards isLoggedIn={!!sessionData?.user} />
         </div>
@@ -48,10 +47,8 @@ function SubscribeContent() {
     <StandardPage>
       <div className="container mx-auto py-12 px-4">
         <PricingHeader />
-
         {/* Pricing Card */}
         <PricingCards isLoggedIn={!!sessionData?.user} />
-
         {/* Usage Stats and Chart */}
         {organizationId && (
           <div className="max-w-4xl mx-auto mt-6 bg-white dark:bg-neutral-900/80 rounded-xl border border-neutral-100 dark:border-neutral-850 p-6">

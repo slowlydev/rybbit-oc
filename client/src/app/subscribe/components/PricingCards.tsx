@@ -1,22 +1,20 @@
 "use client";
 
+import { PricingCard } from "@/components/pricing/PricingCard";
 import { Slider } from "@/components/ui/slider";
+import { toast } from "@/components/ui/sonner";
 import { authClient } from "@/lib/auth";
 import { BACKEND_URL } from "@/lib/const";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { toast } from "@/components/ui/sonner";
-import { DEFAULT_EVENT_LIMIT } from "../../../lib/subscription/constants";
 import { trackAdEvent } from "../../../lib/trackAdEvent";
-import { PricingCard } from "@/components/pricing/PricingCard";
 import {
   ENTERPRISE_FEATURES,
   EVENT_TIERS,
-  FREE_FEATURES,
   PRO_FEATURES,
   STANDARD_FEATURES,
   findPriceForTier,
-  formatEventTier,
+  formatEventTier
 } from "./utils";
 
 import { useRouter } from "next/navigation";
@@ -260,43 +258,25 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
           onClick={() => (siteId ? router.push(`/${siteId}`) : undefined)}
           disabled={!siteId}
         /> */}
-
         <PricingCard
           title="Standard"
           description="Everything you need to get started as a small business"
-          priceDisplay={
-            isCustomTier ? (
-              <div className="text-3xl font-bold">Custom</div>
-            ) : (
-              <div>
-                <span className="text-3xl font-bold">
-                  ${isAnnual ? Math.round(standardAnnualPrice / 12) : standardMonthlyPrice}
-                </span>
-                <span className="ml-1 text-neutral-600 dark:text-neutral-400">/month</span>
-              </div>
-            )
-          }
+          monthlyPrice={standardMonthlyPrice}
+          annualPrice={standardAnnualPrice}
+          isAnnual={isAnnual}
+          isCustomTier={isCustomTier}
           buttonText={isLoading ? "Processing..." : isCustomTier ? "Contact us" : "Get started"}
           features={STANDARD_FEATURES}
           onClick={() => handleSubscribe("standard")}
           disabled={isLoading}
         />
-
         <PricingCard
           title="Pro"
           description="Advanced features for professional teams"
-          priceDisplay={
-            isCustomTier ? (
-              <div className="text-3xl font-bold">Custom</div>
-            ) : (
-              <div>
-                <span className="text-3xl font-bold">
-                  ${isAnnual ? Math.round(proAnnualPrice / 12) : proMonthlyPrice}
-                </span>
-                <span className="ml-1 text-neutral-600 dark:text-neutral-400">/month</span>
-              </div>
-            )
-          }
+          isCustomTier={isCustomTier}
+          monthlyPrice={proMonthlyPrice}
+          annualPrice={proAnnualPrice}
+          isAnnual={isAnnual}
           buttonText={isLoading ? "Processing..." : isCustomTier ? "Contact us" : "Get started"}
           features={PRO_FEATURES}
           recommended={true}
@@ -308,12 +288,7 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
           <PricingCard
             title="Test"
             description="$1 test subscription for development"
-            priceDisplay={
-              <div>
-                <span className="text-3xl font-bold">$1</span>
-                <span className="ml-1 text-neutral-600 dark:text-neutral-400">/month</span>
-              </div>
-            }
+            isCustomTier={isCustomTier}
             buttonText={isLoading ? "Processing..." : "Subscribe ($1)"}
             features={["Test plan"]}
             onClick={() => handleTestSubscribe()}
@@ -324,8 +299,8 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
         <PricingCard
           title="Enterprise"
           description="Advanced features for enterprise teams"
-          priceDisplay={<div className="text-3xl font-bold">Custom</div>}
           features={ENTERPRISE_FEATURES}
+          isCustomTier={true}
           customButton={
             <a href="https://www.rybbit.com/contact" className="w-full block">
               <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-5 py-3 rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 cursor-pointer">
