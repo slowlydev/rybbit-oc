@@ -13,7 +13,7 @@ export const baseOptions: BaseLayoutProps = {
     title: (
       <>
         <Image
-          src="/rybbit1.svg"
+          src="/rybbit/horizontal_white.svg"
           alt="Rybbit"
           width={120}
           height={0}

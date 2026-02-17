@@ -21,7 +21,7 @@ export function RybbitLogo({ width = 32, height = 32 }: { width?: number; height
 
   return (
     <Image
-      src="/2.svg"
+      src="/rybbit/frog_white.svg"
       alt="Rybbit"
       width={width}
       height={height}
@@ -46,5 +46,5 @@ export function RybbitTextLogo({ width = 150, height = 34 }: { width?: number; h
     return <Image src={whiteLabelImage} alt="Rybbit" width={width} height={height} />;
   }
 
-  return <Image src="/rybbit-text.svg" alt="Rybbit" width={width} height={height} className="dark:invert-0 invert" />;
+  return <Image src="/rybbit/horizontal_white.svg" alt="Rybbit" width={width} height={height} className="dark:invert-0 invert" />;
 }

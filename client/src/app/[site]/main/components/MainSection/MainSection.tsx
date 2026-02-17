@@ -5,11 +5,10 @@ import Link from "next/link";
 import { useGetOverview } from "../../../../../api/analytics/hooks/useGetOverview";
 import { useGetOverviewBucketed } from "../../../../../api/analytics/hooks/useGetOverviewBucketed";
 import { BucketSelection } from "../../../../../components/BucketSelection";
-import { RybbitLogo } from "../../../../../components/RybbitLogo";
+import { RybbitTextLogo } from "../../../../../components/RybbitLogo";
 import { useWhiteLabel } from "../../../../../hooks/useIsWhiteLabel";
 import { authClient } from "../../../../../lib/auth";
 import { useStore } from "../../../../../lib/store";
-import { cn } from "../../../../../lib/utils";
 import { Chart } from "./Chart";
 import { Overview } from "./Overview";
 import { PreviousChart } from "./PreviousChart";
@@ -78,10 +77,9 @@ export function MainSection() {
               {!isWhiteLabel && (
                 <Link
                   href={session.data ? "/" : "https://rybbit.com"}
-                  className={cn("text-lg font-semibold flex items-center gap-1 opacity-75", tilt_wrap.className)}
+                  className="opacity-75"
                 >
-                  <RybbitLogo width={24} height={24} />
-                  rybbit
+                  <RybbitTextLogo width={80} height={0} />
                 </Link>
               )}
             </div>
