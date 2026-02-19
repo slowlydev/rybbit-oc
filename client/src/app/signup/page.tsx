@@ -4,12 +4,10 @@ import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthError } from "@/components/auth/AuthError";
 import { AuthInput } from "@/components/auth/AuthInput";
 import { SocialButtons } from "@/components/auth/SocialButtons";
-import { Turnstile } from "@/components/auth/Turnstile";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Used for disabled signup view
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,7 +19,6 @@ import { SpinningGlobe } from "../../components/SpinningGlobe";
 import { useSetPageTitle } from "../../hooks/useSetPageTitle";
 import { authClient } from "../../lib/auth";
 import { useConfigs } from "../../lib/configs";
-import { IS_CLOUD } from "../../lib/const";
 import { userStore } from "../../lib/userStore";
 import { cn, isValidDomain, normalizeDomain } from "../../lib/utils";
 
@@ -45,12 +42,10 @@ function SignupPageContent() {
   // Step 1: Account creation
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   // Step 2: Organization creation
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
-  const [referralSource, setReferralSource] = useState("");
 
   // Step 3: Website addition
   const [organizationId, setOrganizationId] = useState("");
@@ -74,26 +69,12 @@ function SignupPageContent() {
     setError("");
 
     try {
-      // Validate Turnstile token if in cloud mode
-      if (IS_CLOUD && !turnstileToken) {
-        setError("Please complete the captcha verification");
-        setIsLoading(false);
-        return;
-      }
-
       const { data, error } = await authClient.signUp.email(
         {
           email,
           name: email.split("@")[0], // Use email prefix as default name
           password,
         },
-        {
-          onRequest: context => {
-            if (IS_CLOUD && turnstileToken) {
-              context.headers.set("x-captcha-response", turnstileToken);
-            }
-          },
-        }
       );
 
       if (data?.user) {
@@ -140,13 +121,6 @@ function SignupPageContent() {
 
       setOrganizationId(data.id);
 
-      // Track how user found Rybbit
-      if (IS_CLOUD && referralSource && userStore.getState().user?.id) {
-        window.rybbit?.identify(userStore.getState().user?.id || "", {
-          source: referralSource,
-        });
-      }
-
       setCurrentStep(3);
     } catch (error) {
       setError(String(error));
@@ -171,11 +145,7 @@ function SignupPageContent() {
       try {
         const normalizedDomain = normalizeDomain(domain);
         const response = await addSite(normalizedDomain, normalizedDomain, organizationId);
-        if (IS_CLOUD) {
-          router.push("/subscribe?siteId=" + response.siteId);
-        } else {
-          router.push(`/${response.siteId}`);
-        }
+        router.push(`/${response.siteId}`);
       } catch (error) {
         setError(String(error));
       }
@@ -213,21 +183,13 @@ function SignupPageContent() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
               />
-              {IS_CLOUD && (
-                <Turnstile
-                  onSuccess={token => setTurnstileToken(token)}
-                  onError={() => setTurnstileToken("")}
-                  onExpire={() => setTurnstileToken("")}
-                  className="flex justify-center"
-                />
-              )}
               <AuthButton
                 isLoading={isLoading}
                 loadingText="Creating account..."
                 onClick={handleAccountSubmit}
                 type="button"
                 className="mt-6 transition-all duration-300 h-11"
-                disabled={IS_CLOUD ? !turnstileToken || isLoading : isLoading}
+                disabled={isLoading}
               >
                 Continue
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -262,57 +224,11 @@ function SignupPageContent() {
                 />
               </div>
 
-              {IS_CLOUD && (
-                <div className="space-y-2">
-                  <Label htmlFor="referralSource">How did you find Rybbit?</Label>
-                  <Select value={referralSource} onValueChange={setReferralSource}>
-                    <SelectTrigger className="h-10 bg-neutral-100 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700">
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="google">Google</SelectItem>
-                      <SelectItem value="reddit">Reddit</SelectItem>
-                      <SelectItem value="twitter">Twitter/X</SelectItem>
-                      <SelectItem value="youtube">YouTube</SelectItem>
-                      <SelectItem value="linkedin">LinkedIn</SelectItem>
-                      <SelectItem value="discord">Discord</SelectItem>
-                      <SelectItem value="producthunt">Product Hunt</SelectItem>
-                      <SelectItem value="hacker-news">Hacker News</SelectItem>
-                      <SelectItem value="github">Github</SelectItem>
-                      <SelectItem value="friends">Friends</SelectItem>
-                      <SelectItem value="work">Work</SelectItem>
-                      <SelectItem value="blog">Blog</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* <div className="space-y-2">
-                <Label htmlFor="orgSlug">Organization Slug</Label>
-                <Input
-                  id="orgSlug"
-                  type="text"
-                  placeholder="acme-inc"
-                  value={orgSlug}
-                  onChange={(e) =>
-                    setOrgSlug(
-                      e.target.value
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")
-                        .replace(/[^a-z0-9-]/g, "")
-                    )
-                  }
-                  required
-                  className="h-10 transition-all bg-neutral-800/50 border-neutral-700"
-                />
-              </div> */}
-
               <div className="flex flex-col gap-4">
                 <Button
                   className="w-full transition-all duration-300 h-11 bg-emerald-600 hover:bg-emerald-500 text-white"
                   onClick={handleOrganizationSubmit}
-                  disabled={isLoading || !orgName || !orgSlug || (IS_CLOUD && !referralSource)}
+                  disabled={isLoading || !orgName || !orgSlug}
                   variant="success"
                 >
                   Continue
@@ -456,7 +372,7 @@ function SignupPageContent() {
           </div>
         </div>
 
-        {!IS_CLOUD && (
+        {
           <div className="text-xs text-muted-foreground mt-8">
             <a
               href="https://rybbit.com"
@@ -467,7 +383,7 @@ function SignupPageContent() {
               Open source web analytics powered by Rybbit
             </a>
           </div>
-        )}
+        }
       </div>
 
       {/* Right panel - globe (hidden on mobile/tablet) */}

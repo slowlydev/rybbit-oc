@@ -5,13 +5,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/sonner";
-import { useUpdateAccountSettings } from "../../../../api/admin/hooks/useAccountSettings";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { Input } from "../../../../components/ui/input";
-import { Switch } from "../../../../components/ui/switch";
 import { validateEmail } from "../../../../lib/auth-utils";
-import { IS_CLOUD } from "../../../../lib/const";
 import { ApiKeyManager } from "./ApiKeyManager";
 import { ChangePassword } from "./ChangePassword";
 import { DeleteAccount } from "./DeleteAccount";
@@ -22,7 +19,6 @@ export function AccountInner() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const signout = useSignout();
-  const updateAccountSettings = useUpdateAccountSettings();
 
   const [email, setEmail] = useState(session.data?.user.email ?? "");
   const [name, setName] = useState(session.data?.user.name ?? "");
@@ -91,19 +87,6 @@ export function AccountInner() {
     }
   };
 
-  const handleEmailReportsToggle = async (checked: boolean) => {
-    try {
-      await updateAccountSettings.mutateAsync({
-        sendAutoEmailReports: checked,
-      });
-      toast.success(`Email reports ${checked ? "enabled" : "disabled"}`);
-      session.refetch();
-    } catch (error) {
-      console.error("Error updating email reports setting:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to update email reports setting");
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <Card className="p-2">
@@ -145,21 +128,6 @@ export function AccountInner() {
               </Button>
             </div>
           </div>
-          {(session.data?.user as any)?.sendAutoEmailReports !== undefined && IS_CLOUD && (
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Send Weekly Email Reports</h4>
-                <p className="text-xs text-neutral-500">Enable or disable automatic email reports for your account.</p>
-              </div>
-              <div className="flex space-x-2">
-                <Switch
-                  checked={(session.data?.user as any).sendAutoEmailReports}
-                  onCheckedChange={handleEmailReportsToggle}
-                  disabled={updateAccountSettings.isPending}
-                />
-              </div>
-            </div>
-          )}
           <Button variant="outline" onClick={signout}>
             Sign out
           </Button>

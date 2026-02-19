@@ -8,8 +8,6 @@ import { importQuotaManager } from "../../services/import/importQuotaManager.js"
 import { db } from "../../db/postgres/postgres.js";
 import { organization, sites } from "../../db/postgres/schema.js";
 import { eq } from "drizzle-orm";
-import { getBestSubscription } from "../../lib/subscriptionUtils.js";
-import { IS_CLOUD } from "../../lib/const.js";
 
 const batchImportRequestSchema = z
   .object({
@@ -69,15 +67,7 @@ export async function batchImportEvents(request: FastifyRequest<BatchImportReque
       return reply.status(404).send({ error: "Site not found" });
     }
 
-    if (IS_CLOUD) {
-      const subscription = await getBestSubscription(siteRecord.organizationId, siteRecord.stripeCustomerId);
-
-      if (subscription.source === "free") {
-        return reply.status(403).send({
-          error: "Data import is not available on the free plan. Please upgrade to a paid plan.",
-        });
-      }
-    }
+    // Unlocked: no subscription check needed for imports
 
     try {
       const quotaTracker = await importQuotaManager.getTracker(siteRecord.organizationId);

@@ -29,7 +29,7 @@ import { CountryExclusionManager } from "./CountryExclusionManager";
 import { GSCManager } from "./GSCManager";
 import { useStripeSubscription } from "../../lib/subscription/useStripeSubscription";
 import { Badge } from "../ui/badge";
-import { IS_CLOUD } from "../../lib/const";
+import { IS_UNLOCKED } from "../../lib/const";
 
 interface SiteConfigurationProps {
   siteMetadata: SiteResponse;
@@ -185,41 +185,32 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
 
   const { data: subscription, isLoading: isSubscriptionLoading } = useStripeSubscription();
 
-  const sessionReplayDisabled = !subscription?.planName.includes("pro") && IS_CLOUD;
-  const standardFeaturesDisabled = !subscription?.planName.includes("standard") && !subscription?.planName.includes("appsumo") && IS_CLOUD;
+  // Unlocked: all features always enabled
+  const sessionReplayDisabled = false;
+  const standardFeaturesDisabled = false;
 
   // Configuration for analytics feature toggles
   const analyticsToggles: ToggleConfig[] = [
-    ...(!subscription?.planName?.startsWith("appsumo") && !isSubscriptionLoading
-      ? [
-        {
-          id: "sessionReplay",
-          label: "Session Replay",
-          description: "Record and replay user sessions to understand user behavior",
-          value: toggleStates.sessionReplay,
-          key: "sessionReplay",
-          enabledMessage: "Session replay enabled",
-          disabledMessage: "Session replay disabled",
-          disabled: sessionReplayDisabled,
-          badge: <Badge variant="success">Pro</Badge>,
-        } as ToggleConfig,
-      ]
-      : []),
-    ...(IS_CLOUD
-      ? [
-        {
-          id: "webVitals",
-          label: "Web Vitals",
-          description: "Track Core Web Vitals metrics (LCP, CLS, INP, FCP, TTFB)",
-          value: toggleStates.webVitals,
-          key: "webVitals" as keyof SiteResponse,
-          enabledMessage: "Web Vitals enabled",
-          disabledMessage: "Web Vitals disabled",
-          disabled: standardFeaturesDisabled,
-          badge: <Badge variant="success">Standard</Badge>,
-        } as ToggleConfig,
-      ]
-      : []),
+    {
+      id: "sessionReplay",
+      label: "Session Replay",
+      description: "Record and replay user sessions to understand user behavior",
+      value: toggleStates.sessionReplay,
+      key: "sessionReplay",
+      enabledMessage: "Session replay enabled",
+      disabledMessage: "Session replay disabled",
+      disabled: sessionReplayDisabled,
+    },
+    {
+      id: "webVitals",
+      label: "Web Vitals",
+      description: "Track Core Web Vitals metrics (LCP, CLS, INP, FCP, TTFB)",
+      value: toggleStates.webVitals,
+      key: "webVitals" as keyof SiteResponse,
+      enabledMessage: "Web Vitals enabled",
+      disabledMessage: "Web Vitals disabled",
+      disabled: standardFeaturesDisabled,
+    },
     {
       id: "trackSpaNavigation",
       label: "SPA Navigation",
@@ -268,7 +259,6 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
       enabledMessage: "Error tracking enabled",
       disabledMessage: "Error tracking disabled",
       disabled: standardFeaturesDisabled,
-      badge: <Badge variant="success">Standard</Badge>,
     },
     {
       id: "trackButtonClicks",
@@ -279,7 +269,6 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
       enabledMessage: "Button click tracking enabled",
       disabledMessage: "Button click tracking disabled",
       disabled: standardFeaturesDisabled,
-      badge: <Badge variant="success">Standard</Badge>,
     },
     {
       id: "trackCopy",
@@ -290,7 +279,6 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
       enabledMessage: "Copy tracking enabled",
       disabledMessage: "Copy tracking disabled",
       disabled: standardFeaturesDisabled,
-      badge: <Badge variant="success">Standard</Badge>,
     },
     {
       id: "trackFormInteractions",
@@ -301,7 +289,6 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
       enabledMessage: "Form interaction tracking enabled",
       disabledMessage: "Form interaction tracking disabled",
       disabled: standardFeaturesDisabled,
-      badge: <Badge variant="success">Standard</Badge>,
     },
   ];
 
@@ -312,7 +299,7 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
         <div key={toggle.id} className="flex items-center justify-between">
           <div>
             <Label htmlFor={toggle.id} className="text-sm font-medium text-foreground flex items-center gap-2">
-              {toggle.label} {toggle.badge && IS_CLOUD && toggle.badge}
+              {toggle.label} {toggle.badge && toggle.badge}
             </Label>
             <p className="text-xs text-muted-foreground mt-1">{toggle.description}</p>
           </div>
@@ -342,7 +329,7 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
       <div className="space-y-4">{renderToggleSection(autoCaptureToggles, "Auto Capture")}</div>
       <IPExclusionManager siteId={siteMetadata.siteId} disabled={disabled} />
       <CountryExclusionManager siteId={siteMetadata.siteId} disabled={disabled} />
-      {IS_CLOUD && <GSCManager disabled={disabled} />}
+      {IS_UNLOCKED && <GSCManager disabled={disabled} />}
       <div className="space-y-3">
         <div>
           <h4 className="text-sm font-semibold text-foreground">Change Domain</h4>

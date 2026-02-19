@@ -89,14 +89,6 @@ import {
   verifyScript,
 } from "./api/sites/index.js";
 import {
-  createCheckoutSession,
-  createPortalSession,
-  getSubscription,
-  handleWebhook,
-  previewSubscriptionUpdate,
-  updateSubscription,
-} from "./api/stripe/index.js";
-import {
   addUserToOrganization,
   createApiKey,
   deleteApiKey,
@@ -122,12 +114,9 @@ import {
 } from "./lib/auth-middleware.js";
 import { mapHeaders } from "./lib/auth-utils.js";
 import { auth } from "./lib/auth.js";
-import { IS_CLOUD } from "./lib/const.js";
-import { reengagementService } from "./services/reengagement/reengagementService.js";
 import { telemetryService } from "./services/telemetryService.js";
 import { handleIdentify } from "./services/tracker/identifyService.js";
 import { trackEvent } from "./services/tracker/trackEvent.js";
-import { weeklyReportService } from "./services/weekyReports/weeklyReportService.js";
 
 // Pre-composed middleware chains for common auth patterns
 // Cast as any to work around Fastify's type inference limitations with preHandler
@@ -345,29 +334,12 @@ async function gscRoutes(fastify: FastifyInstance) {
   fastify.get("/sites/:siteId/gsc/data", publicSite, getGSCData);
 }
 
-async function stripeAdminRoutes(fastify: FastifyInstance) {
-  // STRIPE & ADMIN
-  if (IS_CLOUD) {
-    // Stripe Routes
-    fastify.post("/stripe/create-checkout-session", authOnly, createCheckoutSession);
-    fastify.post("/stripe/create-portal-session", authOnly, createPortalSession);
-    fastify.post("/stripe/preview-subscription-update", authOnly, previewSubscriptionUpdate);
-    fastify.post("/stripe/update-subscription", authOnly, updateSubscription);
-    fastify.get("/stripe/subscription", authOnly, getSubscription);
-    fastify.post("/stripe/webhook", { config: { rawBody: true } }, handleWebhook); // Public - Stripe webhook
-
-    // Admin Routes
-    fastify.get("/admin/sites", adminOnly, getAdminSites);
-    fastify.get("/admin/organizations", adminOnly, getAdminOrganizations);
-    fastify.get("/admin/service-event-count", adminOnly, getAdminServiceEventCount);
-    fastify.post("/admin/telemetry", collectTelemetry); // Public - telemetry collection
-
-    // AppSumo Routes
-    const { activateAppSumoLicense, handleAppSumoWebhook } = await import("./api/as/index.js");
-
-    fastify.post("/as/activate", authOnly, activateAppSumoLicense);
-    fastify.post("/as/webhook", handleAppSumoWebhook); // Public - AppSumo webhook
-  }
+async function adminRoutes(fastify: FastifyInstance) {
+  // Admin Routes (always available)
+  fastify.get("/admin/sites", adminOnly, getAdminSites);
+  fastify.get("/admin/organizations", adminOnly, getAdminOrganizations);
+  fastify.get("/admin/service-event-count", adminOnly, getAdminServiceEventCount);
+  fastify.post("/admin/telemetry", collectTelemetry); // Public - telemetry collection
 }
 
 // Main API routes plugin - registers all domain plugins
@@ -378,7 +350,7 @@ async function apiRoutes(fastify: FastifyInstance) {
   await fastify.register(organizationsRoutes);
   await fastify.register(userRoutes);
   await fastify.register(gscRoutes);
-  await fastify.register(stripeAdminRoutes);
+  await fastify.register(adminRoutes);
 
   // Health check
   fastify.get("/health", { logLevel: "silent" }, (_: FastifyRequest, reply: FastifyReply) => reply.send("OK"));
@@ -395,10 +367,6 @@ const start = async () => {
     await Promise.all([initializeClickhouse(), initPostgres()]);
 
     telemetryService.startTelemetryCron();
-    if (IS_CLOUD && process.env.NODE_ENV !== "development") {
-      weeklyReportService.startWeeklyReportCron();
-      reengagementService.startReengagementCron();
-    }
 
     // Start the server first
     await server.listen({ port: 3001, host: "0.0.0.0" });

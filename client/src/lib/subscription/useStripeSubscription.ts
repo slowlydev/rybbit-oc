@@ -1,7 +1,4 @@
-import { authClient } from "@/lib/auth";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { authedFetch } from "../../api/utils";
-import { IS_CLOUD } from "../const";
+import { UseQueryResult } from "@tanstack/react-query";
 
 export interface SubscriptionData {
   id: string;
@@ -20,22 +17,28 @@ export interface SubscriptionData {
   isOverride?: boolean;
 }
 
-export function useStripeSubscription(): UseQueryResult<SubscriptionData | undefined, Error> {
-  const { data: activeOrg } = authClient.useActiveOrganization();
+const UNLIMITED_SUBSCRIPTION: SubscriptionData = {
+  id: "unlimited",
+  planName: "Unlimited",
+  status: "active",
+  currentPeriodEnd: "2099-12-31T23:59:59Z",
+  currentPeriodStart: new Date().toISOString(),
+  createdAt: new Date().toISOString(),
+  monthlyEventCount: 0,
+  eventLimit: Infinity,
+  interval: "lifetime",
+  cancelAtPeriodEnd: false,
+};
 
-  const fetchSubscription = async () => {
-    if (!activeOrg || !IS_CLOUD) {
-      return undefined;
-    }
-
-    return authedFetch<SubscriptionData>(`/stripe/subscription?organizationId=${activeOrg.id}`);
+export function useStripeSubscription(): Pick<
+  UseQueryResult<SubscriptionData | undefined, Error>,
+  "data" | "isLoading" | "error" | "isError" | "refetch"
+> {
+  return {
+    data: UNLIMITED_SUBSCRIPTION,
+    isLoading: false,
+    error: null,
+    isError: false,
+    refetch: (() => Promise.resolve({ data: UNLIMITED_SUBSCRIPTION })) as any,
   };
-
-  return useQuery<SubscriptionData | undefined>({
-    queryKey: ["stripe-subscription", activeOrg?.id],
-    queryFn: fetchSubscription,
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-    enabled: !!activeOrg,
-  });
 }

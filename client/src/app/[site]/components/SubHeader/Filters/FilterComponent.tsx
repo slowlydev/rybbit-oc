@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../../../components/ui/tooltip";
 import { FilterOptions, StringOperatorOptions, NumericOperatorOptions, isNumericParameter } from "./const";
 import { ValueSelect } from "./ValueSelect";
-import { IS_CLOUD } from "../../../../../lib/const";
 
 // Validate regex pattern and return error message if invalid
 function validateRegex(pattern: string): string | null {
@@ -42,10 +41,8 @@ export function FilterComponent({
   availableFilters?: FilterParameter[];
 }) {
   const availableFilterOptions = availableFilters
-    ? FilterOptions.filter(option => availableFilters?.includes(option.value)).filter(
-        option => IS_CLOUD || !option.cloudOnly
-      )
-    : FilterOptions.filter(option => IS_CLOUD || !option.cloudOnly);
+    ? FilterOptions.filter(option => availableFilters?.includes(option.value))
+    : FilterOptions;
 
   const isNumeric = isNumericParameter(filter.parameter);
   const operatorOptions = isNumeric ? NumericOperatorOptions : StringOperatorOptions;

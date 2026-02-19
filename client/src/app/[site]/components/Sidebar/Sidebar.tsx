@@ -22,13 +22,11 @@ import { useGetSite } from "../../../../api/admin/hooks/useSites";
 import { Sidebar as SidebarComponents } from "../../../../components/sidebar/Sidebar";
 import { SiteSettings } from "../../../../components/SiteSettings/SiteSettings";
 import { authClient } from "../../../../lib/auth";
-import { IS_CLOUD } from "../../../../lib/const";
+import { IS_UNLOCKED } from "../../../../lib/const";
 import { useEmbedablePage } from "../../utils";
 import { SiteSelector } from "./SiteSelector";
-import { useStripeSubscription } from "../../../../lib/subscription/useStripeSubscription";
 
 function SidebarContent() {
-  const { data: subscription, isLoading: isSubscriptionLoading } = useStripeSubscription();
   const session = authClient.useSession();
   const pathname = usePathname();
   const embed = useEmbedablePage();
@@ -83,7 +81,7 @@ function SidebarContent() {
           href={getTabPath("globe")}
           icon={<Globe2 className="w-4 h-4" />}
         />
-        {IS_CLOUD && (
+        {IS_UNLOCKED && (
           <SidebarComponents.Item
             label="Pages"
             active={isActiveTab("pages")}
@@ -91,7 +89,7 @@ function SidebarContent() {
             icon={<File className="w-4 h-4" />}
           />
         )}
-        {IS_CLOUD && (
+        {IS_UNLOCKED && (
           <SidebarComponents.Item
             label="Performance"
             active={isActiveTab("performance")}
@@ -115,14 +113,12 @@ function SidebarContent() {
         </div>
         <SidebarComponents.SectionHeader>Product Analytics</SidebarComponents.SectionHeader>
         <div className="hidden md:block">
-          {!subscription?.planName?.startsWith("appsumo") && !isSubscriptionLoading && (
-            <SidebarComponents.Item
-              label="Replay"
-              active={isActiveTab("replay")}
-              href={getTabPath("replay")}
-              icon={<Video className="w-4 h-4" />}
-            />
-          )}
+          <SidebarComponents.Item
+            label="Replay"
+            active={isActiveTab("replay")}
+            href={getTabPath("replay")}
+            icon={<Video className="w-4 h-4" />}
+          />
         </div>
         <SidebarComponents.Item
           label="Funnels"

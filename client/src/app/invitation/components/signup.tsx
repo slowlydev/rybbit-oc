@@ -3,12 +3,10 @@
 import { useState } from "react";
 import { authClient } from "../../../lib/auth";
 import { userStore } from "../../../lib/userStore";
-import { IS_CLOUD } from "../../../lib/const";
 import { AuthInput } from "@/components/auth/AuthInput";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthError } from "@/components/auth/AuthError";
 import { SocialButtons } from "@/components/auth/SocialButtons";
-import { Turnstile } from "@/components/auth/Turnstile";
 
 interface SignupProps {
   callbackURL: string;
@@ -19,7 +17,6 @@ export function Signup({ callbackURL }: SignupProps) {
   const [error, setError] = useState<string>("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,26 +24,12 @@ export function Signup({ callbackURL }: SignupProps) {
     setError("");
 
     try {
-      // Validate Turnstile token if in cloud mode
-      if (IS_CLOUD && !turnstileToken) {
-        setError("Please complete the captcha verification");
-        setIsLoading(false);
-        return;
-      }
-
       const { data, error } = await authClient.signUp.email(
         {
           email,
           name: email.split("@")[0], // Use email prefix as default name
           password,
         },
-        {
-          onRequest: context => {
-            if (IS_CLOUD && turnstileToken) {
-              context.headers.set("x-captcha-response", turnstileToken);
-            }
-          },
-        }
       );
 
       if (data?.user) {
@@ -95,19 +78,10 @@ export function Signup({ callbackURL }: SignupProps) {
         <AuthButton
           isLoading={isLoading}
           loadingText="Creating account..."
-          disabled={IS_CLOUD ? !turnstileToken || isLoading : isLoading}
+          disabled={isLoading}
         >
           Sign Up to Accept Invitation
         </AuthButton>
-
-        {IS_CLOUD && (
-          <Turnstile
-            onSuccess={token => setTurnstileToken(token)}
-            onError={() => setTurnstileToken("")}
-            onExpire={() => setTurnstileToken("")}
-            className="flex justify-center"
-          />
-        )}
 
         <AuthError error={error} />
       </div>

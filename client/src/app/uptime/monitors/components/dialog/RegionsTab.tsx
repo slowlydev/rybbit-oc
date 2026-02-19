@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authedFetch } from "../../../../../api/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CountryFlag } from "@/app/[site]/components/shared/icons/CountryFlag";
-import { IS_CLOUD } from "@/lib/const";
+import { IS_UNLOCKED } from "@/lib/const";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -21,7 +21,7 @@ interface Region {
 
 export function RegionsTab() {
   const form = useFormContext();
-  const monitoringType = IS_CLOUD ? "global" : "local";
+  const monitoringType = IS_UNLOCKED ? "global" : "local";
   const selectedRegions = form.watch("selectedRegions") || [];
 
   const { data: regionsData, isLoading } = useQuery({
@@ -40,10 +40,10 @@ export function RegionsTab() {
     form.setValue("monitoringType", monitoringType);
 
     // For local monitoring, ensure "local" is selected
-    if (!IS_CLOUD) {
+    if (!IS_UNLOCKED) {
       form.setValue("selectedRegions", ["local"]);
     }
-  }, [monitoringType, form, IS_CLOUD]);
+  }, [monitoringType, form, IS_UNLOCKED]);
 
   if (isLoading) {
     return (
@@ -69,7 +69,7 @@ export function RegionsTab() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="text-sm font-medium flex items-center gap-2">
-              {IS_CLOUD ? (
+              {IS_UNLOCKED ? (
                 <>
                   <Globe className="h-4 w-4" /> Global Monitoring
                 </>
@@ -80,13 +80,13 @@ export function RegionsTab() {
               )}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {IS_CLOUD ? "Monitor from multiple regions worldwide" : "Monitor from your main server location only"}
+              {IS_UNLOCKED ? "Monitor from multiple regions worldwide" : "Monitor from your main server location only"}
             </p>
           </div>
         </div>
       </div>
 
-      {IS_CLOUD ? (
+      {IS_UNLOCKED ? (
         <>
           <FormField
             control={form.control}

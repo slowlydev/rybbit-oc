@@ -1,5 +1,5 @@
 import { createClient } from "@clickhouse/client";
-import { IS_CLOUD } from "../../lib/const.js";
+import { IS_UNLOCKED } from "../../lib/const.js";
 
 export const clickhouse = createClient({
   url: process.env.CLICKHOUSE_HOST,
@@ -64,7 +64,7 @@ export const initializeClickhouse = async () => {
     `,
   });
 
-  if (IS_CLOUD) {
+  if (IS_UNLOCKED) {
     await clickhouse.exec({
       query: `
         ALTER TABLE events
@@ -215,7 +215,7 @@ export const initializeClickhouse = async () => {
     `,
   });
 
-  if (IS_CLOUD) {
+  if (IS_UNLOCKED) {
     await clickhouse.exec({
       query: `
         CREATE TABLE IF NOT EXISTS hourly_events_by_site_mv_target (

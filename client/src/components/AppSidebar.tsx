@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Building2, HelpCircle, LogOut, Settings, ShieldUser, User } from "lucide-react";
+import { BookOpen, Building2, LogOut, Settings, ShieldUser, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -8,8 +8,7 @@ import { useEmbedablePage } from "../app/[site]/utils";
 import { useAdminPermission } from "../app/admin/hooks/useAdminPermission";
 import { useSignout } from "../hooks/useSignout";
 import { authClient } from "../lib/auth";
-import { IS_CLOUD } from "../lib/const";
-import { useStripeSubscription } from "../lib/subscription/useStripeSubscription";
+import { IS_UNLOCKED } from "../lib/const";
 import { cn } from "../lib/utils";
 import { RybbitLogo } from "./RybbitLogo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
@@ -17,7 +16,7 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 function AdminLink({ isExpanded }: { isExpanded: boolean }) {
   const pathname = usePathname();
   const { isAdmin } = useAdminPermission();
-  if (!IS_CLOUD || !isAdmin) return null;
+  if (!IS_UNLOCKED || !isAdmin) return null;
 
   return (
     <SidebarLink
@@ -36,8 +35,6 @@ function AppSidebarContent() {
   const [isExpanded, setIsExpanded] = useState(false);
   const embed = useEmbedablePage();
   const signout = useSignout();
-
-  const { data: subscription } = useStripeSubscription();
 
   if (embed) return null;
 
@@ -62,23 +59,6 @@ function AppSidebarContent() {
           active={false}
           expanded={isExpanded}
         />
-        {
-          IS_CLOUD && subscription?.status === "active" && <SidebarLink
-            href="mailto:hello@rybbit.com"
-            icon={<HelpCircle className="w-5 h-5" />}
-            label="Email Support"
-            target="_blank"
-            active={false}
-            expanded={isExpanded}
-          />
-        }
-        {/* <SidebarLink
-          href="/uptime/monitors"
-          icon={<SquareActivity className="w-5 h-5" />}
-          label="Uptime"
-          active={pathname.startsWith("/uptime")}
-          expanded={isExpanded}
-        /> */}
         {session?.user.role === "admin" && <AdminLink isExpanded={isExpanded} />}
       </div>
       <div className="flex flex-col items-start gap-2 w-full">

@@ -9,18 +9,17 @@ import { NodeHttpHandler } from "@smithy/node-http-handler";
 import { Readable } from "stream";
 import { gunzipSync } from "zlib";
 import { compress as zstdCompress, decompress as zstdDecompress } from "@mongodb-js/zstd";
-import { IS_CLOUD } from "../../lib/const.js";
 import { createServiceLogger } from "../../lib/logger/logger.js";
 
 class R2StorageService {
   private client: S3Client | null = null;
   private bucketName: string = "";
   private enabled: boolean = false;
-  private logger = createServiceLogger("r2-storage");
+  private logger = createServiceLogger("s3-storage");
 
   constructor() {
-    // Only initialize R2 in cloud environment
-    if (IS_CLOUD && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
+    // Initialize with generic S3-compatible credentials (MinIO, Garage, AWS S3, R2, etc.)
+    if (process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY && process.env.S3_ENDPOINT) {
       // Create a custom HTTP handler that strips checksum headers
       const httpHandler = new NodeHttpHandler();
       const originalHandle = httpHandler.handle.bind(httpHandler);
@@ -41,23 +40,21 @@ class R2StorageService {
       };
 
       this.client = new S3Client({
-        region: "auto",
-        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        region: process.env.S3_REGION || "auto",
+        endpoint: process.env.S3_ENDPOINT,
         credentials: {
-          accessKeyId: process.env.R2_ACCESS_KEY_ID,
-          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+          accessKeyId: process.env.S3_ACCESS_KEY_ID,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
         },
-        // Required for R2 compatibility
         forcePathStyle: true,
-        // Use our custom HTTP handler
         requestHandler: httpHandler,
       });
 
-      this.bucketName = process.env.R2_BUCKET_NAME || "rybbit";
+      this.bucketName = process.env.S3_BUCKET_NAME || "rybbit";
       this.enabled = true;
-      this.logger.info({ bucket: this.bucketName }, "R2Storage initialized");
+      this.logger.info({ bucket: this.bucketName, endpoint: process.env.S3_ENDPOINT }, "S3 storage initialized");
     } else {
-      this.logger.debug("R2Storage not enabled - missing IS_CLOUD or R2 credentials");
+      this.logger.debug("S3 storage not enabled - missing S3_ENDPOINT or S3 credentials");
     }
   }
 

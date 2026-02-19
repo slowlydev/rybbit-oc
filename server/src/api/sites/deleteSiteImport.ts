@@ -3,11 +3,6 @@ import { z } from "zod";
 import { getImportById, deleteImport } from "../../services/import/importStatusManager.js";
 import { clickhouse } from "../../db/clickhouse/clickhouse.js";
 import { importQuotaManager } from "../../services/import/importQuotaManager.js";
-import { db } from "../../db/postgres/postgres.js";
-import { organization, sites } from "../../db/postgres/schema.js";
-import { eq } from "drizzle-orm";
-import { getBestSubscription } from "../../lib/subscriptionUtils.js";
-import { IS_CLOUD } from "../../lib/const.js";
 
 const deleteImportRequestSchema = z
   .object({
@@ -47,27 +42,7 @@ export async function deleteSiteImport(request: FastifyRequest<DeleteImportReque
       return reply.status(400).send({ error: "Cannot delete active import" });
     }
 
-    if (IS_CLOUD) {
-      const [siteRecord] = await db
-        .select({
-          organizationId: sites.organizationId,
-          stripeCustomerId: organization.stripeCustomerId,
-        })
-        .from(sites)
-        .leftJoin(organization, eq(sites.organizationId, organization.id))
-        .where(eq(sites.siteId, siteId))
-        .limit(1);
-
-      if (siteRecord.organizationId) {
-        const subscription = await getBestSubscription(siteRecord.organizationId, siteRecord.stripeCustomerId);
-
-        if (subscription.source === "free") {
-          return reply.status(403).send({
-            error: "Data import is not available on the free plan. Please upgrade to a paid plan.",
-          });
-        }
-      }
-    }
+    // Unlocked: no subscription check needed for imports
 
     try {
       await clickhouse.command({

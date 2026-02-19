@@ -7,7 +7,7 @@ import {
 } from "../../../../../api/analytics/endpoints";
 import { getStartAndEndDate } from "../../../../../api/utils";
 import { fetchGSCConnectionStatus, fetchGSCData, GSCDimension } from "../../../../../api/gsc/endpoints";
-import { IS_CLOUD } from "../../../../../lib/const";
+import { IS_UNLOCKED } from "../../../../../lib/const";
 import { CSVFile, downloadZip, formatDateForFilename } from "../../../../../lib/export";
 import { Time } from "../../../../../components/DateSelector/types";
 import { Filter } from "@rybbit/shared";
@@ -90,7 +90,7 @@ export async function exportCsv({ site, time, filters, timeZone }: ExportCsvPara
     ...PAGE_METRICS,
     ...DEVICE_METRICS,
     ...COUNTRY_METRICS,
-    ...(IS_CLOUD ? NETWORK_METRICS : []),
+    ...(IS_UNLOCKED ? NETWORK_METRICS : []),
   ];
 
   const metricPromises = allMetrics.map(async ({ param, filename }) => {

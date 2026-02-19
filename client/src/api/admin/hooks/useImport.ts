@@ -1,15 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImportPlatform } from "@/types/import";
-import { DEFAULT_EVENT_LIMIT } from "@/lib/subscription/constants";
-import { IS_CLOUD } from "@/lib/const";
 import { getSiteImports, createSiteImport, deleteSiteImport } from "../endpoints";
-import { useCurrentSite } from "./useSites";
 
 export function useGetSiteImports(site: number) {
-  const { subscription } = useCurrentSite();
-
-  const isFreeTier = IS_CLOUD && subscription?.eventLimit === DEFAULT_EVENT_LIMIT;
-
   return useQuery({
     queryKey: ["get-site-imports", site],
     queryFn: async () => await getSiteImports(site),
@@ -19,7 +12,6 @@ export function useGetSiteImports(site: number) {
     },
     placeholderData: { data: [] },
     staleTime: 30000,
-    enabled: !isFreeTier,
   });
 }
 

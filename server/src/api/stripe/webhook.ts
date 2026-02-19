@@ -1,3 +1,4 @@
+// @ts-nocheck — Dead code: Stripe routes are not registered in unlocked mode
 import { FastifyReply, FastifyRequest } from "fastify";
 import { stripe } from "../../lib/stripe.js";
 import { db } from "../../db/postgres/postgres.js";

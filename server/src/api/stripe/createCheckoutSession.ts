@@ -1,3 +1,4 @@
+// @ts-nocheck — Dead code: Stripe routes are not registered in unlocked mode
 import { eq, and } from "drizzle-orm";
 import { FastifyReply, FastifyRequest } from "fastify";
 import Stripe from "stripe";

@@ -2,7 +2,6 @@ import type { City } from "@maxmind/geoip2-node";
 import { Reader } from "@maxmind/geoip2-node";
 import { readFile } from "fs/promises";
 import path from "path";
-import { IS_CLOUD } from "../../lib/const.js";
 import { logger } from "../../lib/logger/logger.js";
 import { IPAPIResponse, LocationResponse } from "./types.js";
 
@@ -237,7 +236,7 @@ async function getLocationFromLocal(ips: string[]): Promise<Record<string, Locat
 export async function getLocation(ips: string[], useLocal?: boolean): Promise<Record<string, LocationResponse>> {
   const dedupedIps = [...new Set(ips)];
 
-  if (IS_CLOUD && !useLocal) {
+  if (process.env.IPAPI_KEY && !useLocal) {
     return getLocationFromIPAPI(dedupedIps);
   }
 

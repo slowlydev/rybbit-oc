@@ -1,7 +1,7 @@
 "use client";
 import { useGetLiveUserCount } from "../../../api/analytics/hooks/useGetLiveUserCount";
 import { useSetPageTitle } from "../../../hooks/useSetPageTitle";
-import { IS_CLOUD } from "../../../lib/const";
+import { IS_UNLOCKED } from "../../../lib/const";
 import { useStore } from "../../../lib/store";
 import { SubHeader } from "../components/SubHeader/SubHeader";
 import { MainSection } from "./components/MainSection/MainSection";
@@ -40,8 +40,8 @@ function MainPageContent() {
         <Countries />
         <Events />
         <Weekdays />
-        {IS_CLOUD && <Network />}
-        {IS_CLOUD && <SearchConsole />}
+        {IS_UNLOCKED && <Network />}
+        {IS_UNLOCKED && <SearchConsole />}
       </div>
     </div>
   );

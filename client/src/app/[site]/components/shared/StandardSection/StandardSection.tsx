@@ -10,7 +10,7 @@ import { ErrorState } from "../../../../../components/ErrorState";
 import { CardLoader } from "../../../../../components/ui/card";
 import { ScrollArea } from "../../../../../components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../../../components/ui/tooltip";
-import { IS_CLOUD } from "../../../../../lib/const";
+import { IS_UNLOCKED } from "../../../../../lib/const";
 import { Row } from "./Row";
 import { StandardSkeleton } from "./Skeleton";
 import { StandardSectionDialog } from "./StandardSectionDialog";
@@ -71,7 +71,7 @@ export function StandardSection({
       <div className="flex flex-row gap-2 justify-between pr-1 text-xs text-neutral-600 dark:text-neutral-400 mb-2">
         <div className="flex flex-row gap-1 items-center">
           {title}
-          {IS_CLOUD && ["Countries", "Regions", "Cities"].includes(title) && (
+          {IS_UNLOCKED && ["Countries", "Regions", "Cities"].includes(title) && (
             <Tooltip>
               <TooltipTrigger>
                 <Info className="w-3 h-3" />

@@ -21,7 +21,7 @@ import { GeneralTab } from "./GeneralTab";
 import { AdvancedTab } from "./AdvancedTab";
 import { RegionsTab } from "./RegionsTab";
 import { NotificationsTab } from "./NotificationsTab";
-import { IS_CLOUD } from "@/lib/const";
+import { IS_UNLOCKED } from "@/lib/const";
 import { useQuery } from "@tanstack/react-query";
 import { authedFetch } from "../../../../../api/utils";
 
@@ -46,7 +46,7 @@ export function MonitorDialog({ monitor, open, onOpenChange }: MonitorDialogProp
       }>("/uptime/regions");
       return response.regions;
     },
-    enabled: open && IS_CLOUD,
+    enabled: open && IS_UNLOCKED,
   });
 
   const form = useForm<any>({
@@ -94,8 +94,8 @@ export function MonitorDialog({ monitor, open, onOpenChange }: MonitorDialogProp
             ipVersion: "any" as const,
           },
           validationRules: [],
-          monitoringType: IS_CLOUD ? "global" : "local",
-          selectedRegions: IS_CLOUD ? [] : ["local"], // Empty array for cloud, will be populated in RegionsTab
+          monitoringType: IS_UNLOCKED ? "global" : "local",
+          selectedRegions: IS_UNLOCKED ? [] : ["local"], // Empty array for cloud, will be populated in RegionsTab
         },
   });
 
@@ -130,7 +130,7 @@ export function MonitorDialog({ monitor, open, onOpenChange }: MonitorDialogProp
 
   // Initialize regions for new monitors in cloud mode
   useEffect(() => {
-    if (open && !isEdit && IS_CLOUD && regionsData) {
+    if (open && !isEdit && IS_UNLOCKED && regionsData) {
       const globalRegions = regionsData.filter(r => !r.isLocal && r.isHealthy);
       if (globalRegions.length > 0) {
         const currentRegions = form.getValues("selectedRegions");
@@ -147,7 +147,7 @@ export function MonitorDialog({ monitor, open, onOpenChange }: MonitorDialogProp
         }
       }
     }
-  }, [open, isEdit, IS_CLOUD, regionsData, form]);
+  }, [open, isEdit, IS_UNLOCKED, regionsData, form]);
 
   // Reset form when dialog closes or monitor changes
   useEffect(() => {

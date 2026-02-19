@@ -2,7 +2,6 @@
 
 import { useAppEnv } from "@/hooks/useIsProduction";
 import { useStopImpersonation } from "@/hooks/useStopImpersonation";
-import { IS_CLOUD } from "@/lib/const";
 import QueryProvider from "@/providers/QueryProvider";
 import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
@@ -46,14 +45,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           )}
           {appEnv === "demo" && (
             <Script src="https://demo.rybbit.com/api/script.js" data-site-id="22" strategy="afterInteractive" />
-          )}
-          {appEnv === "prod" && IS_CLOUD && (
-            <>
-              <Script id="rewardful-queue" strategy="beforeInteractive">
-                {`(function(w,r){w._rwq=r;w[r]=w[r]||function(){(w[r].q=w[r].q||[]).push(arguments)}})(window,'rewardful');`}
-              </Script>
-              <Script src="https://r.wdfl.co/rw.js" data-rewardful="fc3780" strategy="afterInteractive" />
-            </>
           )}
         </body>
       </NuqsAdapter>

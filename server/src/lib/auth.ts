@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
-import { admin, captcha, emailOTP, organization, apiKey } from "better-auth/plugins";
+import { admin, emailOTP, organization, apiKey } from "better-auth/plugins";
 import dotenv from "dotenv";
 import { and, asc, eq } from "drizzle-orm";
 import pg from "pg";
@@ -8,9 +8,8 @@ import pg from "pg";
 import { db } from "../db/postgres/postgres.js";
 import * as schema from "../db/postgres/schema.js";
 import { invitation, member, memberSiteAccess, user } from "../db/postgres/schema.js";
-import { DISABLE_SIGNUP, IS_CLOUD } from "./const.js";
-import { addContactToAudience, sendInvitationEmail, sendOtpEmail, sendWelcomeEmail } from "./email/email.js";
-import { onboardingTipsService } from "../services/onboardingTips/onboardingTipsService.js";
+import { DISABLE_SIGNUP } from "./const.js";
+import { sendInvitationEmail, sendOtpEmail, sendWelcomeEmail } from "./email/email.js";
 
 dotenv.config();
 
@@ -59,15 +58,6 @@ const pluginList = [
       await sendOtpEmail(email, otp, type);
     },
   }),
-  // Add Cloudflare Turnstile captcha (cloud only)
-  ...(IS_CLOUD && process.env.TURNSTILE_SECRET_KEY && process.env.NODE_ENV === "production"
-    ? [
-        captcha({
-          provider: "cloudflare-turnstile",
-          secretKey: process.env.TURNSTILE_SECRET_KEY,
-        }),
-      ]
-    : []),
 ];
 
 export const auth = betterAuth({
@@ -84,16 +74,6 @@ export const auth = betterAuth({
     // Disable email verification for now
     requireEmailVerification: false,
     disableSignUp: DISABLE_SIGNUP,
-  },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    },
   },
   user: {
     additionalFields: {
@@ -138,19 +118,6 @@ export const auth = betterAuth({
           }
 
           sendWelcomeEmail(u.email, u.name);
-          // Add contact to marketing audience and schedule onboarding emails
-          try {
-            await addContactToAudience(u.email, u.name);
-
-            const emailIds = await onboardingTipsService.scheduleOnboardingEmails(u.email, u.name);
-
-            // Store scheduled email IDs for potential cancellation
-            if (emailIds.length > 0) {
-              await db.update(user).set({ scheduledTipEmailIds: emailIds }).where(eq(user.id, u.id));
-            }
-          } catch (error) {
-            console.error("Error setting up onboarding emails:", error);
-          }
         },
       },
       update: {
