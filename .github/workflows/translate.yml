@@ -111,11 +111,34 @@ jobs:
             - Keep translations natural and idiomatic, not literal
             - Maintain consistent terminology within each language file
             - Do NOT modify en.json
+            - Only edit the translation JSON files. Do not run any git commands or create PRs.
             - If there are no missing translations, do nothing
-
-            After making changes, create a PR with the title "Update translations" and a summary of what was added/fixed.
           claude_args: >-
             --model claude-sonnet-4-6
-            --max-turns 30
+            --max-turns 50
             --allowedTools "Edit" "Read" "Write" "Glob" "Grep"
-            "Bash(git *)" "Bash(gh pr *)" "Bash(python3 *)" "Bash(node *)"
+            "Bash(python3 *)"
+
+      - name: Commit and open PR
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet client/messages/; then
+            echo "No translation changes to commit."
+            exit 0
+          fi
+
+          BRANCH="update-translations-$(date +%Y%m%d%H%M%S)"
+          git checkout -b "$BRANCH"
+          git add client/messages/
+          git commit -m "Update translations"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --title "Update translations" \
+            --body "Automated translation update: filled missing/empty translation keys across all locale files." \
+            --base master \
+            --head "$BRANCH"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
