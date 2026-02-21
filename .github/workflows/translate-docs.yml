@@ -82,6 +82,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "github-actions[bot]"
           prompt: |
             The message extraction step has just run and updated the translation files in docs/messages/.
             New keys have been added with empty string values to the non-English locale files.
