@@ -36,6 +36,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { UserTableSkeleton } from "./UserTableSkeleton";
 import { userStore } from "@/lib/userStore";
 import { SortableHeader } from "../shared/SortableHeader";
+import { useDateTimeFormat } from "../../../../hooks/useDateTimeFormat";
 import { parseUtcTimestamp } from "../../../../lib/dateTimeUtils";
 import { AddToOrganizationDialog } from "./AddToOrganizationDialog";
 import { useRemoveUserFromOrganization } from "@/api/admin/hooks/useOrganizations";
@@ -83,6 +84,7 @@ export function UsersTable({
   const { data: organizations } = useAdminOrganizations();
   const removeUserFromOrganization = useRemoveUserFromOrganization();
   const t = useExtracted();
+  const { formatRelative } = useDateTimeFormat();
 
   const handleRemoveFromOrganization = async () => {
     if (!selectedUser || !selectedOrganizationId) return;
@@ -127,7 +129,7 @@ export function UsersTable({
       {
         accessorKey: "createdAt",
         header: ({ column }) => <SortableHeader column={column}>{t("Created At")}</SortableHeader>,
-        cell: ({ row }) => <div>{parseUtcTimestamp(row.getValue("createdAt")).toRelative()}</div>,
+        cell: ({ row }) => <div>{formatRelative(parseUtcTimestamp(row.getValue("createdAt")))}</div>,
       },
       {
         id: "actions",

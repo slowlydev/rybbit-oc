@@ -8,7 +8,8 @@ import Link from "next/link";
 import { useExtracted } from "next-intl";
 import { SessionEvent } from "../../../api/analytics/endpoints";
 import { getEventDisplayName, PROPS_TO_HIDE } from "../../../lib/events";
-import { formatDuration, hour12 } from "../../../lib/dateTimeUtils";
+import { useDateTimeFormat } from "../../../hooks/useDateTimeFormat";
+import { formatDuration } from "../../../lib/dateTimeUtils";
 import { cn } from "../../../lib/utils";
 import { EventTypeIcon } from "../../EventIcons";
 
@@ -169,6 +170,7 @@ export function PageviewItem({
   highlightedEventTimestamp,
 }: PageviewItemProps) {
   const t = useExtracted();
+  const { hour12 } = useDateTimeFormat();
   const isPageview = item.type === "pageview";
   const isOutbound = item.type === "outbound";
   const isEvent = item.type === "custom_event";

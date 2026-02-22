@@ -9,7 +9,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { memo, useCallback, useState } from "react";
 import { GetSessionsResponse } from "../../api/analytics/endpoints";
-import { formatShortDuration, hour12, userLocale } from "../../lib/dateTimeUtils";
+import { useDateTimeFormat } from "@/hooks/useDateTimeFormat";
+import { formatShortDuration } from "../../lib/dateTimeUtils";
 import { cn, formatter, getUserDisplayName, truncateString } from "../../lib/utils";
 import { Avatar } from "../Avatar";
 import { Channel } from "../Channel";
@@ -36,6 +37,7 @@ interface SessionCardProps {
 export function SessionCard({ session, onClick, userId, expandedByDefault, highlightedEventTimestamp }: SessionCardProps) {
   const { site } = useParams();
   const t = useExtracted();
+  const { hour12, formatDateTime } = useDateTimeFormat();
   const [expanded, setExpanded] = useState(expandedByDefault || false);
   const [replayDrawerOpen, setReplayDrawerOpen] = useState(false);
   // Calculate session duration in minutes
@@ -85,12 +87,14 @@ export function SessionCard({ session, onClick, userId, expandedByDefault, highl
               {!!session.identified_user_id && <IdentifiedBadge traits={session.traits} />}
             </div>
             <span className="text-xs text-neutral-500 dark:text-neutral-400">
-              {DateTime.fromSQL(session.session_start, {
-                zone: "utc",
-              })
-                .setLocale(userLocale)
-                .setZone(getTimezone())
-                .toFormat(hour12 ? "MMM d, h:mm a" : "dd MMM, HH:mm")}
+              {formatDateTime(DateTime.fromSQL(session.session_start, { zone: "utc" }), {
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12,
+                timeZone: getTimezone(),
+              })}
             </span>
           </div>
 
@@ -287,12 +291,14 @@ export function SessionCard({ session, onClick, userId, expandedByDefault, highl
           {/* Time information */}
           <div className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-300">
             <span className="text-neutral-500 dark:text-neutral-400">
-              {DateTime.fromSQL(session.session_start, {
-                zone: "utc",
-              })
-                .setLocale(userLocale)
-                .setZone(getTimezone())
-                .toFormat(hour12 ? "MMM d, h:mm a" : "dd MMM, HH:mm")}
+              {formatDateTime(DateTime.fromSQL(session.session_start, { zone: "utc" }), {
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12,
+                timeZone: getTimezone(),
+              })}
             </span>
             <span className="text-neutral-500 dark:text-neutral-400">•</span>
             <span>{duration}</span>

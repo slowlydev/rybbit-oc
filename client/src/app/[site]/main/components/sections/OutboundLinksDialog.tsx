@@ -13,6 +13,7 @@ import { DateTime } from "luxon";
 import { ChevronDown, ChevronUp, Loader2, Search, SquareArrowOutUpRight } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { useDateTimeFormat } from "../../../../../hooks/useDateTimeFormat";
 import { OutboundLink } from "../../../../../api/analytics/endpoints";
 import { cn } from "../../../../../lib/utils";
 
@@ -29,6 +30,7 @@ type SortKey = "url" | "count" | "percentage" | "lastClicked";
 
 export function OutboundLinksDialog({ outboundLinks, expanded, close }: OutboundLinksDialogProps) {
   const t = useExtracted();
+  const { formatRelative } = useDateTimeFormat();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 200);
   const [sortKey, setSortKey] = useState<SortKey>("count");
@@ -189,7 +191,7 @@ export function OutboundLinksDialog({ outboundLinks, expanded, close }: Outbound
                       {(() => {
                         try {
                           const dt = DateTime.fromSQL(row.lastClicked, { zone: "utc" }).setZone(getTimezone());
-                          return dt.toRelative();
+                          return formatRelative(dt);
                         } catch {
                           return "-";
                         }

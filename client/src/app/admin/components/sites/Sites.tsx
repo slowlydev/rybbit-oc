@@ -24,6 +24,7 @@ import { AdminLayout } from "../shared/AdminLayout";
 import { GrowthChart } from "../shared/GrowthChart";
 import Link from "next/link";
 import { Favicon } from "../../../../components/Favicon";
+import { useDateTimeFormat } from "../../../../hooks/useDateTimeFormat";
 import { parseUtcTimestamp } from "../../../../lib/dateTimeUtils";
 import { formatter } from "../../../../lib/utils";
 import { useExtracted } from "next-intl";
@@ -31,6 +32,7 @@ import { useExtracted } from "next-intl";
 export function Sites() {
   const { data: sites, isLoading, isError } = useAdminSites();
   const t = useExtracted();
+  const { formatRelative } = useDateTimeFormat();
   const [searchQuery, setSearchQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([{ id: "eventsLast24Hours", desc: true }]);
   const [pagination, setPagination] = useState({
@@ -80,7 +82,7 @@ export function Sites() {
       {
         accessorKey: "createdAt",
         header: ({ column }) => <SortableHeader column={column}>{t("Created")}</SortableHeader>,
-        cell: ({ row }) => <div>{parseUtcTimestamp(row.getValue("createdAt")).toRelative()}</div>,
+        cell: ({ row }) => <div>{formatRelative(parseUtcTimestamp(row.getValue("createdAt")))}</div>,
       },
       {
         accessorKey: "public",

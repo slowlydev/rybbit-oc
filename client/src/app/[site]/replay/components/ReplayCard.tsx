@@ -3,6 +3,7 @@ import { Clock, MousePointerClick, Trash2 } from "lucide-react";
 import { DateTime } from "luxon";
 import { useExtracted } from "next-intl";
 import { useState } from "react";
+import { useDateTimeFormat } from "../../../../hooks/useDateTimeFormat";
 import { useDeleteSessionReplay } from "../../../../api/analytics/hooks/sessionReplay/useDeleteSessionReplay";
 import { Avatar } from "../../../../components/Avatar";
 import { IdentifiedBadge } from "../../../../components/IdentifiedBadge";
@@ -53,6 +54,7 @@ interface SessionReplayListItem {
 
 export function ReplayCard({ replay }: { replay: SessionReplayListItem }) {
   const t = useExtracted();
+  const { formatRelative } = useDateTimeFormat();
   const { sessionId, setSessionId, resetPlayerState } = useReplayStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const deleteSessionReplay = useDeleteSessionReplay();
@@ -106,7 +108,7 @@ export function ReplayCard({ replay }: { replay: SessionReplayListItem }) {
       </div>
 
       <div className="flex items-center gap-2 mb-1">
-        <div className="text-xs text-neutral-600 dark:text-neutral-400">{startTime.toRelative()}</div>
+        <div className="text-xs text-neutral-600 dark:text-neutral-400">{formatRelative(startTime)}</div>
         {duration && (
           <div className="flex items-center gap-1 text-neutral-600 dark:text-neutral-400 text-xs">
             <Clock className="w-3 h-3" />

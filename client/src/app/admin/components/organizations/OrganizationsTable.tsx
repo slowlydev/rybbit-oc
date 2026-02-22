@@ -5,6 +5,7 @@ import { AdminOrganizationData } from "@/api/admin/endpoints";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDateTimeFormat } from "../../../../hooks/useDateTimeFormat";
 import { parseUtcTimestamp } from "@/lib/dateTimeUtils";
 import { formatter } from "@/lib/utils";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -30,6 +31,7 @@ interface OrganizationsTableProps {
 
 export function OrganizationsTable({ organizations, isLoading, searchQuery }: OrganizationsTableProps) {
   const t = useExtracted();
+  const { formatRelative } = useDateTimeFormat();
   const [expandedOrgs, setExpandedOrgs] = useState<Set<string>>(new Set());
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState({
@@ -80,7 +82,7 @@ export function OrganizationsTable({ organizations, isLoading, searchQuery }: Or
       {
         accessorKey: "createdAt",
         header: ({ column }) => <SortableHeader column={column}>{t("Created")}</SortableHeader>,
-        cell: ({ row }) => <div>{parseUtcTimestamp(row.getValue("createdAt")).toRelative()}</div>,
+        cell: ({ row }) => <div>{formatRelative(parseUtcTimestamp(row.getValue("createdAt")))}</div>,
       },
       {
         accessorKey: "monthlyEventCount",

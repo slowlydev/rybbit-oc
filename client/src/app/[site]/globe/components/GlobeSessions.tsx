@@ -21,7 +21,8 @@ import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "../../../../components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../../components/ui/tooltip";
-import { formatShortDuration, hour12, userLocale } from "../../../../lib/dateTimeUtils";
+import { useDateTimeFormat } from "../../../../hooks/useDateTimeFormat";
+import { formatShortDuration } from "../../../../lib/dateTimeUtils";
 import { cn, formatter, truncateString } from "../../../../lib/utils";
 
 function SessionCardSkeleton() {
@@ -58,6 +59,7 @@ function SessionCardSkeleton() {
 
 function SessionCard({ session, onClick }: { session: GetSessionsResponse[number]; onClick?: () => void }) {
   const t = useExtracted();
+  const { hour12, formatDateTime } = useDateTimeFormat();
   // Calculate session duration in minutes
   const start = DateTime.fromSQL(session.session_start, { zone: "utc" });
   const end = DateTime.fromSQL(session.session_end, { zone: "utc" });
@@ -80,12 +82,14 @@ function SessionCard({ session, onClick }: { session: GetSessionsResponse[number
         <div className="flex space-x-2 items-center pr-2">
           <div className="flex items-center gap-1.5 text-xs text-neutral-300">
             <span className="text-neutral-400">
-              {DateTime.fromSQL(session.session_start, {
-                zone: "utc",
-              })
-                .setLocale(userLocale)
-                .setZone(getTimezone())
-                .toFormat(hour12 ? "MMM d, h:mm a" : "dd MMM, HH:mm")}
+              {formatDateTime(DateTime.fromSQL(session.session_start, { zone: "utc" }), {
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12,
+                timeZone: getTimezone(),
+              })}
             </span>
             <span className="text-neutral-400">•</span>
             <span className="hidden md:block">{duration}</span>

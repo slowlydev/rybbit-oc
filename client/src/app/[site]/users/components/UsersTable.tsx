@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useExtracted } from "next-intl";
+import { useDateTimeFormat } from "../../../../hooks/useDateTimeFormat";
 import { useDebounce } from "@uidotdev/usehooks";
 import { UsersResponse } from "../../../../api/analytics/endpoints";
 import { useGetUsers } from "../../../../api/analytics/hooks/useGetUsers";
@@ -73,19 +74,20 @@ const SortHeader = ({ column, children }: any) => {
   );
 };
 
-const formatRelativeTime = (dateStr: string) => {
-  const date = DateTime.fromSQL(dateStr, { zone: "utc" }).setZone(getTimezone());
-  const diff = Math.abs(date.diffNow(["minutes"]).minutes);
-
-  if (diff < 1) {
-    return "<1 min ago";
-  }
-
-  return date.toRelative();
-};
-
 export function UsersTable() {
   const t = useExtracted();
+  const { formatRelative, formatDateTime } = useDateTimeFormat();
+
+  const formatRelativeTime = (dateStr: string) => {
+    const date = DateTime.fromSQL(dateStr, { zone: "utc" }).setZone(getTimezone());
+    const diff = Math.abs(date.diffNow(["minutes"]).minutes);
+
+    if (diff < 1) {
+      return "<1 min ago";
+    }
+
+    return formatRelative(date);
+  };
   const { site } = useParams();
 
   const [pagination, setPagination] = useState({
@@ -256,7 +258,7 @@ export function UsersTable() {
         const date = DateTime.fromSQL(info.getValue(), {
           zone: "utc",
         }).setZone(getTimezone());
-        const formattedDate = date.toLocaleString(DateTime.DATETIME_SHORT);
+        const formattedDate = formatDateTime(date, { year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
         const relativeTime = formatRelativeTime(info.getValue());
 
         return (
@@ -279,7 +281,7 @@ export function UsersTable() {
         const date = DateTime.fromSQL(info.getValue(), {
           zone: "utc",
         }).setZone(getTimezone());
-        const formattedDate = date.toLocaleString(DateTime.DATETIME_SHORT);
+        const formattedDate = formatDateTime(date, { year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
         const relativeTime = formatRelativeTime(info.getValue());
 
         return (

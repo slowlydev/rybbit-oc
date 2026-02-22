@@ -2,7 +2,7 @@
 
 import { EventCountRow } from "@/api/admin/endpoints/adminServiceEventCount";
 import { ChartTooltip } from "@/components/charts/ChartTooltip";
-import { userLocale } from "@/lib/dateTimeUtils";
+import { useDateTimeFormat } from "@/hooks/useDateTimeFormat";
 import { useNivoTheme } from "@/lib/nivo";
 import { formatter } from "@/lib/utils";
 import { ResponsiveLine } from "@nivo/line";
@@ -41,6 +41,7 @@ export function EventUsageChart({
   const { width } = useWindowSize();
   const t = useExtracted();
   const nivoTheme = useNivoTheme();
+  const { locale, formatDateTime } = useDateTimeFormat();
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
 
   const maxTicks = Math.round((width ?? Infinity) / 200);
@@ -160,8 +161,7 @@ export function EventUsageChart({
               truncateTickAt: 0,
               tickValues: Math.min(maxTicks, maxTickCount),
               format: (value) => {
-                const dt = DateTime.fromJSDate(value).setLocale(userLocale);
-                return dt.toFormat("MMM d");
+                return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(value);
               },
             }}
             axisLeft={{
@@ -192,7 +192,7 @@ export function EventUsageChart({
                 <ChartTooltip>
                   <div className="p-3 min-w-[100px]">
                     <div className="font-medium mb-1">
-                      {currentTime.toLocaleString(DateTime.DATE_MED)}
+                      {formatDateTime(currentTime, { month: "short", day: "numeric", year: "numeric" })}
                     </div>
                     {slice.points
                       .sort(

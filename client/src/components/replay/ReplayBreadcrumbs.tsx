@@ -36,6 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { getTimezone } from "@/lib/store";
 import { cn, getUserDisplayName } from "@/lib/utils";
 import { useReplayStore } from "./replayStore";
+import { useExtracted } from "next-intl";
 
 // Event type mapping based on rrweb event types
 const EVENT_TYPE_INFO = {
@@ -150,6 +151,7 @@ const getEventColor = (event: any) => {
 };
 
 export function ReplayBreadcrumbs() {
+  const t = useExtracted();
   const params = useParams();
   const siteId = Number(params.site);
   const { sessionId, player, setCurrentTime } = useReplayStore();
@@ -278,12 +280,12 @@ export function ReplayBreadcrumbs() {
           {isIdentified && <IdentifiedBadge traits={data.metadata.traits} />}
         </div>
         <Link href={userLink} className="flex items-center gap-2">
-          <Button size="sm">View User</Button>
+          <Button size="sm">{t("View User")}</Button>
         </Link>
       </div>
       <div className="rounded-lg border border-neutral-100 dark:border-neutral-800 flex flex-col h-full bg-white dark:bg-neutral-900">
         <div className="p-2 border-b border-neutral-100 dark:border-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 shrink-0">
-          {data.events.length} events captured ({groupedEvents.length} groups)
+          {t("{count} events captured ({groupCount} groups)", { count: String(data.events.length), groupCount: String(groupedEvents.length) })}
         </div>
         <ScrollArea className="flex-1 rounded-lg">
           <div className="overflow-x-hidden">

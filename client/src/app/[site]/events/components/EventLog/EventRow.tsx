@@ -7,7 +7,7 @@ import { Event } from "../../../../../api/analytics/endpoints";
 import { Avatar } from "../../../../../components/Avatar";
 import { EventTypeIcon } from "../../../../../components/EventIcons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../../../components/ui/tooltip";
-import { hour12, userLocale } from "../../../../../lib/dateTimeUtils";
+import { useDateTimeFormat } from "../../../../../hooks/useDateTimeFormat";
 import { getTimezone } from "../../../../../lib/store";
 import { getCountryName, getUserDisplayName, truncateString } from "../../../../../lib/utils";
 import { Browser } from "../../../components/shared/icons/Browser";
@@ -24,9 +24,10 @@ interface EventRowProps {
 
 export function EventRow({ event, site, onClick }: EventRowProps) {
   const t = useExtracted();
+  const { locale, hour12, formatRelative } = useDateTimeFormat();
   const eventProperties = parseEventProperties(event);
   const eventTime = DateTime.fromSQL(event.timestamp, { zone: "utc" })
-    .setLocale(userLocale)
+    .setLocale(locale)
     .setZone(getTimezone());
   const pagePath = buildEventPath(event);
   const pageUrl = `https://${event.hostname}${pagePath}`;
@@ -62,7 +63,7 @@ export function EventRow({ event, site, onClick }: EventRowProps) {
             <span>{eventTime.toFormat(hour12 ? "MMM d, h:mm:ss a" : "dd MMM, HH:mm:ss")}</span>
           </TooltipTrigger>
           <TooltipContent>
-            <span>{eventTime.toRelative()}</span>
+            <span>{formatRelative(eventTime)}</span>
           </TooltipContent>
         </Tooltip>
       </div>

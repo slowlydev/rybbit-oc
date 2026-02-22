@@ -6,6 +6,7 @@ import { useGetErrorEventsInfinite } from "@/api/analytics/hooks/errors/useGetEr
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useDateTimeFormat } from "../../../../hooks/useDateTimeFormat";
 import { useGetRegionName } from "@/lib/geo";
 import { getTimezone } from "@/lib/store";
 import { getCountryName, truncateString } from "@/lib/utils";
@@ -28,6 +29,7 @@ interface ErrorDetailsProps {
 // Component to display individual error event
 function ErrorEventItem({ errorEvent }: { errorEvent: ErrorEvent }) {
   const t = useExtracted();
+  const { formatRelative } = useDateTimeFormat();
   const { getRegionName } = useGetRegionName();
   const { site } = useParams();
 
@@ -51,7 +53,7 @@ function ErrorEventItem({ errorEvent }: { errorEvent: ErrorEvent }) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-4">
           <span className="text-sm text-neutral-700 dark:text-neutral-200">
-            {DateTime.fromSQL(errorEvent.timestamp, { zone: "utc" }).setZone(getTimezone()).toRelative()}
+            {formatRelative(DateTime.fromSQL(errorEvent.timestamp, { zone: "utc" }).setZone(getTimezone()))}
           </span>
           <div className="flex items-center gap-2">
             {errorEvent.country && (

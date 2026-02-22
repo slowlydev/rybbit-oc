@@ -8,6 +8,7 @@ import { Avatar, generateName } from "../../../../../components/Avatar";
 import { Badge } from "../../../../../components/ui/badge";
 import { Skeleton } from "../../../../../components/ui/skeleton";
 import { IdentifiedBadge } from "../../../../../components/IdentifiedBadge";
+import { useDateTimeFormat } from "../../../../../hooks/useDateTimeFormat";
 import { formatDuration } from "../../../../../lib/dateTimeUtils";
 import { getCountryName, getLanguageName } from "../../../../../lib/utils";
 import { Browser } from "../../../components/shared/icons/Browser";
@@ -85,6 +86,7 @@ function StatCard({
 
 export function UserSidebar({ data, isLoading, sessionCount, getRegionName }: UserSidebarProps) {
   const t = useExtracted();
+  const { formatRelative } = useDateTimeFormat();
   const isIdentified = !!data?.identified_user_id;
 
   // Filter custom traits (exclude username, name, email)
@@ -292,7 +294,7 @@ export function UserSidebar({ data, isLoading, sessionCount, getRegionName }: Us
                   {device.anonymous_id}
                 </span>
                 <span className="text-neutral-400 dark:text-neutral-500 text-xs">
-                  {DateTime.fromISO(device.created_at).toRelative()}
+                  {formatRelative(DateTime.fromISO(device.created_at))}
                 </span>
               </div>
             ))}
