@@ -3,6 +3,7 @@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { MultiSelect } from "@/components/MultiSelect";
+import { useExtracted } from "next-intl";
 
 export interface TierOption {
   value: string;
@@ -28,18 +29,19 @@ export function OrganizationFilters({
   selectedTiers,
   setSelectedTiers,
 }: OrganizationFiltersProps) {
+  const t = useExtracted();
   return (
     <div className="flex items-start gap-4 sm:flex-row flex-col sm:items-center">
       <div className="flex items-center gap-2">
         <Switch id="show-zero-events" checked={showZeroEvents} onCheckedChange={setShowZeroEvents} />
         <Label htmlFor="show-zero-events" className="text-sm cursor-pointer">
-          Show orgs with 0 events (30d)
+          {t("Show orgs with 0 events (30d)")}
         </Label>
       </div>
       <div className="flex items-center gap-2">
         <Switch id="show-only-over-limit" checked={showOnlyOverLimit} onCheckedChange={setShowOnlyOverLimit} />
         <Label htmlFor="show-only-over-limit" className="text-sm cursor-pointer">
-          Only over limit
+          {t("Only over limit")}
         </Label>
       </div>
       <MultiSelect
@@ -47,7 +49,7 @@ export function OrganizationFilters({
         options={availableTiers}
         value={selectedTiers}
         onChange={(newValue) => setSelectedTiers(newValue as TierOption[])}
-        placeholder="All tiers"
+        placeholder={t("All tiers")}
         isClearable
       />
     </div>

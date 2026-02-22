@@ -15,6 +15,8 @@ import { DateTime } from "luxon";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useExtracted } from "next-intl";
+import { useDateTimeFormat } from "../../../../hooks/useDateTimeFormat";
 import { useDebounce } from "@uidotdev/usehooks";
 import { UsersResponse } from "../../../../api/analytics/endpoints";
 import { useGetUsers } from "../../../../api/analytics/hooks/useGetUsers";
@@ -72,18 +74,20 @@ const SortHeader = ({ column, children }: any) => {
   );
 };
 
-const formatRelativeTime = (dateStr: string) => {
-  const date = DateTime.fromSQL(dateStr, { zone: "utc" }).setZone(getTimezone());
-  const diff = Math.abs(date.diffNow(["minutes"]).minutes);
-
-  if (diff < 1) {
-    return "<1 min ago";
-  }
-
-  return date.toRelative();
-};
-
 export function UsersTable() {
+  const t = useExtracted();
+  const { formatRelative, formatDateTime } = useDateTimeFormat();
+
+  const formatRelativeTime = (dateStr: string) => {
+    const date = DateTime.fromSQL(dateStr, { zone: "utc" }).setZone(getTimezone());
+    const diff = Math.abs(date.diffNow(["minutes"]).minutes);
+
+    if (diff < 1) {
+      return "<1 min ago";
+    }
+
+    return formatRelative(date);
+  };
   const { site } = useParams();
 
   const [pagination, setPagination] = useState({
@@ -118,7 +122,7 @@ export function UsersTable() {
 
   const columns = [
     columnHelper.accessor("user_id", {
-      header: "User",
+      header: t("User"),
       cell: info => {
         const identifiedUserId = info.row.original.identified_user_id;
         const isIdentified = !!info.row.original.identified_user_id;
@@ -139,7 +143,7 @@ export function UsersTable() {
       },
     }),
     columnHelper.accessor("country", {
-      header: "Country",
+      header: t("Country"),
       cell: info => {
         const country = info.getValue();
         return (
@@ -152,7 +156,7 @@ export function UsersTable() {
                 <CountryFlag country={country || ""} />
               </TooltipTrigger>
               <TooltipContent>
-                <p>{country ? getCountryName(country) : "Unknown"}</p>
+                <p>{country ? getCountryName(country) : t("Unknown")}</p>
               </TooltipContent>
             </Tooltip>
             {info.row.original.city || info.row.original.region || getCountryName(country)}
@@ -161,7 +165,7 @@ export function UsersTable() {
       },
     }),
     columnHelper.accessor("referrer", {
-      header: "Channel",
+      header: t("Channel"),
       cell: info => {
         const channel = info.row.original.channel;
         const referrer = info.getValue();
@@ -192,7 +196,7 @@ export function UsersTable() {
       },
     }),
     columnHelper.accessor("browser", {
-      header: "Browser",
+      header: t("Browser"),
       cell: info => {
         const browser = info.getValue();
         return (
@@ -201,13 +205,13 @@ export function UsersTable() {
             onClick={e => handleFilterClick(e, "browser", browser)}
           >
             <Browser browser={browser || "Unknown"} />
-            {browser || "Unknown"}
+            {browser || t("Unknown")}
           </div>
         );
       },
     }),
     columnHelper.accessor("operating_system", {
-      header: "OS",
+      header: t("OS"),
       cell: info => {
         const os = info.getValue();
         return (
@@ -216,13 +220,13 @@ export function UsersTable() {
             onClick={e => handleFilterClick(e, "operating_system", os)}
           >
             <OperatingSystem os={os || ""} />
-            {os || "Unknown"}
+            {os || t("Unknown")}
           </div>
         );
       },
     }),
     columnHelper.accessor("device_type", {
-      header: "Device",
+      header: t("Device"),
       cell: info => {
         const deviceType = info.getValue();
         return (
@@ -237,24 +241,24 @@ export function UsersTable() {
       },
     }),
     columnHelper.accessor("pageviews", {
-      header: ({ column }) => <SortHeader column={column}>Pageviews</SortHeader>,
+      header: ({ column }) => <SortHeader column={column}>{t("Pageviews")}</SortHeader>,
       cell: info => <div className="whitespace-nowrap">{info.getValue().toLocaleString()}</div>,
     }),
     columnHelper.accessor("events", {
-      header: ({ column }) => <SortHeader column={column}>Events</SortHeader>,
+      header: ({ column }) => <SortHeader column={column}>{t("Events")}</SortHeader>,
       cell: info => <div className="whitespace-nowrap">{info.getValue().toLocaleString()}</div>,
     }),
     columnHelper.accessor("sessions", {
-      header: ({ column }) => <SortHeader column={column}>Sessions</SortHeader>,
+      header: ({ column }) => <SortHeader column={column}>{t("Sessions")}</SortHeader>,
       cell: info => <div className="whitespace-nowrap">{info.getValue().toLocaleString()}</div>,
     }),
     columnHelper.accessor("last_seen", {
-      header: ({ column }) => <SortHeader column={column}>Last Seen</SortHeader>,
+      header: ({ column }) => <SortHeader column={column}>{t("Last Seen")}</SortHeader>,
       cell: info => {
         const date = DateTime.fromSQL(info.getValue(), {
           zone: "utc",
         }).setZone(getTimezone());
-        const formattedDate = date.toLocaleString(DateTime.DATETIME_SHORT);
+        const formattedDate = formatDateTime(date, { year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
         const relativeTime = formatRelativeTime(info.getValue());
 
         return (
@@ -272,12 +276,12 @@ export function UsersTable() {
       },
     }),
     columnHelper.accessor("first_seen", {
-      header: ({ column }) => <SortHeader column={column}>First Seen</SortHeader>,
+      header: ({ column }) => <SortHeader column={column}>{t("First Seen")}</SortHeader>,
       cell: info => {
         const date = DateTime.fromSQL(info.getValue(), {
           zone: "utc",
         }).setZone(getTimezone());
-        const formattedDate = date.toLocaleString(DateTime.DATETIME_SHORT);
+        const formattedDate = formatDateTime(date, { year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
         const relativeTime = formatRelativeTime(info.getValue());
 
         return (
@@ -317,8 +321,8 @@ export function UsersTable() {
   if (isError) {
     return (
       <ErrorState
-        title="Failed to load users"
-        message="There was a problem fetching the users. Please try again later."
+        title={t("Failed to load users")}
+        message={t("There was a problem fetching the users. Please try again later.")}
       />
     );
   }
@@ -332,14 +336,14 @@ export function UsersTable() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="username">Username</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="email">Email</SelectItem>
-              <SelectItem value="user_id">User ID</SelectItem>
+              <SelectItem value="username">{t("Username")}</SelectItem>
+              <SelectItem value="name">{t("Name")}</SelectItem>
+              <SelectItem value="email">{t("Email")}</SelectItem>
+              <SelectItem value="user_id">{t("User ID")}</SelectItem>
             </SelectContent>
           </Select>
           <Input
-            placeholder={`Search by ${searchField === "user_id" ? "user ID" : searchField}...`}
+            placeholder={t("Search by {field}...", { field: searchField === "user_id" ? t("user ID") : searchField })}
             className="rounded-l-none"
             type="search"
             value={searchTerm}
@@ -354,7 +358,7 @@ export function UsersTable() {
             disabled={debouncedSearch.length > 0}
           />
           <Label htmlFor="identified-only" className="text-sm text-neutral-600 dark:text-neutral-400 cursor-pointer">
-            Identified only
+            {t("Identified only")}
           </Label>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -363,7 +367,7 @@ export function UsersTable() {
               </Link>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Learn how to identify users</p>
+              <p>{t("Learn how to identify users")}</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -406,7 +410,7 @@ export function UsersTable() {
                     colSpan={columns.length}
                     className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400"
                   >
-                    No users found
+                    {t("No users found")}
                   </td>
                 </tr>
               ) : (

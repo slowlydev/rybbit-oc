@@ -3,6 +3,7 @@
 import { BookOpen, Building2, LogOut, Settings, ShieldUser, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useExtracted } from "next-intl";
 import { Suspense, useState } from "react";
 import { useEmbedablePage } from "../app/[site]/utils";
 import { useAdminPermission } from "../app/admin/hooks/useAdminPermission";
@@ -16,13 +17,14 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 function AdminLink({ isExpanded }: { isExpanded: boolean }) {
   const pathname = usePathname();
   const { isAdmin } = useAdminPermission();
+  const t = useExtracted();
   if (!IS_UNLOCKED || !isAdmin) return null;
 
   return (
     <SidebarLink
       href="/admin"
       icon={<ShieldUser className="w-5 h-5" />}
-      label="Admin"
+      label={t("Admin")}
       active={pathname.startsWith("/admin")}
       expanded={isExpanded}
     />
@@ -35,6 +37,7 @@ function AppSidebarContent() {
   const [isExpanded, setIsExpanded] = useState(false);
   const embed = useEmbedablePage();
   const signout = useSignout();
+  const t = useExtracted();
 
   if (embed) return null;
 
@@ -54,7 +57,7 @@ function AppSidebarContent() {
         <SidebarLink
           href="https://rybbit.com/docs"
           icon={<BookOpen className="w-5 h-5" />}
-          label="Documentation"
+          label={t("Documentation")}
           target="_blank"
           active={false}
           expanded={isExpanded}
@@ -71,21 +74,21 @@ function AppSidebarContent() {
             <SidebarLink
               href="/settings/account"
               icon={<User className="w-5 h-5" />}
-              label="Account"
+              label={t("Account")}
               active={pathname.startsWith("/settings/account")}
               expanded={isExpanded}
             />
             <SidebarLink
               href="/settings/organization"
               icon={<Building2 className="w-5 h-5" />}
-              label="Organization"
+              label={t("Organization")}
               active={pathname.startsWith("/settings/organization")}
               expanded={isExpanded}
             />
             <SidebarLink
               onClick={signout}
               icon={<LogOut className="w-5 h-5" />}
-              label="Sign out"
+              label={t("Sign out")}
               expanded={isExpanded}
             />
           </>

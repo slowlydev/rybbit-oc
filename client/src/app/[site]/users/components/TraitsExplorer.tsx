@@ -1,11 +1,13 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { Tags } from "lucide-react";
 import { NothingFound } from "../../../../components/NothingFound";
 import { useGetUserTraitKeys } from "../../../../api/analytics/hooks/useGetUserTraits";
 import { TraitKeyRow } from "./TraitKeyRow";
 
 export function TraitsExplorer() {
+  const t = useExtracted();
   const { data, isLoading } = useGetUserTraitKeys();
 
   if (isLoading) {
@@ -34,8 +36,8 @@ export function TraitsExplorer() {
     return (
       <NothingFound
         icon={<Tags className="w-10 h-10" />}
-        title="No traits found"
-        description={<p>Traits will appear here once you <a href="https://rybbit.com/docs/identify-users" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">identify users</a> with custom properties.</p>}
+        title={t("No traits found")}
+        description={<p>{t("Traits will appear here once you")} <a href="https://rybbit.com/docs/identify-users" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">{t("identify users")}</a> {t("with custom properties.")}</p>}
       />
     );
   }

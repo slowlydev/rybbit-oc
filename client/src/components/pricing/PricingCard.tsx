@@ -1,5 +1,6 @@
 import { Check, X, ArrowDown, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 
 export type FeatureItem = { feature: string; included?: boolean } | string;
@@ -41,6 +42,7 @@ export function PricingCard({
   annualPrice,
   isAnnual = false,
 }: PricingCardProps) {
+  const t = useExtracted();
   const [isExpanded, setIsExpanded] = useState(false);
   const isFree = variant === "free";
   const isPrimary = buttonVariant === "primary";
@@ -67,7 +69,7 @@ export function PricingCard({
                 <h3 className="text-xl font-bold">{title}</h3>
                 {recommended && (
                   <span className="px-2 py-0.5 text-xs font-semibold bg-emerald-500/30 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/40 dark:border-emerald-500/30">
-                    Most Popular
+                    {t("Most Popular")}
                   </span>
                 )}
               </div>
@@ -76,15 +78,15 @@ export function PricingCard({
 
             {/* Price display */}
             <div className="mb-6 space-y-1">
-              <div>{isCustomTier ? <div className="text-3xl font-bold">{customPriceLabel || "Custom"}
+              <div>{isCustomTier ? <div className="text-3xl font-bold">{customPriceLabel || t("Custom")}
               </div> : <div>
                 <span className="text-3xl font-bold">
                   ${isAnnual ? Math.round(annualPrice! / 12) : monthlyPrice}
                 </span>
-                <span className="ml-1 pb-1 text-neutral-600 dark:text-neutral-400">/month</span>
+                <span className="ml-1 pb-1 text-neutral-600 dark:text-neutral-400">{t("/month")}</span>
               </div>}</div>
               <div className="text-xs">
-                <span className="text-xs text-neutral-600 dark:text-neutral-400">billed {isAnnual ? `annually at $${annualPrice}` : "monthly"}</span>
+                <span className="text-xs text-neutral-600 dark:text-neutral-400">{isAnnual ? t("billed annually at ${annualPrice}", { annualPrice: String(annualPrice) }) : t("billed monthly")}</span>
               </div>
             </div>
 
@@ -133,12 +135,12 @@ export function PricingCard({
                   {isExpanded ? (
                     <>
                       <ArrowUp className="h-4 w-4 mr-3" />
-                      Show less
+                      {t("Show less")}
                     </>
                   ) : (
                     <>
                       <ArrowDown className="h-4 w-4 mr-3" />
-                      Show more ({features.length - 7} more)
+                      {t("Show more ({count} more)", { count: String(features.length - 7) })}
                     </>
                   )}
                 </button>

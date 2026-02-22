@@ -2,6 +2,7 @@
 
 import { trackAdEvent } from "@/lib/trackAdEvent";
 import { Menu, X } from "lucide-react";
+import { useExtracted } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -11,6 +12,7 @@ import { BlackFridayBanner } from "./BlackFridayBanner";
 import { WelcomeBanner } from "./WelcomeBanner";
 
 export function CustomHeader() {
+  const t = useExtracted();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -39,31 +41,31 @@ export function CustomHeader() {
               href="/pricing"
               className="text-sm font-base text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
             >
-              Pricing
+              {t("Pricing")}
             </Link>
             <Link
               href="/features"
               className="text-sm font-base text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
             >
-              Features
+              {t("Features")}
             </Link>
             <Link
               href="/docs"
               className="text-sm font-base text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
             >
-              Docs
+              {t("Docs")}
             </Link>
             {/* <Link
               href="/blog"
               className="text-sm font-base text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
             >
-              Blog
+              {t("Blog")}
             </Link> */}
             <Link
               href="/sponsors"
               className="text-sm font-base text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
             >
-              Sponsors
+              {t("Sponsors")}
             </Link>
           </div>
         </div>
@@ -106,7 +108,7 @@ export function CustomHeader() {
               onClick={() => trackAdEvent("login", { location: "header" })}
               className="bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white text-sm font-medium px-3 py-1.5 rounded-md transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-opacity-50"
             >
-              Login
+              {t("Login")}
             </button>
           </AppLink>
         </div>
@@ -118,7 +120,7 @@ export function CustomHeader() {
             className="inline-flex items-center justify-center rounded-md p-2 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <span className="sr-only">Open main menu</span>
+            <span className="sr-only">{t("Open main menu")}</span>
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
@@ -133,21 +135,21 @@ export function CustomHeader() {
               className="block rounded-md px-3 py-2 text-base font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Pricing
+              {t("Pricing")}
             </Link>
             <Link
               href="/docs"
               className="block rounded-md px-3 py-2 text-base font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Docs
+              {t("Docs")}
             </Link>
             <Link
               href="/blog"
               className="block rounded-md px-3 py-2 text-base font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Blog
+              {t("Blog")}
             </Link>
             <a
               href="https://github.com/rybbit-io/rybbit"
@@ -161,7 +163,7 @@ export function CustomHeader() {
 
             <div className="pt-2 border-t border-neutral-300 dark:border-neutral-800">
               <div className="px-3 py-2 flex items-center justify-between">
-                <span className="text-base font-medium text-neutral-600 dark:text-neutral-300">Theme</span>
+                <span className="text-base font-medium text-neutral-600 dark:text-neutral-300">{t("Theme")}</span>
                 <ThemeSwitcher />
               </div>
             </div>
@@ -173,7 +175,7 @@ export function CustomHeader() {
                   data-rybbit-event="login"
                   className="w-full bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white text-sm font-medium px-3 py-2 rounded-md border border-neutral-400 dark:border-neutral-600"
                 >
-                  Login
+                  {t("Login")}
                 </button>
               </AppLink>
             </div>

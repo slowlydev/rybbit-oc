@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, Check } from "lucide-react";
+import { useExtracted } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
@@ -25,6 +26,7 @@ import { cn, isValidDomain, normalizeDomain } from "../../lib/utils";
 function SignupPageContent() {
   const { configs, isLoading: isLoadingConfigs } = useConfigs();
   useSetPageTitle("Signup");
+  const t = useExtracted();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [stepParam] = useQueryState("step", parseAsInteger);
@@ -107,11 +109,11 @@ function SignupPageContent() {
       });
 
       if (error) {
-        throw new Error(error.message || "Failed to create organization");
+        throw new Error(error.message || t("Failed to create organization"));
       }
 
       if (!data?.id) {
-        throw new Error("No organization ID returned");
+        throw new Error(t("No organization ID returned"));
       }
 
       // Set as active organization
@@ -137,7 +139,7 @@ function SignupPageContent() {
     try {
       // Validate domain
       if (!isValidDomain(domain)) {
-        setError("Invalid domain format. Must be a valid domain like example.com or sub.example.com");
+        setError(t("Invalid domain format. Must be a valid domain like example.com or sub.example.com"));
         setIsLoading(false);
         return;
       }
@@ -162,12 +164,12 @@ function SignupPageContent() {
       case 1:
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Signup</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("Signup")}</h2>
             <div className="space-y-4">
               <SocialButtons onError={setError} callbackURL="/signup?step=2" mode="signup" />
               <AuthInput
                 id="email"
-                label="Email"
+                label={t("Email")}
                 type="email"
                 placeholder="email@example.com"
                 required
@@ -176,7 +178,7 @@ function SignupPageContent() {
               />
               <AuthInput
                 id="password"
-                label="Password"
+                label={t("Password")}
                 type="password"
                 placeholder="••••••••"
                 required
@@ -185,22 +187,22 @@ function SignupPageContent() {
               />
               <AuthButton
                 isLoading={isLoading}
-                loadingText="Creating account..."
+                loadingText={t("Creating account...")}
                 onClick={handleAccountSubmit}
                 type="button"
                 className="mt-6 transition-all duration-300 h-11"
                 disabled={isLoading}
               >
-                Continue
+                {t("Continue")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </AuthButton>
               <div className="text-center text-sm">
-                Already have an account?{" "}
+                {t("Already have an account?")}{" "}
                 <Link
                   href="/login"
                   className="underline underline-offset-4 hover:text-emerald-400 transition-colors duration-300"
                 >
-                  Log in
+                  {t("Log in")}
                 </Link>
               </div>
             </div>
@@ -209,10 +211,10 @@ function SignupPageContent() {
       case 2:
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Create your organization</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("Create your organization")}</h2>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="orgName">Organization Name</Label>
+                <Label htmlFor="orgName">{t("Organization Name")}</Label>
                 <Input
                   id="orgName"
                   type="text"
@@ -231,11 +233,11 @@ function SignupPageContent() {
                   disabled={isLoading || !orgName || !orgSlug}
                   variant="success"
                 >
-                  Continue
+                  {t("Continue")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button className="w-full transition-all duration-300 h-11" onClick={() => router.push("/")}>
-                  I'm joining someone else's organization
+                  {t("I'm joining someone else's organization")}
                 </Button>
               </div>
             </div>
@@ -244,10 +246,10 @@ function SignupPageContent() {
       case 3:
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Add your site</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("Add your site")}</h2>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="domain">Website Domain</Label>
+                <Label htmlFor="domain">{t("Website Domain")}</Label>
                 <Input
                   id="domain"
                   type="text"
@@ -257,7 +259,7 @@ function SignupPageContent() {
                   required
                   className="h-10 transition-all bg-neutral-100 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700"
                 />
-                <p className="text-xs text-muted-foreground">Enter the domain of the website you want to track</p>
+                <p className="text-xs text-muted-foreground">{t("Enter the domain of the website you want to track")}</p>
               </div>
 
               <div className="flex justify-between">
@@ -267,7 +269,7 @@ function SignupPageContent() {
                   disabled={isLoading || !domain || !isValidDomain(domain)}
                   variant="success"
                 >
-                  Continue
+                  {t("Continue")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -289,14 +291,14 @@ function SignupPageContent() {
         <Card className="w-full max-w-sm p-1">
           <CardHeader>
             <RybbitLogo width={32} height={32} />
-            <CardTitle className="text-2xl flex justify-center">Sign Up Disabled</CardTitle>
+            <CardTitle className="text-2xl flex justify-center">{t("Sign Up Disabled")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-6">
               <p className="text-center">
-                New account registration is currently disabled. If you have an account, you can{" "}
+                {t("New account registration is currently disabled. If you have an account, you can")}{" "}
                 <Link href="/login" className="underline">
-                  sign in
+                  {t("sign in")}
                 </Link>
                 .
               </p>
@@ -319,14 +321,14 @@ function SignupPageContent() {
         </div>
 
         <div className="flex-1 flex flex-col justify-center w-full max-w-[550px] mx-auto">
-          <h1 className="text-lg text-neutral-600 dark:text-neutral-300 mb-6">Get started with Rybbit</h1>
+          <h1 className="text-lg text-neutral-600 dark:text-neutral-300 mb-6">{t("Get started with Rybbit")}</h1>
 
           {/* Horizontal step indicator */}
           <div className="flex items-center w-full mb-8">
             {[
-              { step: 1, label: "Account" },
-              { step: 2, label: "Organization" },
-              { step: 3, label: "Website" },
+              { step: 1, label: t("Account") },
+              { step: 2, label: t("Organization") },
+              { step: 3, label: t("Website") },
             ].map(({ step, label }, index) => (
               <React.Fragment key={step}>
                 <div className="flex flex-col items-center gap-2">
@@ -380,7 +382,7 @@ function SignupPageContent() {
               rel="noopener"
               title="Rybbit - Open Source Privacy-Focused Web Analytics"
             >
-              Open source web analytics powered by Rybbit
+              {t("Open source web analytics powered by Rybbit")}
             </a>
           </div>
         }

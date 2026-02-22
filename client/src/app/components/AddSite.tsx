@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { AlertCircle, AppWindow, Plus } from "lucide-react";
 import { DateTime } from "luxon";
+import { useExtracted } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { addSite } from "../../api/admin/endpoints";
@@ -67,6 +68,7 @@ const getSiteLimit = (subscription: SubscriptionData | undefined) => {
 export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disabled?: boolean }) {
   const { setSite } = useStore();
   const router = useRouter();
+  const t = useExtracted();
 
   const { data: activeOrganization } = authClient.useActiveOrganization();
   const { data: sites, refetch } = useGetSitesFromOrg(activeOrganization?.id);
@@ -86,13 +88,13 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
     setError("");
 
     if (!activeOrganization?.id) {
-      setError("Please select an organization");
+      setError(t("Please select an organization"));
       return;
     }
 
     // Validate before attempting to add
     if (!isValidDomain(domain)) {
-      setError("Invalid domain format. Must be a valid domain like example.com or sub.example.com");
+      setError(t("Invalid domain format. Must be a valid domain like example.com or sub.example.com"));
       return;
     }
 
@@ -128,14 +130,14 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
       <Tooltip>
         <TooltipTrigger asChild>
           {trigger || (
-            <Button disabled title="Upgrade to Pro to add more websites">
+            <Button disabled title={t("Upgrade to Pro to add more websites")}>
               <Plus className="h-4 w-4" />
-              Add Website
+              {t("Add Website")}
             </Button>
           )}
         </TooltipTrigger>
         <TooltipContent>
-          You need to be on an active subscription to add websites
+          {t("You need to be on an active subscription to add websites")}
         </TooltipContent>
       </Tooltip>
     );
@@ -147,14 +149,14 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
       <Tooltip>
         <TooltipTrigger asChild>
           {trigger || (
-            <Button disabled title="Upgrade to Pro to add more websites">
+            <Button disabled title={t("Upgrade to Pro to add more websites")}>
               <Plus className="h-4 w-4" />
-              Add Website
+              {t("Add Website")}
             </Button>
           )}
         </TooltipTrigger>
         <TooltipContent>
-          You have reached the limit of {getSiteLimit(subscription)} websites. Upgrade to add more websites
+          {t("You have reached the limit of {limit} websites. Upgrade to add more websites", { limit: String(getSiteLimit(subscription)) })}
         </TooltipContent>
       </Tooltip>
     );
@@ -175,7 +177,7 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
           {trigger || (
             <Button disabled={finalDisabled}>
               <Plus className="h-4 w-4" />
-              Add Website
+              {t("Add Website")}
             </Button>
           )}
         </DialogTrigger>
@@ -183,15 +185,15 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AppWindow className="h-6 w-6" />
-              Add Website
+              {t("Add Website")}
             </DialogTitle>
-            <DialogDescription>Track analytics for a new website in your organization</DialogDescription>
+            <DialogDescription>{t("Track analytics for a new website in your organization")}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
             <div className="grid w-full items-center gap-1.5">
               <Label htmlFor="domain" className="text-sm font-medium">
-                Domain
+                {t("Domain")}
               </Label>
               <Input
                 id="domain"
@@ -204,10 +206,10 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="isPublic" className="text-sm font-medium">
-                  Public Analytics
+                  {t("Public Analytics")}
                 </Label>
                 <p className="text-xs text-muted-foreground mt-1">
-                  When enabled, anyone can view analytics without logging in
+                  {t("When enabled, anyone can view analytics without logging in")}
                 </p>
               </div>
               <Switch id="isPublic" checked={isPublic} onCheckedChange={setIsPublic} />
@@ -217,10 +219,10 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="saltUserIds" className="text-sm font-medium">
-                  Enable User ID Salting
+                  {t("Enable User ID Salting")}
                 </Label>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Enhance privacy with daily rotating salts for user IDs
+                  {t("Enhance privacy with daily rotating salts for user IDs")}
                 </p>
               </div>
               <Switch id="saltUserIds" checked={saltUserIds} onCheckedChange={setSaltUserIds} />
@@ -230,16 +232,16 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error Adding Website</AlertTitle>
+              <AlertTitle>{t("Error Adding Website")}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           <DialogFooter>
             <Button type="button" onClick={() => setOpen(false)} variant="outline">
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit" variant={"success"} onClick={handleSubmit} disabled={!domain}>
-              Add
+              {t("Add")}
             </Button>
           </DialogFooter>
         </DialogContent>

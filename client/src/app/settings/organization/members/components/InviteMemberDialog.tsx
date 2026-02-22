@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserPlus } from "lucide-react";
+import { useExtracted } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 
@@ -51,6 +52,7 @@ const getMemberLimit = (subscription: SubscriptionData | undefined) => {
 export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: InviteMemberDialogProps) {
   const { data: subscription } = useStripeSubscription();
   const queryClient = useQueryClient();
+  const t = useExtracted();
 
   const isOverMemberLimit = useMemo(() => {
     if (!IS_CLOUD) return false;
@@ -90,7 +92,7 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["organizationInvitations"] });
-      toast.success(`Invitation sent to ${email}`);
+      toast.success(t("Invitation sent to {email}", { email }));
       setOpen(false);
       onSuccess();
       setEmail("");
@@ -100,7 +102,7 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
       setError("");
     },
     onError: (err: any) => {
-      setError(err.message || "Failed to send invitation");
+      setError(err.message || t("Failed to send invitation"));
     },
   });
 
@@ -108,12 +110,12 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
     setError("");
 
     if (!email) {
-      setError("Email is required");
+      setError(t("Email is required"));
       return;
     }
 
     if (role === "member" && restrictSiteAccess && selectedSiteIds.length === 0) {
-      setError("Please select at least one site or disable site restrictions");
+      setError(t("Please select at least one site or disable site restrictions"));
       return;
     }
 
@@ -125,15 +127,14 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
       <Tooltip>
         <TooltipTrigger asChild>
           <span>
-            <Button disabled size="sm" variant="outline" title="Upgrade to Pro to add more members">
+            <Button disabled size="sm" variant="outline" title={t("Upgrade to Pro to add more members")}>
               <UserPlus className="h-4 w-4 mr-1" />
-              Invite Member
+              {t("Invite Member")}
             </Button>
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          You have reached the limit of {getMemberLimit(subscription)} member
-          {getMemberLimit(subscription) > 1 ? "s" : ""}. Upgrade to add more members
+          {t("You have reached the limit of {limit} members. Upgrade to add more members", { limit: String(getMemberLimit(subscription)) })}
         </TooltipContent>
       </Tooltip>
     );
@@ -144,17 +145,17 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
           <UserPlus className="h-4 w-4 mr-1" />
-          Invite Member
+          {t("Invite Member")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Invite a new member</DialogTitle>
-          <DialogDescription>Invite a new member to this organization.</DialogDescription>
+          <DialogTitle>{t("Invite a new member")}</DialogTitle>
+          <DialogDescription>{t("Invite a new member to this organization.")}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("Email")}</Label>
             <Input
               id="email"
               type="email"
@@ -164,7 +165,7 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="role">Role</Label>
+            <Label htmlFor="role">{t("Role")}</Label>
             <Select
               value={role}
               onValueChange={value => {
@@ -176,12 +177,12 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder={t("Select a role")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="owner">Owner</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="owner">{t("Owner")}</SelectItem>
+                <SelectItem value="admin">{t("Admin")}</SelectItem>
+                <SelectItem value="member">{t("Member")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -200,14 +201,14 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
                   }}
                 />
                 <Label htmlFor="restrict-site-access" className="cursor-pointer">
-                  Restrict access to specific sites
+                  {t("Restrict access to specific sites")}
                 </Label>
               </div>
               {restrictSiteAccess && (
                 <div className="pl-6">
                   <SiteAccessMultiSelect selectedSiteIds={selectedSiteIds} onChange={setSelectedSiteIds} />
                   <p className="text-xs text-muted-foreground mt-2">
-                    This member will only have access to the selected sites.
+                    {t("This member will only have access to the selected sites.")}
                   </p>
                 </div>
               )}
@@ -218,10 +219,10 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button onClick={handleInvite} disabled={inviteMutation.isPending} variant="success">
-            {inviteMutation.isPending ? "Inviting..." : "Invite"}
+            {inviteMutation.isPending ? t("Inviting...") : t("Invite")}
           </Button>
         </DialogFooter>
       </DialogContent>

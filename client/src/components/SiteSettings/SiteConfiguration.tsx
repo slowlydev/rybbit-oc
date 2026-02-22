@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
+import { useExtracted } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState, useCallback, ReactNode } from "react";
 import { toast } from "@/components/ui/sonner";
@@ -27,8 +28,6 @@ import { normalizeDomain } from "@/lib/utils";
 import { IPExclusionManager } from "./IPExclusionManager";
 import { CountryExclusionManager } from "./CountryExclusionManager";
 import { GSCManager } from "./GSCManager";
-import { useStripeSubscription } from "../../lib/subscription/useStripeSubscription";
-import { Badge } from "../ui/badge";
 import { IS_UNLOCKED } from "../../lib/const";
 
 interface SiteConfigurationProps {
@@ -50,6 +49,7 @@ interface ToggleConfig {
 }
 
 export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: SiteConfigurationProps) {
+  const t = useExtracted();
   const { refetch } = useGetSitesFromOrg(siteMetadata?.organizationId ?? "");
   const router = useRouter();
 
@@ -108,7 +108,7 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
 
   const handleDomainChange = async () => {
     if (!newDomain) {
-      toast.error("Domain cannot be empty");
+      toast.error(t("Domain cannot be empty"));
       return;
     }
 
@@ -116,12 +116,12 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
       setIsChangingDomain(true);
       const normalizedDomain = normalizeDomain(newDomain);
       await updateSiteConfig(siteMetadata.siteId, { domain: normalizedDomain });
-      toast.success("Domain updated successfully");
+      toast.success(t("Domain updated successfully"));
       router.refresh();
       refetch();
     } catch (error) {
       console.error("Error changing domain:", error);
-      toast.error("Failed to update domain");
+      toast.error(t("Failed to update domain"));
     } finally {
       setIsChangingDomain(false);
     }
@@ -131,13 +131,13 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
     try {
       setIsDeleting(true);
       await deleteSite(siteMetadata.siteId);
-      toast.success("Site deleted successfully");
+      toast.success(t("Site deleted successfully"));
       router.push("/");
       onClose?.();
       refetch();
     } catch (error) {
       console.error("Error deleting site:", error);
-      toast.error("Failed to delete site");
+      toast.error(t("Failed to delete site"));
     } finally {
       setIsDeleting(false);
     }
@@ -147,45 +147,43 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
   const privacyToggles: ToggleConfig[] = [
     {
       id: "public",
-      label: "Public Analytics",
-      description: "Anyone can view your site analytics without logging in",
+      label: t("Public Analytics"),
+      description: t("Anyone can view your site analytics without logging in"),
       value: toggleStates.public,
       key: "public",
-      enabledMessage: "Site analytics made public",
-      disabledMessage: "Site analytics made private",
+      enabledMessage: t("Site analytics made public"),
+      disabledMessage: t("Site analytics made private"),
     },
     {
       id: "saltUserIds",
-      label: "User ID Salting",
-      description: "User IDs will be salted with a daily rotating key for enhanced privacy",
+      label: t("User ID Salting"),
+      description: t("User IDs will be salted with a daily rotating key for enhanced privacy"),
       value: toggleStates.saltUserIds,
       key: "saltUserIds",
-      enabledMessage: "User ID salting enabled",
-      disabledMessage: "User ID salting disabled",
+      enabledMessage: t("User ID salting enabled"),
+      disabledMessage: t("User ID salting disabled"),
     },
     {
       id: "blockBots",
-      label: "Block Bot Traffic",
-      description: "Traffic from known bots and crawlers will not be tracked",
+      label: t("Block Bot Traffic"),
+      description: t("Traffic from known bots and crawlers will not be tracked"),
       value: toggleStates.blockBots,
       key: "blockBots",
-      enabledMessage: "Bot blocking enabled",
-      disabledMessage: "Bot blocking disabled",
+      enabledMessage: t("Bot blocking enabled"),
+      disabledMessage: t("Bot blocking disabled"),
     },
     {
       id: "trackIp",
-      label: "Track IP Address",
-      description: "Track the IP address of the user. This is definitely not GDPR compliant!",
+      label: t("Track IP Address"),
+      description: t("Track the IP address of the user. This is definitely not GDPR compliant!"),
       value: toggleStates.trackIp,
       key: "trackIp",
-      enabledMessage: "IP address tracking enabled",
-      disabledMessage: "IP address tracking disabled",
+      enabledMessage: t("IP address tracking enabled"),
+      disabledMessage: t("IP address tracking disabled"),
     },
   ];
 
-  const { data: subscription, isLoading: isSubscriptionLoading } = useStripeSubscription();
-
-  // Unlocked: all features always enabled
+  // Unlocked: all features always enabled, no plan restrictions
   const sessionReplayDisabled = false;
   const standardFeaturesDisabled = false;
 
@@ -193,101 +191,101 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
   const analyticsToggles: ToggleConfig[] = [
     {
       id: "sessionReplay",
-      label: "Session Replay",
-      description: "Record and replay user sessions to understand user behavior",
+      label: t("Session Replay"),
+      description: t("Record and replay user sessions to understand user behavior"),
       value: toggleStates.sessionReplay,
       key: "sessionReplay",
-      enabledMessage: "Session replay enabled",
-      disabledMessage: "Session replay disabled",
+      enabledMessage: t("Session replay enabled"),
+      disabledMessage: t("Session replay disabled"),
       disabled: sessionReplayDisabled,
     },
     {
       id: "webVitals",
-      label: "Web Vitals",
-      description: "Track Core Web Vitals metrics (LCP, CLS, INP, FCP, TTFB)",
+      label: t("Web Vitals"),
+      description: t("Track Core Web Vitals metrics (LCP, CLS, INP, FCP, TTFB)"),
       value: toggleStates.webVitals,
       key: "webVitals" as keyof SiteResponse,
-      enabledMessage: "Web Vitals enabled",
-      disabledMessage: "Web Vitals disabled",
+      enabledMessage: t("Web Vitals enabled"),
+      disabledMessage: t("Web Vitals disabled"),
       disabled: standardFeaturesDisabled,
     },
     {
       id: "trackSpaNavigation",
-      label: "SPA Navigation",
-      description: "Automatically track navigation in single-page applications",
+      label: t("SPA Navigation"),
+      description: t("Automatically track navigation in single-page applications"),
       value: toggleStates.trackSpaNavigation,
       key: "trackSpaNavigation",
-      enabledMessage: "SPA navigation tracking enabled",
-      disabledMessage: "SPA navigation tracking disabled",
+      enabledMessage: t("SPA navigation tracking enabled"),
+      disabledMessage: t("SPA navigation tracking disabled"),
     },
     {
       id: "trackUrlParams",
-      label: "URL Parameters",
-      description: "Include query string parameters in page tracking",
+      label: t("URL Parameters"),
+      description: t("Include query string parameters in page tracking"),
       value: toggleStates.trackUrlParams,
       key: "trackUrlParams",
-      enabledMessage: "URL parameters tracking enabled",
-      disabledMessage: "URL parameters tracking disabled",
+      enabledMessage: t("URL parameters tracking enabled"),
+      disabledMessage: t("URL parameters tracking disabled"),
     },
     {
       id: "trackInitialPageView",
-      label: "Initial Page View",
-      description: "Automatically track the first page view when the script loads",
+      label: t("Initial Page View"),
+      description: t("Automatically track the first page view when the script loads"),
       value: toggleStates.trackInitialPageView,
       key: "trackInitialPageView",
-      enabledMessage: "Initial page view tracking enabled",
-      disabledMessage: "Initial page view tracking disabled",
+      enabledMessage: t("Initial page view tracking enabled"),
+      disabledMessage: t("Initial page view tracking disabled"),
     },
   ];
 
   const autoCaptureToggles: ToggleConfig[] = [
     {
       id: "trackOutbound",
-      label: "Outbound Links",
-      description: "Track when users click on external links",
+      label: t("Outbound Links"),
+      description: t("Track when users click on external links"),
       value: toggleStates.trackOutbound,
       key: "trackOutbound",
-      enabledMessage: "Outbound tracking enabled",
-      disabledMessage: "Outbound tracking disabled",
+      enabledMessage: t("Outbound tracking enabled"),
+      disabledMessage: t("Outbound tracking disabled"),
     },
     {
       id: "trackErrors",
-      label: "Error Tracking",
-      description: "Capture JavaScript errors and exceptions from your site",
+      label: t("Error Tracking"),
+      description: t("Capture JavaScript errors and exceptions from your site"),
       value: toggleStates.trackErrors,
       key: "trackErrors",
-      enabledMessage: "Error tracking enabled",
-      disabledMessage: "Error tracking disabled",
+      enabledMessage: t("Error tracking enabled"),
+      disabledMessage: t("Error tracking disabled"),
       disabled: standardFeaturesDisabled,
     },
     {
       id: "trackButtonClicks",
-      label: "Button Clicks",
-      description: "Automatically track clicks on all buttons",
+      label: t("Button Clicks"),
+      description: t("Automatically track clicks on all buttons"),
       value: toggleStates.trackButtonClicks,
       key: "trackButtonClicks",
-      enabledMessage: "Button click tracking enabled",
-      disabledMessage: "Button click tracking disabled",
+      enabledMessage: t("Button click tracking enabled"),
+      disabledMessage: t("Button click tracking disabled"),
       disabled: standardFeaturesDisabled,
     },
     {
       id: "trackCopy",
-      label: "Copy Events",
-      description: "Track when users copy text from your site",
+      label: t("Copy Events"),
+      description: t("Track when users copy text from your site"),
       value: toggleStates.trackCopy,
       key: "trackCopy",
-      enabledMessage: "Copy tracking enabled",
-      disabledMessage: "Copy tracking disabled",
+      enabledMessage: t("Copy tracking enabled"),
+      disabledMessage: t("Copy tracking disabled"),
       disabled: standardFeaturesDisabled,
     },
     {
       id: "trackFormInteractions",
-      label: "Form Interactions",
-      description: "Automatically track form submissions and input/select changes",
+      label: t("Form Interactions"),
+      description: t("Automatically track form submissions and input/select changes"),
       value: toggleStates.trackFormInteractions,
       key: "trackFormInteractions",
-      enabledMessage: "Form interaction tracking enabled",
-      disabledMessage: "Form interaction tracking disabled",
+      enabledMessage: t("Form interaction tracking enabled"),
+      disabledMessage: t("Form interaction tracking disabled"),
       disabled: standardFeaturesDisabled,
     },
   ];
@@ -324,16 +322,16 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
 
   return (
     <div className="pt-4 pb-6 space-y-6 max-h-[70vh] overflow-y-auto">
-      <div className="space-y-4">{renderToggleSection(privacyToggles, "Privacy & Security")}</div>
-      <div className="space-y-4">{renderToggleSection(analyticsToggles, "Analytics Features")}</div>
-      <div className="space-y-4">{renderToggleSection(autoCaptureToggles, "Auto Capture")}</div>
+      <div className="space-y-4">{renderToggleSection(privacyToggles, t("Privacy & Security"))}</div>
+      <div className="space-y-4">{renderToggleSection(analyticsToggles, t("Analytics Features"))}</div>
+      <div className="space-y-4">{renderToggleSection(autoCaptureToggles, t("Auto Capture"))}</div>
       <IPExclusionManager siteId={siteMetadata.siteId} disabled={disabled} />
       <CountryExclusionManager siteId={siteMetadata.siteId} disabled={disabled} />
       {IS_UNLOCKED && <GSCManager disabled={disabled} />}
       <div className="space-y-3">
         <div>
-          <h4 className="text-sm font-semibold text-foreground">Change Domain</h4>
-          <p className="text-xs text-muted-foreground">Update the domain for this site</p>
+          <h4 className="text-sm font-semibold text-foreground">{t("Change Domain")}</h4>
+          <p className="text-xs text-muted-foreground">{t("Update the domain for this site")}</p>
         </div>
         <div className="flex space-x-2">
           <Input
@@ -346,33 +344,32 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
             onClick={handleDomainChange}
             disabled={isChangingDomain || newDomain === siteMetadata.domain || disabled}
           >
-            {isChangingDomain ? "Updating..." : "Update"}
+            {isChangingDomain ? t("Updating...") : t("Update")}
           </Button>
         </div>
       </div>
 
       {/* Danger Zone Section */}
       <div className="space-y-3 pt-3">
-        <h4 className="text-sm font-semibold text-destructive">Danger Zone</h4>
+        <h4 className="text-sm font-semibold text-destructive">{t("Danger Zone")}</h4>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" disabled={disabled}>
               <AlertTriangle className="h-4 w-4" />
-              Delete Site
+              {t("Delete Site")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>{t("Are you absolutely sure?")}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the site &quot;{siteMetadata.name}&quot; and
-                all of its analytics data.
+                {t('This action cannot be undone. This will permanently delete the site "{name}" and all of its analytics data.', { name: siteMetadata.name })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDelete} disabled={isDeleting} variant="destructive">
-                {isDeleting ? "Deleting..." : "Yes, delete site"}
+                {isDeleting ? t("Deleting...") : t("Yes, delete site")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

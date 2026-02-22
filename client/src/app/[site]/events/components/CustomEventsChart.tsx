@@ -5,6 +5,7 @@ import { useWindowSize } from "@uidotdev/usehooks";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 
+import { useExtracted } from "next-intl";
 import { useGetEventBucketed } from "@/api/analytics/hooks/events/useGetEventBucketed";
 import { ChartTooltip } from "@/components/charts/ChartTooltip";
 import { CardLoader } from "@/components/ui/card";
@@ -40,6 +41,7 @@ type EventSeries = {
 };
 
 export function CustomEventsChart({ eventLimit }: { eventLimit: number }) {
+  const t = useExtracted();
   const { bucket } = useStore();
   const { data, isLoading } = useGetEventBucketed({ limit: eventLimit });
   const { width } = useWindowSize();
@@ -143,8 +145,8 @@ export function CustomEventsChart({ eventLimit }: { eventLimit: number }) {
       {isAllHidden ? (
         <div className="h-[260px] w-full flex items-center justify-center">
           <div className="text-center text-neutral-500">
-            <p className="text-sm font-medium">All event series hidden</p>
-            <p className="text-xs">Click a legend item to show it</p>
+            <p className="text-sm font-medium">{t("All event series hidden")}</p>
+            <p className="text-xs">{t("Click a legend item to show it")}</p>
           </div>
         </div>
       ) : (

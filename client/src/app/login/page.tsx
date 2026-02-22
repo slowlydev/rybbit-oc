@@ -4,6 +4,7 @@ import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthError } from "@/components/auth/AuthError";
 import { AuthInput } from "@/components/auth/AuthInput";
 import { SocialButtons } from "@/components/auth/SocialButtons";
+import { useExtracted } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -17,6 +18,7 @@ import { userStore } from "../../lib/userStore";
 export default function Page() {
   const { configs, isLoading: isLoadingConfigs } = useConfigs();
   useSetPageTitle("Login");
+  const t = useExtracted();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -63,14 +65,14 @@ export default function Page() {
           </a>
         </div>
         <div className="flex-1 flex flex-col justify-center w-full max-w-[550px] mx-auto">
-          <h1 className="text-lg text-neutral-600 dark:text-neutral-300 mb-6">Welcome back</h1>
+          <h1 className="text-lg text-neutral-600 dark:text-neutral-300 mb-6">{t("Welcome back")}</h1>
           <div className="flex flex-col gap-4">
             <SocialButtons onError={setError} />
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-4">
                 <AuthInput
                   id="email"
-                  label="Email"
+                  label={t("Email")}
                   type="email"
                   placeholder="example@email.com"
                   required
@@ -80,34 +82,39 @@ export default function Page() {
 
                 <AuthInput
                   id="password"
-                  label="Password"
+                  label={t("Password")}
                   type="password"
                   placeholder="••••••••"
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
+                  rightElement={
+                    <Link href="/reset-password" className="text-xs text-muted-foreground hover:text-primary">
+                      {t("Forgot password?")}
+                    </Link>
+                  }
                 />
 
                 <AuthButton
                   isLoading={isLoading}
-                  loadingText="Logging in..."
+                  loadingText={t("Logging in...")}
                   disabled={isLoading}
                 >
-                  Login
+                  {t("Login")}
                 </AuthButton>
 
-                <AuthError error={error} title="Error Logging In" />
+                <AuthError error={error} title={t("Error Logging In")} />
               </div>
             </form>
 
             {(!configs?.disableSignup || !isLoadingConfigs) && (
               <div className="text-center text-sm">
-                Don't have an account?{" "}
+                {t("Don't have an account?")}{" "}
                 <Link
                   href="/signup"
                   className="underline underline-offset-4 hover:text-emerald-400 transition-colors duration-300"
                 >
-                  Sign up
+                  {t("Sign up")}
                 </Link>
               </div>
             )}
@@ -122,7 +129,7 @@ export default function Page() {
               rel="noopener"
               title="Rybbit - Open Source Privacy-Focused Web Analytics"
             >
-              Open source web analytics powered by Rybbit
+              {t("Open source web analytics powered by Rybbit")}
             </a>
           </div>
         }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -88,6 +89,7 @@ const useFilterToggle = () => {
 };
 
 export function PerformanceTable({ dimension, title }: PerformanceTableProps) {
+  const t = useExtracted();
   const { site } = useStore();
   const { data: siteMetadata } = useGetSite();
   const { selectedPercentile } = usePerformanceStore();
@@ -122,19 +124,19 @@ export function PerformanceTable({ dimension, title }: PerformanceTableProps) {
       columnHelper.accessor(dimension, {
         header:
           dimension === "pathname"
-            ? "Path"
+            ? t("Path")
             : dimension === "country"
-              ? "Country"
+              ? t("Country")
               : dimension === "device_type"
-                ? "Device Type"
+                ? t("Device Type")
                 : dimension === "browser"
-                  ? "Browser"
+                  ? t("Browser")
                   : dimension === "operating_system"
-                    ? "Operating System"
+                    ? t("Operating System")
                     : dimension.charAt(0).toUpperCase() + dimension.slice(1),
         cell: info => {
           const value = info.getValue();
-          const displayValue = value || (dimension === "pathname" ? "/" : "Unknown");
+          const displayValue = value || (dimension === "pathname" ? "/" : t("Unknown"));
 
           const handleClick = () => {
             if (value) {
@@ -155,17 +157,17 @@ export function PerformanceTable({ dimension, title }: PerformanceTableProps) {
               ) : dimension === "device_type" ? (
                 <>
                   <DeviceIcon deviceType={value || ""} />
-                  {value || "Other"}
+                  {value || t("Other")}
                 </>
               ) : dimension === "browser" && value ? (
                 <>
                   <Browser browser={value} />
-                  {value || "Other"}
+                  {value || t("Other")}
                 </>
               ) : dimension === "operating_system" ? (
                 <>
                   <OperatingSystem os={value || "Other"} />
-                  {value || "Other"}
+                  {value || t("Other")}
                 </>
               ) : (
                 <>
@@ -234,7 +236,7 @@ export function PerformanceTable({ dimension, title }: PerformanceTableProps) {
         cell: info => <MetricCell metric="ttfb" value={info.getValue() as number} percentile={selectedPercentile} />,
       }),
       columnHelper.accessor("event_count", {
-        header: "Events",
+        header: t("Events"),
         cell: info => (
           <div className="text-neutral-600 dark:text-neutral-300">{info.getValue()?.toLocaleString() ?? 0}</div>
         ),
@@ -394,7 +396,7 @@ export function PerformanceTable({ dimension, title }: PerformanceTableProps) {
               {table.getRowModel().rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="text-neutral-500 py-8">
-                    No performance data available
+                    {t("No performance data available")}
                   </TableCell>
                 </TableRow>
               ) : (

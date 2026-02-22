@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { useMemo, useState } from "react";
 import { useGetGoals } from "../../../api/analytics/hooks/goals/useGetGoals";
 import { DisabledOverlay } from "../../../components/DisabledOverlay";
@@ -57,6 +58,7 @@ const GoalCardSkeleton = () => (
 );
 
 export default function GoalsPage() {
+  const t = useExtracted();
   useSetPageTitle("Goals");
 
   const { site } = useStore();
@@ -142,7 +144,7 @@ export default function GoalsPage() {
         <SubHeader availableFilters={GOALS_PAGE_FILTERS} />
         <div className="flex items-center justify-between">
           <Input
-            placeholder="Filter goals"
+            placeholder={t("Filter goals")}
             className="w-48"
             isSearch
             value={searchQuery}
@@ -162,15 +164,15 @@ export default function GoalsPage() {
         ) : !goalsData || goalsData.data.length === 0 ? (
           <NothingFound
             icon={<Target className="w-10 h-10" />}
-            title={"No goals found"}
-            description={"Create your first conversion goal to start tracking important user actions."}
+            title={t("No goals found")}
+            description={t("Create your first conversion goal to start tracking important user actions.")}
             action={<CreateGoalButton siteId={Number(site)} />}
           />
         ) : filteredGoals.length === 0 ? (
           <NothingFound
             icon={<Target className="w-10 h-10" />}
-            title={"No goals found"}
-            description={`No goals match "${searchQuery}"`}
+            title={t("No goals found")}
+            description={t('No goals match "{searchQuery}"', { searchQuery })}
           />
         ) : (
           <div className="space-y-6">

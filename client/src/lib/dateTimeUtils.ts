@@ -155,7 +155,7 @@ export const hourMinuteLabels: string[] = getLocalizedTimeLabels(userLocale, {
   hour12: hour12,
 });
 
-export const formatChartDateTime = (dt: DateTime, bucket: TimeBucket) => {
+export const formatChartDateTime = (dt: DateTime, bucket: TimeBucket, locale = userLocale) => {
   const showMinutes = ["minute", "five_minutes", "ten_minutes", "fifteen_minutes", "hour"].includes(bucket);
   const options: Intl.DateTimeFormatOptions = {
     month: "short",
@@ -176,7 +176,7 @@ export const formatChartDateTime = (dt: DateTime, bucket: TimeBucket) => {
     options.minute = "numeric";
     options.hour = "numeric";
   }
-  return new Intl.DateTimeFormat(userLocale, options).format(dt.toJSDate());
+  return new Intl.DateTimeFormat(locale, options).format(dt.toJSDate());
 };
 
 /**

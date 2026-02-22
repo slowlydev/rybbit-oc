@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 
 import { BucketSelection } from "@/components/BucketSelection";
@@ -14,6 +15,7 @@ const EVENT_LIMIT_OPTIONS = [1, 3, 5, 8, 10];
 type ChartTab = "custom_events" | "event_types";
 
 export function EventsChart() {
+  const t = useExtracted();
   const [tab, setTab] = useState<ChartTab>("custom_events");
   const [eventLimit, setEventLimit] = useState(5);
 
@@ -23,8 +25,8 @@ export function EventsChart() {
         <CardHeader className="flex flex-col gap-0 pb-0">
           <div className="flex items-start gap-2">
             <TabsList className="flex-1 mt-[-8px]">
-              <TabsTrigger value="custom_events">Custom Events</TabsTrigger>
-              <TabsTrigger value="event_types">Event Types</TabsTrigger>
+              <TabsTrigger value="custom_events">{t("Custom Events")}</TabsTrigger>
+              <TabsTrigger value="event_types">{t("Event Types")}</TabsTrigger>
             </TabsList>
             <div className="hidden items-center gap-2 sm:flex">
               {tab === "custom_events" && (
@@ -35,7 +37,7 @@ export function EventsChart() {
                   <SelectContent size="sm">
                     {EVENT_LIMIT_OPTIONS.map(option => (
                       <SelectItem key={option} value={String(option)} size="sm">
-                        Top {option}
+                        {t("Top {option}", { option: String(option) })}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -54,7 +56,7 @@ export function EventsChart() {
                   <SelectContent size="sm">
                     {EVENT_LIMIT_OPTIONS.map(option => (
                       <SelectItem key={option} value={String(option)} size="sm">
-                        Top {option}
+                        {t("Top {option}", { option: String(option) })}
                       </SelectItem>
                     ))}
                   </SelectContent>

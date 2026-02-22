@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useExtracted } from "next-intl";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { Loader2, Search } from "lucide-react";
 import { Input } from "../../../../components/ui/input";
@@ -26,6 +27,7 @@ export function TraitValueUsersList({
   value: string;
   userCount: number;
 }) {
+  const t = useExtracted();
   const [searchTerm, setSearchTerm] = useState("");
   const { site } = useParams();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -99,7 +101,7 @@ export function TraitValueUsersList({
   if (flattenedUsers.length === 0) {
     return (
       <div className="pl-12 py-3 text-xs text-neutral-500 dark:text-neutral-400">
-        No users found
+        {t("No users found")}
       </div>
     );
   }
@@ -111,7 +113,7 @@ export function TraitValueUsersList({
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400" />
             <Input
-              placeholder="Search users..."
+              placeholder={t("Search users...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-7 pl-7 text-xs"
@@ -156,8 +158,7 @@ export function TraitValueUsersList({
               />
               <DeviceTypeTooltipIcon device_type={user.device_type || ""} />
               <span className="text-neutral-500 dark:text-neutral-400 text-xs whitespace-nowrap ml-1">
-                {user.sessions.toLocaleString()}{" "}
-                {user.sessions === 1 ? "session" : "sessions"}
+                {user.sessions === 1 ? t("{count} session", { count: user.sessions.toLocaleString() }) : t("{count} sessions", { count: user.sessions.toLocaleString() })}
               </span>
             </div>
           </div>
@@ -168,7 +169,7 @@ export function TraitValueUsersList({
           {isFetchingNextPage && (
             <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400 text-xs">
               <Loader2 className="h-3 w-3 animate-spin" />
-              Loading more...
+              {t("Loading more...")}
             </div>
           )}
         </div>

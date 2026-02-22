@@ -1,5 +1,8 @@
+import { eq, and } from "drizzle-orm";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { DateTime } from "luxon";
+import { db } from "../../db/postgres/postgres.js";
+import { member } from "../../db/postgres/schema.js";
 
 function getStartOfMonth() {
   return DateTime.now().startOf("month").toJSDate();
@@ -43,6 +46,25 @@ export async function getSubscription(
     return reply.status(400).send({ error: "Organization ID is required" });
   }
 
-  const responseData = await getSubscriptionInner(organizationId);
-  return reply.send(responseData);
+  // Verify user is a member of this organization
+  const memberResult = await db
+    .select({ role: member.role })
+    .from(member)
+    .where(and(eq(member.userId, userId), eq(member.organizationId, organizationId)))
+    .limit(1);
+
+  if (!memberResult.length) {
+    return reply.status(403).send({ error: "You do not have access to this organization" });
+  }
+
+  try {
+    const responseData = await getSubscriptionInner(organizationId);
+    return reply.send(responseData);
+  } catch (error: any) {
+    console.error("Get Subscription Error:", error);
+    return reply.status(500).send({
+      error: "Failed to fetch subscription details",
+      details: error.message,
+    });
+  }
 }

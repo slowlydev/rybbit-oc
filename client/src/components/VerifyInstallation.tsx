@@ -2,6 +2,7 @@
 
 import { useVerifyScript } from "@/api/admin/hooks/useSites";
 import { CheckCircle, AlertTriangle, XCircle, Loader2 } from "lucide-react";
+import { useExtracted } from "next-intl";
 import { Button } from "./ui/button";
 
 interface VerifyInstallationProps {
@@ -10,6 +11,7 @@ interface VerifyInstallationProps {
 
 export function VerifyInstallation({ siteId }: VerifyInstallationProps) {
   const { mutate: verify, data: verifyResult, isPending: isVerifying, reset: resetVerify } = useVerifyScript();
+  const t = useExtracted();
 
   return (
     <div className="flex flex-col gap-2">
@@ -23,10 +25,10 @@ export function VerifyInstallation({ siteId }: VerifyInstallationProps) {
         {isVerifying ? (
           <>
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            Checking installation...
+            {t("Checking installation...")}
           </>
         ) : (
-          "Verify Installation"
+          t("Verify Installation")
         )}
       </Button>
       {verifyResult && (
@@ -34,17 +36,17 @@ export function VerifyInstallation({ siteId }: VerifyInstallationProps) {
           {verifyResult.scriptTagFound && verifyResult.scriptExecuted && verifyResult.siteIdMatch ? (
             <div className="flex text-sm items-center gap-2 text-green-600 dark:text-green-400">
               <CheckCircle className="w-4 h-4" />
-              <span className="font-medium">Script is installed and running correctly.</span>
+              <span className="font-medium">{t("Script is installed and running correctly.")}</span>
             </div>
           ) : verifyResult.scriptTagFound && !verifyResult.scriptExecuted ? (
             <div className="flex text-sm items-center gap-2 text-amber-600 dark:text-amber-400">
               <AlertTriangle className="w-4 h-4" />
-              <span className="font-medium">Script tag found but not executing</span>
+              <span className="font-medium">{t("Script tag found but not executing")}</span>
             </div>
           ) : (
             <div className="flex text-sm items-center gap-2 text-red-600 dark:text-red-400">
               <XCircle className="w-4 h-4" />
-              <span className="font-medium">Script not detected</span>
+              <span className="font-medium">{t("Script not detected")}</span>
             </div>
           )}
           {verifyResult.issues.length > 0 && (

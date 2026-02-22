@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { Card, CardContent, CardLoader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNivoTheme } from "@/lib/nivo";
@@ -26,6 +27,7 @@ const tilt_wrap = Tilt_Warp({
 });
 
 export function PerformanceChart() {
+  const t = useExtracted();
   const session = authClient.useSession();
   const { site, bucket } = useStore();
   const { selectedPerformanceMetric, selectedPercentile } = usePerformanceStore();
@@ -244,8 +246,8 @@ export function PerformanceChart() {
         ) : data.length === 0 ? (
           <div className="h-[300px] w-full flex items-center justify-center">
             <div className="text-center text-neutral-500">
-              <p className="text-lg font-medium">No performance data available</p>
-              <p className="text-sm">Try adjusting your date range or filters</p>
+              <p className="text-lg font-medium">{t("No performance data available")}</p>
+              <p className="text-sm">{t("Try adjusting your date range or filters")}</p>
             </div>
           </div>
         ) : (

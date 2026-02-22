@@ -1,6 +1,7 @@
 "use client";
 
 import { DateTime } from "luxon";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { useGetOrgEventCount } from "../api/analytics/hooks/useGetOrgEventCount";
 import { Badge } from "./ui/badge";
@@ -32,6 +33,7 @@ interface UsageChartProps {
 }
 
 export function UsageChart({ organizationId, timeZone = "UTC" }: UsageChartProps) {
+  const t = useExtracted();
   const [period, setPeriod] = useState<PeriodValue>("30");
 
   const { startDate, endDate } = getPeriodDates(period);
@@ -46,22 +48,32 @@ export function UsageChart({ organizationId, timeZone = "UTC" }: UsageChartProps
   const totalEvents =
     data?.data?.reduce((acc, e) => acc + e.event_count, 0) ?? 0;
 
-  const periodLabel = period === "all" ? "All Time" : `Last ${period} Days`;
+  const getPeriodLabel = (): string => {
+    switch (period) {
+      case "all": return t("All Time");
+      case "7": return t("Last 7 Days");
+      case "14": return t("Last 14 Days");
+      case "30": return t("Last 30 Days");
+      case "60": return t("Last 60 Days");
+      default: return period;
+    }
+  };
+  const periodLabel = getPeriodLabel();
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium text-sm text-neutral-600 dark:text-neutral-300 flex items-center gap-2">
-          {periodLabel} Usage
+          {t("{period} Usage", { period: periodLabel })}
           <Badge variant="outline" className="text-neutral-600 dark:text-neutral-300">
-            {totalEvents.toLocaleString()} events
+            {t("{count} events", { count: totalEvents.toLocaleString() })}
           </Badge>
         </h3>
         <Tabs value={period} onValueChange={v => setPeriod(v as PeriodValue)}>
           <TabsList className="h-7">
             {PERIODS.map(p => (
               <TabsTrigger key={p.value} value={p.value} className="text-xs px-2 py-0.5">
-                {p.label}
+                {p.value === "all" ? t("All") : p.label}
               </TabsTrigger>
             ))}
           </TabsList>

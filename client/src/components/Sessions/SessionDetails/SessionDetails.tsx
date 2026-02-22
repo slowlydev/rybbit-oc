@@ -1,6 +1,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight } from "lucide-react";
+import { useExtracted } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -28,6 +29,7 @@ export function SessionDetails({ session, userId, highlightedEventTimestamp }: S
     isFetchingNextPage,
   } = useGetSessionDetailsInfinite(session.session_id);
   const { site } = useParams();
+  const t = useExtracted();
 
   // Flatten all events into a single array
   const allEvents = useMemo(() => {
@@ -81,15 +83,15 @@ export function SessionDetails({ session, userId, highlightedEventTimestamp }: S
       ) : error ? (
         <Alert variant="destructive" className="mt-4">
           <AlertDescription>
-            Error loading session details. Please try again.
+            {t("Error loading session details. Please try again.")}
           </AlertDescription>
         </Alert>
       ) : sessionDetailsData?.pages[0]?.data ? (
         <Tabs defaultValue="timeline" className="mt-4">
           <div className="flex justify-between items-center mb-6">
             <TabsList>
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
-              <TabsTrigger value="info">Session Info</TabsTrigger>
+              <TabsTrigger value="timeline">{t("Timeline")}</TabsTrigger>
+              <TabsTrigger value="info">{t("Session Info")}</TabsTrigger>
             </TabsList>
             {!userId && (
               <Link
@@ -98,7 +100,7 @@ export function SessionDetails({ session, userId, highlightedEventTimestamp }: S
                 )}`}
               >
                 <Button size={"sm"} variant={"success"}>
-                  View User <ArrowRight className="w-4 h-4" />
+                  {t("View User")} <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             )}
@@ -130,7 +132,7 @@ export function SessionDetails({ session, userId, highlightedEventTimestamp }: S
         </Tabs>
       ) : (
         <div className="py-4 text-center text-neutral-400">
-          No data available
+          {t("No data available")}
         </div>
       )}
     </div>

@@ -5,6 +5,7 @@ import { useWindowSize } from "@uidotdev/usehooks";
 import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
 
+import { useExtracted } from "next-intl";
 import { useGetSiteEventCount } from "@/api/analytics/hooks/events/useGetSiteEventCount";
 import { ChartTooltip } from "@/components/charts/ChartTooltip";
 import { ChartLegend } from "./ChartLegend";
@@ -26,6 +27,21 @@ const EVENT_TYPE_CONFIG = [
   { key: "input_change_count", label: "Input Changes", color: "#f472b6" },
 ] as const;
 
+// Translated labels keyed by the raw label
+function getTranslatedEventTypeLabels(t: (key: string) => string): Record<string, string> {
+  return {
+    Pageviews: t("Pageviews"),
+    "Custom Events": t("Custom Events"),
+    Performance: t("Performance"),
+    Outbound: t("Outbound"),
+    Errors: t("Errors"),
+    "Button Clicks": t("Button Clicks"),
+    Copy: t("Copy"),
+    "Form Submits": t("Form Submits"),
+    "Input Changes": t("Input Changes"),
+  };
+}
+
 type EventTypeKey = (typeof EVENT_TYPE_CONFIG)[number]["key"];
 
 type DataPoint = {
@@ -41,6 +57,7 @@ type Series = {
 };
 
 export function EventTypesChart() {
+  const t = useExtracted();
   const { bucket } = useStore();
   const { data, isLoading } = useGetSiteEventCount();
   const { width } = useWindowSize();
@@ -60,6 +77,8 @@ export function EventTypesChart() {
     });
   };
 
+  const translatedLabels = getTranslatedEventTypeLabels(t);
+
   const { series, legendItems, maxValue, totalPoints } = useMemo(() => {
     if (!data || data.length === 0) {
       return { series: [] as Series[], legendItems: [], maxValue: 1, totalPoints: 0 };
@@ -72,7 +91,7 @@ export function EventTypesChart() {
     });
 
     const allSeries: Series[] = EVENT_TYPE_CONFIG.map((config) => ({
-      id: config.label,
+      id: translatedLabels[config.label] || config.label,
       color: config.color,
       data: sortedData
         .map((row) => {
@@ -102,7 +121,7 @@ export function EventTypesChart() {
       maxValue,
       totalPoints,
     };
-  }, [data, timezone]);
+  }, [data, timezone, translatedLabels]);
 
   const maxTicks = Math.round((width ?? 900) / 85);
   const visibleSeries = series.filter((s) => !hiddenTypes.has(s.id));
@@ -124,8 +143,8 @@ export function EventTypesChart() {
       <>
         <div className="h-[260px] w-full flex items-center justify-center">
           <div className="text-center text-neutral-500">
-            <p className="text-sm font-medium">All event types hidden</p>
-            <p className="text-xs">Click a legend item to show it</p>
+            <p className="text-sm font-medium">{t("All event types hidden")}</p>
+            <p className="text-xs">{t("Click a legend item to show it")}</p>
           </div>
         </div>
         <ChartLegend items={legendItems} hiddenItems={hiddenTypes} onToggle={toggleTypeVisibility} />
@@ -213,7 +232,7 @@ export function EventTypesChart() {
                     ))}
                   </div>
                   <div className="mt-2 flex justify-between border-t border-neutral-100 dark:border-neutral-750 pt-2">
-                    <span className="text-neutral-600 dark:text-neutral-300">Total</span>
+                    <span className="text-neutral-600 dark:text-neutral-300">{t("Total")}</span>
                     <span className="font-semibold text-neutral-700 dark:text-neutral-200">
                       {formatter(total)}
                     </span>

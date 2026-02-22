@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useUserOrganizations } from "../api/admin/hooks/useOrganizations";
@@ -20,6 +21,7 @@ import { canGoForward, goBack, goForward, useStore } from "../lib/store";
 import { AddSite } from "./components/AddSite";
 
 export default function Home() {
+  const t = useExtracted();
   useSetPageTitle("Home");
 
   const { time, setTime } = useStore();
@@ -120,7 +122,7 @@ export default function Home() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
             <Input
-              placeholder="Filter by domain..."
+              placeholder={t("Filter by domain...")}
               value={domainFilter}
               onChange={e => setDomainFilter(e.target.value)}
               className="pl-9"
@@ -132,9 +134,9 @@ export default function Home() {
                 options={allTags.map(tag => ({ value: tag, label: tag }))}
                 value={selectedTags}
                 onValueChange={setSelectedTags}
-                placeholder="Filter by tags..."
-                searchPlaceholder="Search tags..."
-                emptyText="No tags found."
+                placeholder={t("Filter by tags...")}
+                searchPlaceholder={t("Search tags...")}
+                emptyText={t("No tags found.")}
                 className="border-neutral-150 dark:border-neutral-800"
               />
             </div>
@@ -161,13 +163,13 @@ export default function Home() {
         })}
         {hasNoSites ? (
           <Card className="p-6 flex flex-col items-center text-center">
-            <CardTitle className="mb-2 text-xl">No websites yet</CardTitle>
-            <CardDescription className="mb-4">Add your first website to start tracking analytics</CardDescription>
+            <CardTitle className="mb-2 text-xl">{t("No websites yet")}</CardTitle>
+            <CardDescription className="mb-4">{t("Add your first website to start tracking analytics")}</CardDescription>
             <AddSite
               trigger={
                 <Button variant="success" disabled={!canAddSites}>
                   <Plus className="h-4 w-4" />
-                  Add Website
+                  {t("Add Website")}
                 </Button>
               }
             />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { SessionsList } from "@/components/Sessions/SessionsList";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -28,6 +29,7 @@ const LIMIT = 25;
 
 export default function UserPage() {
   useSetPageTitle("User");
+  const t = useExtracted();
 
   const { userId: rawUserId, site } = useParams();
   const userId = (() => {
@@ -72,12 +74,12 @@ export default function UserPage() {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/${site}/users`}>Users</Link>
+                <Link href={`/${site}/users`}>{t("Users")}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{isLoading ? "Loading..." : displayName}</BreadcrumbPage>
+              <BreadcrumbPage>{isLoading ? t("Loading...") : displayName}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

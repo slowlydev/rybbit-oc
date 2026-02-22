@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { EVENT_TYPE_CONFIG, EventType } from "@/lib/events";
@@ -16,6 +17,19 @@ export function EventTypeFilter({
   onToggle,
   events,
 }: EventTypeFilterProps) {
+  const t = useExtracted();
+
+  const translatedLabels: Record<string, string> = {
+    Pageview: t("Pageview"),
+    Event: t("Event"),
+    Outbound: t("Outbound"),
+    "Button Click": t("Button Click"),
+    Copy: t("Copy"),
+    "Form Submit": t("Form Submit"),
+    "Input Change": t("Input Change"),
+    Error: t("Error"),
+  };
+
   // Calculate counts for each event type
   const counts = useMemo(() => {
     const result: Record<string, number> = {};
@@ -50,7 +64,7 @@ export function EventTypeFilter({
             >
               <EventTypeIcon type={option.value as EventType} className="h-3 w-3" />
             </div>
-            <span>{option.label}</span>
+            <span>{translatedLabels[option.label] || option.label}</span>
             {count > 0 && (
               <span
                 className={cn(

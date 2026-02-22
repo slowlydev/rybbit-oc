@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatter } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { ChevronDown } from "lucide-react";
+import { useExtracted } from "next-intl";
 
 interface SubscriptionTiersTableProps {
   organizations: AdminOrganizationData[] | undefined;
@@ -15,6 +16,7 @@ interface SubscriptionTiersTableProps {
 }
 
 export function SubscriptionTiersTable({ organizations, isLoading }: SubscriptionTiersTableProps) {
+  const t = useExtracted();
   const [tierFilter, setTierFilter] = useState("");
   const [tierSorting, setTierSorting] = useState<{ column: string; direction: "asc" | "desc" }>({
     column: "count",
@@ -87,7 +89,7 @@ export function SubscriptionTiersTable({ organizations, isLoading }: Subscriptio
   return (
     <div className="space-y-2">
       <Input
-        placeholder="Filter subscription tiers..."
+        placeholder={t("Filter subscription tiers...")}
         value={tierFilter}
         onChange={e => setTierFilter(e.target.value)}
         className="max-w-xs"
@@ -101,7 +103,7 @@ export function SubscriptionTiersTable({ organizations, isLoading }: Subscriptio
               onClick={() => handleTierSort("tier")}
             >
               <div className="flex items-center gap-1">
-                Subscription Tier
+                {t("Subscription Tier")}
                 <SortIcon column="tier" />
               </div>
             </TableHead>
@@ -110,7 +112,7 @@ export function SubscriptionTiersTable({ organizations, isLoading }: Subscriptio
               onClick={() => handleTierSort("count")}
             >
               <div className="flex items-center justify-end gap-1">
-                Organizations
+                {t("Organizations")}
                 <SortIcon column="count" />
               </div>
             </TableHead>
@@ -119,7 +121,7 @@ export function SubscriptionTiersTable({ organizations, isLoading }: Subscriptio
               onClick={() => handleTierSort("events24h")}
             >
               <div className="flex items-center justify-end gap-1">
-                24h Events
+                {t("24h Events")}
                 <SortIcon column="events24h" />
               </div>
             </TableHead>
@@ -128,7 +130,7 @@ export function SubscriptionTiersTable({ organizations, isLoading }: Subscriptio
               onClick={() => handleTierSort("events30d")}
             >
               <div className="flex items-center justify-end gap-1">
-                30d Events
+                {t("30d Events")}
                 <SortIcon column="events30d" />
               </div>
             </TableHead>
@@ -137,7 +139,7 @@ export function SubscriptionTiersTable({ organizations, isLoading }: Subscriptio
               onClick={() => handleTierSort("avgEvents24h")}
             >
               <div className="flex items-center justify-end gap-1">
-                Avg 24h
+                {t("Avg 24h")}
                 <SortIcon column="avgEvents24h" />
               </div>
             </TableHead>
@@ -146,7 +148,7 @@ export function SubscriptionTiersTable({ organizations, isLoading }: Subscriptio
               onClick={() => handleTierSort("avgEvents30d")}
             >
               <div className="flex items-center justify-end gap-1">
-                Avg 30d
+                {t("Avg 30d")}
                 <SortIcon column="avgEvents30d" />
               </div>
             </TableHead>
@@ -207,7 +209,7 @@ export function SubscriptionTiersTable({ organizations, isLoading }: Subscriptio
           ) : (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-                No subscription data available
+                {t("No subscription data available")}
               </TableCell>
             </TableRow>
           )}

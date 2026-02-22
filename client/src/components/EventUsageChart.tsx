@@ -2,12 +2,13 @@
 
 import { EventCountRow } from "@/api/admin/endpoints/adminServiceEventCount";
 import { ChartTooltip } from "@/components/charts/ChartTooltip";
-import { userLocale } from "@/lib/dateTimeUtils";
+import { useDateTimeFormat } from "@/hooks/useDateTimeFormat";
 import { useNivoTheme } from "@/lib/nivo";
 import { formatter } from "@/lib/utils";
 import { ResponsiveLine } from "@nivo/line";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { DateTime } from "luxon";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 
 const CHART_COLORS = [
@@ -38,7 +39,9 @@ export function EventUsageChart({
   maxTickCount = 10,
 }: EventUsageChartProps) {
   const { width } = useWindowSize();
+  const t = useExtracted();
   const nivoTheme = useNivoTheme();
+  const { locale, formatDateTime } = useDateTimeFormat();
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
 
   const maxTicks = Math.round((width ?? Infinity) / 200);
@@ -114,18 +117,18 @@ export function EventUsageChart({
         {isLoading ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-sm text-muted-foreground">
-              Loading usage data...
+              {t("Loading usage data...")}
             </div>
           </div>
         ) : error ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-sm text-muted-foreground">
-              Failed to load usage data
+              {t("Failed to load usage data")}
             </div>
           </div>
         ) : visibleSeries.length === 0 ? (
           <div className="h-full flex items-center justify-center">
-            <div className="text-sm text-muted-foreground">No data</div>
+            <div className="text-sm text-muted-foreground">{t("No data")}</div>
           </div>
         ) : (
           <ResponsiveLine
@@ -158,8 +161,7 @@ export function EventUsageChart({
               truncateTickAt: 0,
               tickValues: Math.min(maxTicks, maxTickCount),
               format: (value) => {
-                const dt = DateTime.fromJSDate(value).setLocale(userLocale);
-                return dt.toFormat("MMM d");
+                return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(value);
               },
             }}
             axisLeft={{
@@ -190,7 +192,7 @@ export function EventUsageChart({
                 <ChartTooltip>
                   <div className="p-3 min-w-[100px]">
                     <div className="font-medium mb-1">
-                      {currentTime.toLocaleString(DateTime.DATE_MED)}
+                      {formatDateTime(currentTime, { month: "short", day: "numeric", year: "numeric" })}
                     </div>
                     {slice.points
                       .sort(
@@ -223,7 +225,7 @@ export function EventUsageChart({
                         </div>
                       ))}
                     <div className="mt-2 flex justify-between border-t border-neutral-100 dark:border-neutral-750 pt-2">
-                      <div>Total</div>
+                      <div>{t("Total")}</div>
                       <div className="font-semibold">
                         {total.toLocaleString()}
                       </div>
@@ -273,7 +275,7 @@ export function EventUsageChart({
           );
         })}
         <div className="flex items-center justify-between gap-3 border-t border-neutral-200 dark:border-neutral-700 pt-1.5 mt-0.5">
-          <span className="text-neutral-600 dark:text-neutral-400">Total</span>
+          <span className="text-neutral-600 dark:text-neutral-400">{t("Total")}</span>
           <span className="font-semibold tabular-nums">
             {totalEvents.toLocaleString()}
           </span>

@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+import { useExtracted } from "next-intl";
 import { useMemo } from "react";
 import { SessionEvent } from "../../../api/analytics/endpoints";
 import { EventTypeFilter } from "../../EventTypeFilter";
@@ -30,6 +31,7 @@ export function TimelineTab({
   fetchNextPage,
   totalEvents,
 }: TimelineTabProps) {
+  const t = useExtracted();
   const showHostname = useMemo(() => {
     const hostnames = new Set(
       allEvents
@@ -81,10 +83,10 @@ export function TimelineTab({
               {isFetchingNextPage ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Loading...</span>
+                  <span>{t("Loading...")}</span>
                 </>
               ) : (
-                <span>Load More</span>
+                <span>{t("Load More")}</span>
               )}
             </Button>
           </div>
@@ -92,7 +94,7 @@ export function TimelineTab({
 
         {totalEvents > 0 && (
           <div className="text-center text-xs text-neutral-400 dark:text-neutral-500 mt-2">
-            Showing {allEvents.length} of {totalEvents} events
+            {t("Showing {shown} of {total} events", { shown: String(allEvents.length), total: String(totalEvents) })}
           </div>
         )}
       </div>

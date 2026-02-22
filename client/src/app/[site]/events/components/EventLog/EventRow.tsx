@@ -1,12 +1,13 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { Event } from "../../../../../api/analytics/endpoints";
 import { Avatar } from "../../../../../components/Avatar";
 import { EventTypeIcon } from "../../../../../components/EventIcons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../../../components/ui/tooltip";
-import { hour12, userLocale } from "../../../../../lib/dateTimeUtils";
+import { useDateTimeFormat } from "../../../../../hooks/useDateTimeFormat";
 import { getTimezone } from "../../../../../lib/store";
 import { getCountryName, getUserDisplayName, truncateString } from "../../../../../lib/utils";
 import { Browser } from "../../../components/shared/icons/Browser";
@@ -22,14 +23,16 @@ interface EventRowProps {
 }
 
 export function EventRow({ event, site, onClick }: EventRowProps) {
+  const t = useExtracted();
+  const { locale, hour12, formatRelative } = useDateTimeFormat();
   const eventProperties = parseEventProperties(event);
   const eventTime = DateTime.fromSQL(event.timestamp, { zone: "utc" })
-    .setLocale(userLocale)
+    .setLocale(locale)
     .setZone(getTimezone());
   const pagePath = buildEventPath(event);
   const pageUrl = `https://${event.hostname}${pagePath}`;
   const isPageview = event.type === "pageview";
-  const eventData = isPageview ? null : getMainData(event, eventProperties);
+  const eventData = isPageview ? null : getMainData(event, eventProperties, t);
   const userProfileId = event.identified_user_id || event.user_id;
   const displayName = getUserDisplayName({
     identified_user_id: event.identified_user_id || undefined,
@@ -49,7 +52,7 @@ export function EventRow({ event, site, onClick }: EventRowProps) {
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <span>{getEventTypeLabel(event.type)}</span>
+            <span>{getEventTypeLabel(event.type, t)}</span>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -60,7 +63,7 @@ export function EventRow({ event, site, onClick }: EventRowProps) {
             <span>{eventTime.toFormat(hour12 ? "MMM d, h:mm:ss a" : "dd MMM, HH:mm:ss")}</span>
           </TooltipTrigger>
           <TooltipContent>
-            <span>{eventTime.toRelative()}</span>
+            <span>{formatRelative(eventTime)}</span>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -96,7 +99,7 @@ export function EventRow({ event, site, onClick }: EventRowProps) {
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{event.browser || "Unknown browser"}</p>
+            <p>{event.browser || t("Unknown browser")}</p>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -106,7 +109,7 @@ export function EventRow({ event, site, onClick }: EventRowProps) {
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{event.operating_system || "Unknown OS"}</p>
+            <p>{event.operating_system || t("Unknown OS")}</p>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -116,7 +119,7 @@ export function EventRow({ event, site, onClick }: EventRowProps) {
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{event.device_type || "Unknown device"}</p>
+            <p>{event.device_type || t("Unknown device")}</p>
           </TooltipContent>
         </Tooltip>
       </div>

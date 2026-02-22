@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
+import { useExtracted } from "next-intl";
 import { ReactNode, useState } from "react";
 import { updateSiteConfig } from "../api/admin/endpoints/sites";
 import { Badge } from "./ui/badge";
@@ -25,6 +26,7 @@ interface TagEditorProps {
 }
 
 export function TagEditor({ siteId, currentTags, allTags, onTagsUpdated, trigger }: TagEditorProps) {
+  const t = useExtracted();
   const [open, setOpen] = useState(false);
   const [tags, setTags] = useState<string[]>(currentTags);
   const [newTagInput, setNewTagInput] = useState("");
@@ -85,15 +87,15 @@ export function TagEditor({ siteId, currentTags, allTags, onTagsUpdated, trigger
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Tags</DialogTitle>
-          <DialogDescription>Add tags to organize and filter your sites.</DialogDescription>
+          <DialogTitle>{t("Edit Tags")}</DialogTitle>
+          <DialogDescription>{t("Add tags to organize and filter your sites.")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {/* Current tags */}
           <div className="flex flex-wrap gap-2 min-h-[32px]">
             {tags.length === 0 ? (
-              <span className="text-sm text-neutral-500">No tags added yet</span>
+              <span className="text-sm text-neutral-500">{t("No tags added yet")}</span>
             ) : (
               tags.map(tag => (
                 <Badge key={tag} variant="secondary" className="gap-1">
@@ -112,7 +114,7 @@ export function TagEditor({ siteId, currentTags, allTags, onTagsUpdated, trigger
           {/* New tag input */}
           <div className="flex gap-2">
             <Input
-              placeholder="Type a new tag..."
+              placeholder={t("Type a new tag...")}
               value={newTagInput}
               onChange={e => setNewTagInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -123,14 +125,14 @@ export function TagEditor({ siteId, currentTags, allTags, onTagsUpdated, trigger
               onClick={() => handleAddTag(newTagInput)}
               disabled={!newTagInput.trim()}
             >
-              Add
+              {t("Add")}
             </Button>
           </div>
 
           {/* Suggestions from existing tags */}
           {suggestions.length > 0 && (
             <div className="space-y-2">
-              <span className="text-sm text-neutral-500">Existing tags:</span>
+              <span className="text-sm text-neutral-500">{t("Existing tags:")}</span>
               <div className="flex flex-wrap gap-2">
                 {suggestions.slice(0, 10).map(tag => (
                   <Badge
@@ -150,10 +152,10 @@ export function TagEditor({ siteId, currentTags, allTags, onTagsUpdated, trigger
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button onClick={handleSave} disabled={isSaving} variant="success">
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? t("Saving...") : t("Save")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useExtracted } from "next-intl";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { ChevronRight, Loader2, Search } from "lucide-react";
 import { Input } from "../../../../components/ui/input";
@@ -16,6 +17,7 @@ function TraitValueRow({
   value: string;
   userCount: number;
 }) {
+  const t = useExtracted();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -29,11 +31,11 @@ function TraitValueRow({
             className={`h-4 w-4 text-neutral-400 transition-transform ${expanded ? "rotate-90" : ""}`}
           />
           <span className="text-neutral-700 dark:text-neutral-300 truncate">
-            {value || <span className="italic text-neutral-400">empty</span>}
+            {value || <span className="italic text-neutral-400">{t("empty")}</span>}
           </span>
         </div>
         <span className="text-neutral-500 dark:text-neutral-400 text-xs whitespace-nowrap">
-          {userCount.toLocaleString()} {userCount === 1 ? "user" : "users"}
+          {userCount === 1 ? t("{count} user", { count: userCount.toLocaleString() }) : t("{count} users", { count: userCount.toLocaleString() })}
         </span>
       </button>
       {expanded && <TraitValueUsersList traitKey={traitKey} value={value} userCount={userCount} />}
@@ -42,6 +44,7 @@ function TraitValueRow({
 }
 
 export function TraitValuesList({ traitKey }: { traitKey: string }) {
+  const t = useExtracted();
   const [searchTerm, setSearchTerm] = useState("");
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useGetUserTraitValues(traitKey);
@@ -111,7 +114,7 @@ export function TraitValuesList({ traitKey }: { traitKey: string }) {
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400" />
             <Input
-              placeholder="Search values..."
+              placeholder={t("Search values...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-7 pl-7 text-xs"
@@ -132,7 +135,7 @@ export function TraitValuesList({ traitKey }: { traitKey: string }) {
           {isFetchingNextPage && (
             <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400 text-xs">
               <Loader2 className="h-3 w-3 animate-spin" />
-              Loading more...
+              {t("Loading more...")}
             </div>
           )}
         </div>

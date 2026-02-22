@@ -5,9 +5,11 @@ import { Clock } from "lucide-react";
 import { DateTime } from "luxon";
 import Link from "next/link";
 
+import { useExtracted } from "next-intl";
 import { SessionEvent } from "../../../api/analytics/endpoints";
 import { getEventDisplayName, PROPS_TO_HIDE } from "../../../lib/events";
-import { formatDuration, hour12 } from "../../../lib/dateTimeUtils";
+import { useDateTimeFormat } from "../../../hooks/useDateTimeFormat";
+import { formatDuration } from "../../../lib/dateTimeUtils";
 import { cn } from "../../../lib/utils";
 import { EventTypeIcon } from "../../EventIcons";
 
@@ -53,7 +55,8 @@ function renderDetails(
     isFormSubmit: boolean;
     isInputChange: boolean;
     duration: string | null;
-  }
+  },
+  t: (key: string) => string
 ) {
   const {
     isPageview,
@@ -113,7 +116,7 @@ function renderDetails(
           {item.props.stack && (
             <div>
               <p className="mt-2 mb-1 text-neutral-600 dark:text-neutral-300 font-light">
-                Stack Trace:
+                {t("Stack Trace:")}
               </p>
               <pre className="text-xs text-neutral-900 dark:text-neutral-100 bg-neutral-200 dark:bg-neutral-800 p-2 rounded overflow-x-auto whitespace-pre-wrap wrap-break-word">
                 {item.props.stack}
@@ -166,6 +169,8 @@ export function PageviewItem({
   showHostname = true,
   highlightedEventTimestamp,
 }: PageviewItemProps) {
+  const t = useExtracted();
+  const { hour12 } = useDateTimeFormat();
   const isPageview = item.type === "pageview";
   const isOutbound = item.type === "outbound";
   const isEvent = item.type === "custom_event";
@@ -260,7 +265,7 @@ export function PageviewItem({
                 </div>
               </Link>
             ) : (
-              <div className="text-sm truncate">{getEventDisplayName(item)}</div>
+              <div className="text-sm truncate">{getEventDisplayName(item, t)}</div>
             )}
           </div>
 
@@ -278,7 +283,7 @@ export function PageviewItem({
           isFormSubmit,
           isInputChange,
           duration,
-        })}
+        }, t)}
       </div>
     </div>
   );

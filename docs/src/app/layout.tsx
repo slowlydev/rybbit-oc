@@ -1,9 +1,9 @@
 import "@/app/global.css";
-import { RootProvider } from "fumadocs-ui/provider/next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,9 +72,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default async function Layout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <Script src="https://demo.rybbit.com/api/script.js" data-site-id="21" />
       <Script
         src="https://demo.rybbit.com/api/script.js?ns=demo"
@@ -86,14 +87,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </Script>
       <Script src="https://r.wdfl.co/rw.js" data-rewardful="fc3780" strategy="afterInteractive" />
       <body className={`flex flex-col min-h-screen ${inter.variable} font-sans`}>
-        <RootProvider
-          theme={{
-            enabled: true,
-            enableSystem: true,
-          }}
-        >
-          {children}
-        </RootProvider>
+        {children}
       </body>
     </html>
   );

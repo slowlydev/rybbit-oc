@@ -6,6 +6,7 @@ import { toast } from "@/components/ui/sonner";
 import { authClient } from "@/lib/auth";
 import { BACKEND_URL } from "@/lib/const";
 import { cn } from "@/lib/utils";
+import { useExtracted } from "next-intl";
 import { useEffect, useState } from "react";
 import { trackAdEvent } from "../../../lib/trackAdEvent";
 import {
@@ -22,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 
 export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
+  const t = useExtracted();
   const [siteId] = useQueryState("siteId");
   const router = useRouter();
 
@@ -53,20 +55,20 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
 
     // Check if user is logged in directly
     if (!isLoggedIn) {
-      toast.error("Please log in to subscribe.");
+      toast.error(t("Please log in to subscribe."));
       return;
     }
 
     // Check if user has an active organization
     if (!activeOrg) {
-      toast.error("Please select an organization to subscribe.");
+      toast.error(t("Please select an organization to subscribe."));
       return;
     }
 
     const selectedTierPrice = findPriceForTier(eventLimit, isAnnual ? "year" : "month", planType);
 
     if (!selectedTierPrice) {
-      toast.error("Selected pricing plan not found. Please adjust the slider.");
+      toast.error(t("Selected pricing plan not found. Please adjust the slider."));
       return;
     }
 
@@ -98,27 +100,27 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
       trackAdEvent("checkout", { tier: selectedTierPrice.name });
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create checkout session.");
+        throw new Error(data.error || t("Failed to create checkout session."));
       }
 
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl; // Redirect to Stripe checkout
       } else {
-        throw new Error("Checkout URL not received.");
+        throw new Error(t("Checkout URL not received."));
       }
     } catch (error: any) {
-      toast.error(`Subscription failed: ${error.message}`);
+      toast.error(t("Subscription failed: {message}", { message: error.message }));
       setIsLoading(false); // Stop loading on error
     }
   }
 
   async function handleTestSubscribe(): Promise<void> {
     if (!isLoggedIn) {
-      toast.error("Please log in to subscribe.");
+      toast.error(t("Please log in to subscribe."));
       return;
     }
     if (!activeOrg) {
-      toast.error("Please select an organization to subscribe.");
+      toast.error(t("Please select an organization to subscribe."));
       return;
     }
 
@@ -146,16 +148,16 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create checkout session.");
+        throw new Error(data.error || t("Failed to create checkout session."));
       }
 
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
-        throw new Error("Checkout URL not received.");
+        throw new Error(t("Checkout URL not received."));
       }
     } catch (error: any) {
-      toast.error(`Subscription failed: ${error.message}`);
+      toast.error(t("Subscription failed: {message}", { message: error.message }));
       setIsLoading(false);
     }
   }
@@ -181,7 +183,7 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
       <div className="max-w-xl mx-auto mb-8">
         <div className="flex justify-between mb-6 items-center">
           <div>
-            <h3 className="font-semibold mb-2">Monthly pageviews</h3>
+            <h3 className="font-semibold mb-2">{t("Monthly pageviews")}</h3>
             <div className="text-3xl font-bold text-emerald-400">
               {typeof eventLimit === "number" ? eventLimit.toLocaleString() : eventLimit}
             </div>
@@ -199,7 +201,7 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
                       : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
                   )}
                 >
-                  Monthly
+                  {t("Monthly")}
                 </button>
                 <button
                   onClick={() => setIsAnnual(true)}
@@ -210,11 +212,11 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
                       : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
                   )}
                 >
-                  Annual
+                  {t("Annual")}
                 </button>
               </div>
               <span className="absolute -top-3 -right-12 text-xs text-white bg-emerald-500 border border-emerald-500 rounded-full px-2 py-0.5 whitespace-nowrap">
-                4 months free
+                {t("4 months free")}
               </span>
             </div>
           </div>
@@ -249,13 +251,13 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
         <div className={cn("h-full", !isBasicAvailable && "opacity-60")}>
           <PricingCard
             title="Basic"
-            description="For personal projects and small sites"
+            description={t("For personal projects and small sites")}
             monthlyPrice={basicMonthlyPrice}
             annualPrice={basicAnnualPrice}
             isAnnual={isAnnual}
             isCustomTier={!isBasicAvailable}
             customPriceLabel="-"
-            buttonText={!isBasicAvailable ? "Up to 250k only" : isLoading ? "Processing..." : "Get started"}
+            buttonText={!isBasicAvailable ? t("Up to 250k only") : isLoading ? t("Processing...") : t("Get started")}
             features={BASIC_FEATURES}
             onClick={() => handleSubscribe("basic")}
             disabled={isLoading || !isBasicAvailable}
@@ -263,24 +265,24 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
         </div>
         <PricingCard
           title="Standard"
-          description="Everything you need to get started as a small business"
+          description={t("Everything you need to get started as a small business")}
           monthlyPrice={standardMonthlyPrice}
           annualPrice={standardAnnualPrice}
           isAnnual={isAnnual}
           isCustomTier={isCustomTier}
-          buttonText={isLoading ? "Processing..." : isCustomTier ? "Contact us" : "Get started"}
+          buttonText={isLoading ? t("Processing...") : isCustomTier ? t("Contact us") : t("Get started")}
           features={STANDARD_FEATURES}
           onClick={() => handleSubscribe("standard")}
           disabled={isLoading}
         />
         <PricingCard
           title="Pro"
-          description="Advanced features for professional teams"
+          description={t("Advanced features for professional teams")}
           isCustomTier={isCustomTier}
           monthlyPrice={proMonthlyPrice}
           annualPrice={proAnnualPrice}
           isAnnual={isAnnual}
-          buttonText={isLoading ? "Processing..." : isCustomTier ? "Contact us" : "Get started"}
+          buttonText={isLoading ? t("Processing...") : isCustomTier ? t("Contact us") : t("Get started")}
           features={PRO_FEATURES}
           recommended={true}
           onClick={() => handleSubscribe("pro")}
@@ -290,9 +292,9 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
         {showTestPlan && (
           <PricingCard
             title="Test"
-            description="$1 test subscription for development"
+            description={t("$1 test subscription for development")}
             isCustomTier={isCustomTier}
-            buttonText={isLoading ? "Processing..." : "Subscribe ($1)"}
+            buttonText={isLoading ? t("Processing...") : t("Subscribe ($1)")}
             features={["Test plan"]}
             onClick={() => handleTestSubscribe()}
             disabled={isLoading}
@@ -301,13 +303,13 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
 
         <PricingCard
           title="Enterprise"
-          description="Advanced features for enterprise teams"
+          description={t("Advanced features for enterprise teams")}
           features={ENTERPRISE_FEATURES}
           isCustomTier={true}
           customButton={
             <a href="https://www.rybbit.com/contact" className="w-full block">
               <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-5 py-3 rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 cursor-pointer">
-                Contact us
+                {t("Contact us")}
               </button>
             </a>
           }

@@ -5,13 +5,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useStripeSubscription } from "../../../../lib/subscription/useStripeSubscription";
 import { NoOrganization } from "../../../../components/NoOrganization";
 import { useSetPageTitle } from "../../../../hooks/useSetPageTitle";
+import { useExtracted } from "next-intl";
 import { authClient } from "@/lib/auth";
 import { Infinity as InfinityIcon } from "lucide-react";
 
 export default function OrganizationSubscriptionPage() {
   useSetPageTitle("Organization Subscription");
-  const { data: activeSubscription, isLoading: isLoadingSubscription } =
-    useStripeSubscription();
+  const t = useExtracted();
+  const { data: activeSubscription, isLoading: isLoadingSubscription } = useStripeSubscription();
 
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
 
@@ -20,7 +21,7 @@ export default function OrganizationSubscriptionPage() {
   const renderPlanComponent = () => {
     if (!activeOrg && !isPending) {
       return (
-        <NoOrganization message="You need to select an organization to manage your subscription." />
+        <NoOrganization message={t("You need to select an organization to manage your subscription.")} />
       );
     }
 

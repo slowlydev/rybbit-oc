@@ -11,6 +11,7 @@ import { MINUTES_IN_24_HOURS } from "@/lib/const";
 import { truncateString } from "@/lib/utils";
 import { formatShortDuration } from "@/lib/dateTimeUtils";
 import { ExternalLink } from "lucide-react";
+import { useExtracted } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { PageSparklineChart } from "./PageSparklineChart";
@@ -24,6 +25,7 @@ type PageListItemProps = {
 };
 
 export function PageListItem({ pageData, isLoading = false }: PageListItemProps) {
+  const t = useExtracted();
   const [isHovering, setIsHovering] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
   const { data: siteMetadata } = useGetSite();
@@ -135,12 +137,12 @@ export function PageListItem({ pageData, isLoading = false }: PageListItemProps)
             <div className="text-right min-w-[120px]">
               <div>
                 <span className="text-base font-semibold">{pageData.count.toLocaleString()}</span>
-                <span className="text-xs text-foreground/70"> sessions</span>
+                <span className="text-xs text-foreground/70"> {t("sessions")}</span>
               </div>
               {pageData.time_on_page_seconds !== undefined && (
                 <div>
                   <span className="text-base font-semibold">{formatShortDuration(pageData.time_on_page_seconds)} </span>
-                  <span className="text-xs text-foreground/70">avg time</span>
+                  <span className="text-xs text-foreground/70">{t("avg time")}</span>
                 </div>
               )}
             </div>
