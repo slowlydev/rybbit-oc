@@ -1,139 +1,85 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/public/rybbit/horizontal_white.svg">
-    <source media="(prefers-color-scheme: light)" srcset="docs/public/rybbit/horizontal_black.svg">
-    <img src="docs/public/rybbit/horizontal_black.svg" height="70" alt="Rybbit">
-  </picture>
-    <p align="center">Open Source Web & Product Analytics</p>
+# Rybbit — Open Cloud
 
-<p align="center">
-    <a href="https://rybbit.com" target="_blank">Website</a> |
-    <a href="https://demo.rybbit.com/1" target="_blank">Demo</a> |
-    <a href="https://rybbit.com/docs" target="_blank">Documentation</a> |
-    <a href="https://discord.gg/DEhGb4hYBj" target="_blank">Discord</a> |
-    <a href="https://github.com/rybbit-io/rybbit?tab=AGPL-3.0-1-ov-file" target="_blank">License (AGPL-3)</a> |
-    <a href="https://github.com/rybbit-io/rybbit/blob/master/CONTRIBUTE.md" target="_blank">Contribute</a>
-</p>
+A patched fork of [Rybbit](https://github.com/rybbit-io/rybbit) that unlocks all analytics features for self-hosted deployments and removes all SaaS service dependencies.
 
-<a href="https://rybbit.com/" target="_blank">Rybbit</a> is the modern open source and privacy friendly alternative to Google Analytics. It takes only a couple minutes to setup and is super intuitive to use.
+## Images & Deployment
 
-<p align="center">
-  <a href="https://www.producthunt.com/products/rybbit?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_source=badge-rybbit" target="_blank">
-    <img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=1028220&theme=standard&period=daily" alt="Rybbit - Open Source Google Analytics Replacement | Product Hunt" width="250" height="54" />
-  </a>
-</p>
+See packages on github.
 
-<p align="center">
-  <strong><a href="https://demo.rybbit.com/81">🔍 View Live Demo</a></strong> - See Rybbit running on a real-life production site.
-</p>
+```
+ghcr.io/slowlydev/rybbit-client:latest
+ghcr.io/slowlydev/rybbit-backend:latest
+```
 
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 25 20 PM" src="https://github.com/user-attachments/assets/7988ba04-64ee-4410-9972-847d278efa2f" />
+Theres no gurantee these images behave the same as upstream, but they should be close.
 
-<hr>
+Theres also a HELM Chart thats beeing built to deploy this Open Cloud version with all its features to Kubernetes clusters.
 
-## 🚀 Getting Started
+## What's different
 
-There are two ways to start using Rybbit:
+Upstream Rybbit gates several features behind a paid cloud subscription. This fork removes those gates so every feature works out of the box on your own infrastructure.
 
-| Option                                                   | Description                                                   |
-| -------------------------------------------------------- | ------------------------------------------------------------- |
-| **[Hosted Service](https://rybbit.com)**                 | Free tier available - the fastest way to get started          |
-| **[Self-Hosting](https://rybbit.com/docs/self-hosting)** | Deploy and manage Rybbit on your own VPS for complete control |
+| Feature                   | Upstream (self-hosted) | This fork                     |
+| ------------------------- | ---------------------- | ----------------------------- |
+| Web Vitals                | Hidden                 | Enabled                       |
+| Pages tab                 | Hidden                 | Enabled                       |
+| Performance tab           | Hidden                 | Enabled                       |
+| Network filters           | Hidden                 | Enabled                       |
+| Session Replay storage    | Inline ClickHouse only | S3 if configured, else inline |
+| Uptime monitoring         | Local only             | Global regions                |
+| Site/member limits        | Unlimited              | Unlimited                     |
+| Stripe billing            | N/A                    | Removed                       |
+| Resend email              | N/A                    | Removed (no-ops)              |
+| Twilio SMS                | N/A                    | Removed                       |
+| AppSumo                   | N/A                    | Removed                       |
+| Turnstile CAPTCHA         | N/A                    | Removed                       |
+| Google/GitHub OAuth login | N/A                    | Removed                       |
 
-📚 Explore our [documentation](https://rybbit.com/docs) to learn more about installation, configuration, and usage.
+## Features
 
-<hr>
-
-## ✨ Key Features
-
-- All key web analytics metrics including sessions, unique users, pageviews, bounce rate, session duration
+- All standard web analytics: sessions, unique users, pageviews, bounce rate, session duration
 - Session replays
-- No cookies & privacy friendly
-- Customizable goals. retention, user journeys, and funnels dashboards
+- Web Vitals (LCP, FID, CLS, etc.)
+- No cookies, privacy friendly
+- Goals, retention, user journeys, and funnels
 - Advanced filtering across 15+ dimensions
 - Custom events with JSON properties
-- 3 level location tracking (country -> region -> city) + advanced map visualizations
-- Real time dashboard
-- Support for organizations and unlimited number of sites
+- 3-level location tracking (country → region → city) + map visualizations
+- Real-time dashboard
+- Uptime monitoring with global check regions
+- Organizations and unlimited sites
+- Admin panel
 
-<hr>
+## Authentication
 
-## 📊 Comparison
+Email + password only. OTP email login is unavailable (Resend removed). Social OAuth (Google, GitHub) is unavailable.
 
-See how Rybbit compares to other analytics solutions:
+## Optional integrations
 
-| Feature                           | Rybbit | GA4        | Plausible  | Cloudflare |
-| --------------------------------- | ------ | ---------- | ---------- | ---------- |
-| **Open Source**                   | ✅     | ❌         | ✅         | ❌         |
-| **Self-Hosting**                  | ✅     | ❌         | ✅\*       | ❌         |
-| **Cookieless & Privacy friendly** | ✅     | ❌         | ✅         | ✅         |
-| **Advanced Maps**                 | ✅     | ❌         | ❌         | ❌         |
-| **Advanced Filters**              | ✅     | ⚠️ Limited | ⚠️ Limited | ❌         |
-| **Web Vitals**                    | ✅\*\* | ❌         | ❌         | ❌         |
-| **Session Details**               | ✅     | ❌         | ❌         | ❌         |
-| **User Profiles**                 | ✅     | ❌         | ❌         | ❌         |
-| **Session Replays**               | ✅     | ❌         | ❌         | ❌         |
-| **Funnels**                       | ✅     | ✅         | ✅\*\*     | ❌         |
-| **User Journeys**                 | ✅     | ✅         | ❌         | ❌         |
-| **Retention Analysis**            | ✅     | ✅         | ❌         | ❌         |
-| **Goals & Events**                | ✅     | ✅         | ✅         | ❌         |
-| **Real-time Dashboard**           | ✅     | ✅         | ✅         | ✅         |
-| **Custom Events (JSON)**          | ✅     | ✅         | ⚠️ Limited | ❌         |
-| **Error Tracking**                | ✅     | ❌         | ❌         | ❌         |
-| **Public Dashboards**             | ✅     | ❌         | ✅         | ❌         |
-| **Organizations**                 | ✅     | ✅         | ✅         | ✅         |
-| **Free Tier**                     | ✅     | ✅         | ❌         | ✅         |
-| **Frog 🐸**                       | ✅     | ❌         | ❌         | ❌         |
+These features work if you supply credentials, and degrade gracefully without them.
 
-\* Plausible's Community Edition has very limited features compared to their cloud version
+| Env var                                                             | Feature                                                            |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `S3_ENDPOINT` + `S3_ACCESS_KEY_ID` + `S3_SECRET_ACCESS_KEY`         | S3-compatible session replay storage (MinIO, AWS S3, Garage, etc.) |
+| `S3_BUCKET_NAME`                                                    | Bucket name (default: `rybbit`)                                    |
+| `S3_REGION`                                                         | Region hint (default: `auto`)                                      |
+| `IPAPI_KEY`                                                         | Enhanced geolocation: VPN detection, company, ASN data             |
+| `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` + `GOOGLE_REDIRECT_URI` | Google Search Console integration                                  |
+| `MAPBOX_TOKEN`                                                      | Map visualizations                                                 |
 
-\*\* Only available on paid tiers
+## Removed env vars
 
-<hr>
+These are no longer used and should not be set:
 
-## 📊 Dashboard Preview
+`CLOUD`, `NEXT_PUBLIC_CLOUD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`, `APPSUMO_CLIENT_ID`, `APPSUMO_CLIENT_SECRET`, `TURNSTILE_SECRET_KEY`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
 
-### Map
+## Known limitations
 
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 27 12 PM" src="https://github.com/user-attachments/assets/52643121-4f4d-4bbe-9910-2516226bf421" />
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 30 39 PM" src="https://github.com/user-attachments/assets/153585d5-7ff6-43bb-8bf6-fecfbe240ef8" />
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 30 00 PM" src="https://github.com/user-attachments/assets/3873bc6b-9f79-4e9a-b083-0676a7d52b1d" />
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 30 23 PM" src="https://github.com/user-attachments/assets/04ceca1d-a4af-4f52-856c-f054deeb1023" />
+- **No OTP email auth** — password-based login only
+- **Network filters require IPAPI** — filters appear in the UI but show no data without an `IPAPI_KEY`
+- **GSC requires Google credentials** — the Connect button will fail without `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`
+- **No event ingestion limits** — all rate limits are removed; protect your ClickHouse storage capacity externally if needed
 
-## Session Replay
+## License
 
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 29 18 PM" src="https://github.com/user-attachments/assets/6906aef0-8ce0-41f9-9bbb-b175ef158df3" />
-
-### Journeys
-
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 34 13 PM" src="https://github.com/user-attachments/assets/4cd465df-8f91-43bf-a121-647ae2c9e8e1" />
-
-### Funnels
-
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 34 05 PM" src="https://github.com/user-attachments/assets/e3b083c2-4f18-4c8c-bc97-9491a6402439" />
-
-### Goals
-
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 28 26 PM" src="https://github.com/user-attachments/assets/d34c5c00-1dec-4864-9115-bfa9e9811d60" />
-
-### Users
-
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 28 54 PM" src="https://github.com/user-attachments/assets/f10c1bba-6658-4b6a-94a6-dcba351e4eea" />
-
-### Errors
-
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 40 56 PM" src="https://github.com/user-attachments/assets/efd60f04-c203-45ea-981d-14f34ec2b1e1" />
-
-### Retention
-
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 34 20 PM" src="https://github.com/user-attachments/assets/c56a31ac-7af5-419b-82a5-d3aedb68debc" />
-
-### Web Vitals (Cloud only)
-
-<img width="1299" height="797" alt="Screenshot 2025-10-16 at 7 28 01 PM" src="https://github.com/user-attachments/assets/d88b8be0-cd30-4dd6-a0e5-5446c890c0f9" />
-
-<hr>
-
-## ⭐ Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=rybbit-io/rybbit&type=Date)](https://www.star-history.com/#rybbit-io/rybbit&Date)
+[AGPL-3.0](https://github.com/rybbit-io/rybbit?tab=AGPL-3.0-1-ov-file) — same as upstream.
