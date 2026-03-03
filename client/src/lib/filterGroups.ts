@@ -42,18 +42,10 @@ export const GOALS_PAGE_FILTERS: FilterParameter[] = [...BASE_FILTERS];
 export const FUNNEL_PAGE_FILTERS: FilterParameter[] = [...BASE_FILTERS];
 
 export const USER_PAGE_FILTERS: FilterParameter[] = [
-  "hostname",
-  "browser",
-  "browser_version",
-  "operating_system",
-  "operating_system_version",
-  "language",
-  "country",
-  "region",
-  "city",
-  "device_type",
-  "referrer",
-  "user_id",
+  ...BASE_FILTERS,
+  "pathname",
+  "entry_page",
+  "exit_page",
 ];
 
 export const JOURNEY_PAGE_FILTERS: FilterParameter[] = [

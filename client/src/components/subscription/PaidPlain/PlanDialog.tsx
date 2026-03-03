@@ -6,6 +6,7 @@ import { getStripePrices, STRIPE_TIERS } from "@/lib/stripe";
 import { usePreviewSubscriptionUpdate, useUpdateSubscription } from "@/lib/subscription/useSubscriptionMutations";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { CheckoutModal } from "../CheckoutModal";
 import { PlanChangePreviewDialog } from "./PlanChangePreviewDialog";
 
 interface PlanDialogProps {
@@ -20,6 +21,7 @@ export function PlanDialog({ open, onOpenChange, currentPlanName, hasActiveSubsc
   const [showProrationDialog, setShowProrationDialog] = useState(false);
   const [pendingPriceId, setPendingPriceId] = useState<string | null>(null);
   const [pendingPlanName, setPendingPlanName] = useState<string | null>(null);
+  const [checkoutClientSecret, setCheckoutClientSecret] = useState<string | null>(null);
   const stripePrices = getStripePrices();
   const { data: activeOrg } = authClient.useActiveOrganization();
   const previewMutation = usePreviewSubscriptionUpdate();
@@ -52,8 +54,7 @@ export function PlanDialog({ open, onOpenChange, currentPlanName, hasActiveSubsc
         setShowProrationDialog(true);
       } else {
         // For new subscriptions, create a checkout session
-        const successUrl = `${baseUrl}/settings/organization/subscription?session_id={CHECKOUT_SESSION_ID}`;
-        const cancelUrl = `${baseUrl}/settings/organization/subscription`;
+        const returnUrl = `${baseUrl}/settings/organization/subscription?session_id={CHECKOUT_SESSION_ID}`;
 
         const response = await fetch(`${BACKEND_URL}/stripe/create-checkout-session`, {
           method: "POST",
@@ -63,8 +64,7 @@ export function PlanDialog({ open, onOpenChange, currentPlanName, hasActiveSubsc
           credentials: "include",
           body: JSON.stringify({
             priceId,
-            successUrl,
-            cancelUrl,
+            returnUrl,
             organizationId: activeOrg.id,
             referral: window.Rewardful?.referral || undefined,
           }),
@@ -76,10 +76,11 @@ export function PlanDialog({ open, onOpenChange, currentPlanName, hasActiveSubsc
           throw new Error(data.error || "Failed to create checkout session.");
         }
 
-        if (data.checkoutUrl) {
-          window.location.href = data.checkoutUrl;
+        if (data.clientSecret) {
+          setCheckoutClientSecret(data.clientSecret);
+          onOpenChange(false); // close plan selection dialog
         } else {
-          throw new Error("Checkout URL not received.");
+          throw new Error("Checkout session not received.");
         }
       }
     } catch (error: any) {
@@ -243,6 +244,11 @@ export function PlanDialog({ open, onOpenChange, currentPlanName, hasActiveSubsc
         onConfirm={handlePreviewConfirm}
         onCancel={handlePreviewCancel}
         isUpdating={updateMutation.isPending}
+      />
+      <CheckoutModal
+        clientSecret={checkoutClientSecret}
+        open={!!checkoutClientSecret}
+        onOpenChange={(open) => { if (!open) setCheckoutClientSecret(null); }}
       />
     </>
   );

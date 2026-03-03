@@ -71,7 +71,11 @@ export function PageListItem({ pageData, isLoading = false }: PageListItemProps)
   const isLoadingTrafficData = isPastMinutesMode ? isLoadingPastMinutes : isLoadingRegular;
 
   // External URL for the page
-  const pageUrl = siteMetadata?.domain ? `https://${siteMetadata.domain}${pageData.value}` : "";
+  const pageUrl = pageData.hostname
+    ? `https://${pageData.hostname}${pageData.value}`
+    : siteMetadata?.domain
+      ? `https://${siteMetadata.domain}${pageData.value}`
+      : "";
 
   // Fetch page metadata using TanStack Query
   const { data: metadata, isLoading: isLoadingMetadata, isError: isMetadataError } = usePageMetadata(pageUrl);

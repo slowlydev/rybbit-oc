@@ -66,9 +66,9 @@ export function HeroSection({
               href="https://app.rybbit.io/signup"
               eventName="signup"
               eventProps={{ location: "hero", button_text: "get started" }}
-              className="w-full whitespace-nowrap sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 cursor-pointer"
+              className="w-full whitespace-nowrap sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:ring-opacity-50 cursor-pointer"
             >
-              {t("Get started")}
+              {t("Start for $0")}
             </TrackedButton>
             <TrackedButton
               href="https://demo.rybbit.com/81"
@@ -81,10 +81,10 @@ export function HeroSection({
               {t("Live demo")}
             </TrackedButton>
           </div>
-          <p className="text-neutral-500 dark:text-neutral-400 text-xs md:text-sm flex items-center justify-center gap-2 mt-6">
+          {/* <p className="text-neutral-500 dark:text-neutral-400 text-xs md:text-sm flex items-center justify-center gap-2 mt-6">
             <CircleCheckIcon size={16} className="text-neutral-500 dark:text-neutral-400" />
-            {t("30 day money-back guarantee. No credit card required.")}
-          </p>
+            {t("7-day free trial.")}
+          </p> */}
         </div>
         <div className="relative w-full max-w-[1300px] mb-10">
           {/* Background gradients - overlapping circles for organic feel */}

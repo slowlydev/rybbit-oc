@@ -86,7 +86,7 @@ export function ComparisonPage({ competitorName, sections, comparisonContent }: 
           </div>
           <p className="text-neutral-500 dark:text-neutral-400 text-xs md:text-sm flex items-center justify-center gap-2 mt-6">
             <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
-            {t("30 day money-back guarantee. No credit card required.")}
+            {t("7-day free trial")}
           </p>
         </div>
       </div>

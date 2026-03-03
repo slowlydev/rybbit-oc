@@ -8,14 +8,19 @@ import { updateSiteConfig } from "../../../../api/admin/endpoints";
 import { useGetSite } from "../../../../api/admin/hooks/useSites";
 import { Alert, AlertDescription, AlertTitle } from "../../../../components/ui/alert";
 import { Button } from "../../../../components/ui/button";
+import { useStripeSubscription } from "../../../../lib/subscription/useStripeSubscription";
+import { IS_CLOUD } from "../../../../lib/const";
 
 export function EnableSessionReplay() {
   const t = useExtracted();
   const params = useParams();
   const siteId = Number(params.site);
   const { data: siteMetadata, isLoading, refetch } = useGetSite(siteId);
+  const { data: subscription } = useStripeSubscription();
 
-  if (isLoading || siteMetadata?.sessionReplay) return null;
+  const canEnableReplay = !IS_CLOUD || (!!subscription?.planName.includes("pro") && !(subscription?.isTrial && (subscription?.eventLimit ?? 0) >= 500_000));
+
+  if (isLoading || siteMetadata?.sessionReplay || !canEnableReplay) return null;
 
   return (
     <Alert className="p-4 bg-neutral-50/50 border-amber-200/50 dark:bg-neutral-800/25 dark:border-amber-600/80">

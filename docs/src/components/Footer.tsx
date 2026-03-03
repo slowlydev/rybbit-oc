@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useExtracted } from "next-intl";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export function Footer() {
   const t = useExtracted();
@@ -234,7 +235,8 @@ export function Footer() {
         <div className="pt-8 border-t border-neutral-200 dark:border-neutral-800">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-neutral-400">{t("© {year} Rybbit. All rights reserved.", { year: String(new Date().getFullYear()) })}</div>
-            <div className="text-sm text-neutral-400 space-x-4">
+            <div className="text-sm text-neutral-400 space-x-4 flex items-center">
+              <ThemeSwitcher />
               <LanguageSwitcher />
               {t("Made with ❤️ by frogs")}{" "}
               <a href="https://tomato.gg" target="_blank" title="Tomato.gg">

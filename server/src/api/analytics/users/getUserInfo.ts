@@ -74,6 +74,7 @@ export async function getUserInfo(
             argMax(screen_width, timestamp) AS screen_width,
             argMax(screen_height, timestamp) AS screen_height,
             argMin(referrer, timestamp) AS referrer,
+            argMin(channel, timestamp) AS channel,
             MAX(timestamp) AS session_end,
             MIN(timestamp) AS session_start,
             dateDiff('second', MIN(timestamp), MAX(timestamp)) AS session_duration,

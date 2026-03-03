@@ -1,6 +1,5 @@
 import { authClient } from "@/lib/auth";
 import { AlertTriangle, Shield } from "lucide-react";
-import { DateTime } from "luxon";
 import { useExtracted } from "next-intl";
 import { DEFAULT_EVENT_LIMIT } from "../../lib/subscription/constants";
 import { useStripeSubscription } from "../../lib/subscription/useStripeSubscription";
@@ -16,9 +15,6 @@ export function OverridePlan() {
   const { data: activeOrg } = authClient.useActiveOrganization();
 
   const organizationId = activeOrg?.id;
-
-  const endDate = DateTime.now().toISODate();
-  const startDate = DateTime.now().minus({ days: 30 }).toISODate();
 
   if (!subscription) return null;
 
@@ -89,7 +85,7 @@ export function OverridePlan() {
               </div>
             </div>
 
-            {organizationId && <UsageChart organizationId={organizationId} startDate={startDate} endDate={endDate} />}
+            {organizationId && <UsageChart organizationId={organizationId} />}
           </div>
         </CardContent>
       </Card>

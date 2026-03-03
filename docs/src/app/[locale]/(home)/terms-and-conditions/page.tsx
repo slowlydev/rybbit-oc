@@ -83,14 +83,6 @@ export default function TermsAndConditions() {
           constitutes acceptance of the new pricing.
         </p>
 
-        <h3 className="text-xl font-semibold mt-6 mb-3">Refund Policy</h3>
-        <p>
-          We offer a 60-day money-back guarantee for new paid subscriptions. Refund requests must be submitted within 60
-          days of your initial payment. After this period, payments are non-refundable. We do not provide prorated
-          refunds for mid-cycle cancellations, but you retain access to the service through the end of your paid billing
-          period.
-        </p>
-
         <h3 className="text-xl font-semibold mt-6 mb-3">Usage Quotas and Overages</h3>
         <p>
           Each plan includes specific usage limits. If you exceed your plan&apos;s page view limit, you may be required

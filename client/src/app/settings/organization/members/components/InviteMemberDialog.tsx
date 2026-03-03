@@ -24,8 +24,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth";
-import { BASIC_TEAM_LIMIT, IS_CLOUD, STANDARD_TEAM_LIMIT } from "@/lib/const";
-import { SubscriptionData, useStripeSubscription } from "@/lib/subscription/useStripeSubscription";
+import { IS_CLOUD } from "@/lib/const";
+import { useStripeSubscription } from "@/lib/subscription/useStripeSubscription";
 
 import { SiteAccessMultiSelect } from "./SiteAccessMultiSelect";
 
@@ -35,30 +35,17 @@ interface InviteMemberDialogProps {
   memberCount: number;
 }
 
-const getMemberLimit = (subscription: SubscriptionData | undefined) => {
-  if (subscription?.status !== "active") return 1;
-  if (subscription?.planName.includes("pro")) return Infinity;
-  if (subscription?.planName.includes("standard")) return STANDARD_TEAM_LIMIT;
-  if (subscription?.planName.includes("basic")) return BASIC_TEAM_LIMIT;
-  if (subscription?.planName === "appsumo-1") return 1;
-  if (subscription?.planName === "appsumo-2") return 3;
-  if (subscription?.planName === "appsumo-3") return 10;
-  if (subscription?.planName === "appsumo-4") return 25;
-  if (subscription?.planName === "appsumo-5") return 50;
-  if (subscription?.planName === "appsumo-6") return Infinity;
-  return 1;
-};
-
 export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: InviteMemberDialogProps) {
   const { data: subscription } = useStripeSubscription();
   const queryClient = useQueryClient();
   const t = useExtracted();
 
+  const memberLimit = subscription?.memberLimit ?? null;
   const isOverMemberLimit = useMemo(() => {
     if (!IS_CLOUD) return false;
-    const limit = getMemberLimit(subscription);
-    return memberCount >= limit;
-  }, [subscription, memberCount]);
+    if (memberLimit === null) return false;
+    return memberCount >= memberLimit;
+  }, [memberLimit, memberCount]);
 
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "member" | "owner">("member");
@@ -134,7 +121,7 @@ export function InviteMemberDialog({ organizationId, onSuccess, memberCount }: I
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          {t("You have reached the limit of {limit} members. Upgrade to add more members", { limit: String(getMemberLimit(subscription)) })}
+          {t("You have reached the limit of {limit} members. Upgrade to add more members", { limit: String(memberLimit) })}
         </TooltipContent>
       </Tooltip>
     );

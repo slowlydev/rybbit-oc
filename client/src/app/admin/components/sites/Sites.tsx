@@ -108,7 +108,7 @@ export function Sites() {
         cell: ({ row }) => {
           const subscription = row.original.subscription;
           const statusColor =
-            subscription.status === "active"
+            subscription.status === "active" || subscription.status === "trialing"
               ? "default"
               : subscription.status === "canceled"
                 ? "destructive"

@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, AppWindow, Plus } from "lucide-react";
-import { DateTime } from "luxon";
 import { useExtracted } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,48 +21,10 @@ import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import { authClient } from "../../lib/auth";
-import { BASIC_SITE_LIMIT, FREE_SITE_LIMIT, IS_CLOUD, STANDARD_SITE_LIMIT } from "../../lib/const";
+import { IS_CLOUD } from "../../lib/const";
 import { resetStore, useStore } from "../../lib/store";
-import { SubscriptionData, useStripeSubscription } from "../../lib/subscription/useStripeSubscription";
+import { useStripeSubscription } from "../../lib/subscription/useStripeSubscription";
 import { isValidDomain, normalizeDomain } from "../../lib/utils";
-
-const getSiteLimit = (subscription: SubscriptionData | undefined) => {
-  if (subscription?.planName.includes("basic")) {
-    return BASIC_SITE_LIMIT;
-  }
-  if (subscription?.planName.includes("standard")) {
-    // grant unlimited sites to organizations created before June 27, 2025
-    if (
-      subscription?.createdAt &&
-      DateTime.fromISO(subscription.createdAt) < DateTime.fromFormat("2025-06-27", "yyyy-MM-dd")
-    ) {
-      return Infinity;
-    }
-    return STANDARD_SITE_LIMIT;
-  }
-  if (subscription?.planName.includes("pro")) {
-    return Infinity;
-  }
-  if (subscription?.planName === "appsumo-1") {
-    return 3;
-  }
-  if (subscription?.planName === "appsumo-2") {
-    return 10;
-  }
-  if (subscription?.planName === "appsumo-3") {
-    return 25;
-  }
-  if (subscription?.planName === "appsumo-4") {
-    return 50;
-  }
-  if (subscription?.planName === "appsumo-5") {
-    return 100;
-  }
-  if (subscription?.planName === "appsumo-6") {
-    return Infinity;
-  }
-  return FREE_SITE_LIMIT;
-};
 
 export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disabled?: boolean }) {
   const { setSite } = useStore();
@@ -74,7 +35,8 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
   const { data: sites, refetch } = useGetSitesFromOrg(activeOrganization?.id);
   const { data: subscription } = useStripeSubscription();
 
-  const isOverSiteLimit = getSiteLimit(subscription) <= (sites?.sites?.length || 0) && IS_CLOUD;
+  const siteLimit = subscription?.siteLimit ?? null;
+  const isOverSiteLimit = IS_CLOUD && siteLimit !== null && (sites?.sites?.length || 0) >= siteLimit;
 
   const finalDisabled = disabled || isOverSiteLimit;
 
@@ -156,7 +118,7 @@ export function AddSite({ trigger, disabled }: { trigger?: React.ReactNode; disa
           )}
         </TooltipTrigger>
         <TooltipContent>
-          {t("You have reached the limit of {limit} websites. Upgrade to add more websites", { limit: String(getSiteLimit(subscription)) })}
+          {t("You have reached the limit of {limit} websites. Upgrade to add more websites", { limit: String(siteLimit) })}
         </TooltipContent>
       </Tooltip>
     );

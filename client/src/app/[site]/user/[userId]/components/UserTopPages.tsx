@@ -34,7 +34,10 @@ export function UserTopPages({ userId }: { userId: string }) {
               getValue={e => e.value}
               getKey={e => e.value}
               getLabel={e => truncateString(e.value, 50) || "Other"}
-              getLink={e => `https://${siteMetadata?.domain}${e.value}`}
+              getLink={e => {
+                const host = e.hostname || siteMetadata?.domain;
+                return host ? `https://${host}${e.value}` : "#";
+              }}
               expanded={false}
               close={close}
               customFilters={[{ parameter: "user_id", value: [userId], type: "equals" }]}
@@ -51,7 +54,10 @@ export function UserTopPages({ userId }: { userId: string }) {
               getValue={e => e.value}
               getKey={e => e.value}
               getLabel={e => truncateString(e.value, 50) || "Other"}
-              getLink={e => `https://${siteMetadata?.domain}${e.value}`}
+              getLink={e => {
+                const host = e.hostname || siteMetadata?.domain;
+                return host ? `https://${host}${e.value}` : "#";
+              }}
               expanded={false}
               close={close}
               customFilters={[{ parameter: "user_id", value: [userId], type: "equals" }]}

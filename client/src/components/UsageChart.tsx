@@ -27,8 +27,6 @@ function getPeriodDates(period: PeriodValue): { startDate?: string; endDate?: st
 
 interface UsageChartProps {
   organizationId: string;
-  startDate?: string;
-  endDate?: string;
   timeZone?: string;
 }
 

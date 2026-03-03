@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { clickhouse } from "../../db/clickhouse/clickhouse.js";
-import { enrichWithTraits, getTimeStatement, processResults } from "./utils/utils.js";
+import { clickhouse } from "../../../db/clickhouse/clickhouse.js";
+import { enrichWithTraits, getTimeStatement, processResults } from "../utils/utils.js";
 import { FilterParams } from "@rybbit/shared";
-import { getFilterStatement } from "./utils/getFilterStatement.js";
+import { getFilterStatement } from "../utils/getFilterStatement.js";
 
 export type GetSessionsResponse = {
   session_id: string;
@@ -57,7 +57,8 @@ export interface GetSessionsRequest {
     limit: number;
     page: number;
     user_id?: string;
-    session_id?: string;
+    session_id?: string
+    ;
     identified_only?: string;
     min_pageviews?: string;
     min_events?: string;

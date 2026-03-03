@@ -1,11 +1,10 @@
 import { BackgroundGrid } from "@/components/BackgroundGrid";
-import { CheckCircle } from "lucide-react";
-import { Tilt_Warp } from "next/font/google";
-import Image from "next/image";
 import { TrackedButton } from "@/components/TrackedButton";
+import { createOGImageUrl } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
-import { createOGImageUrl } from "@/lib/metadata";
+import { Tilt_Warp } from "next/font/google";
+import Image from "next/image";
 
 const tilt_wrap = Tilt_Warp({
   subsets: ["latin"],
@@ -69,12 +68,6 @@ const sponsors: Sponsor[] = [
     logo: "/sponsors/23m.png",
     url: "https://23m.com",
     amount: 100,
-  },
-  {
-    name: "Cosmoflare",
-    logo: "/sponsors/cosmoflare.png",
-    url: "https://cosmoflare.com",
-    amount: 10,
   },
   {
     name: "Fastscribe",

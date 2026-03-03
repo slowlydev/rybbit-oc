@@ -139,6 +139,11 @@ export const organization = pgTable(
     monthlyEventCount: integer().default(0),
     overMonthlyLimit: boolean().default(false),
     planOverride: text(), // Plan name override (e.g., "pro1m", "standard500k")
+    customPlan: jsonb("custom_plan").$type<{
+      events: number;
+      members: number | null; // null = unlimited
+      websites: number | null; // null = unlimited
+    }>(),
   },
   table => [unique("organization_slug_unique").on(table.slug)]
 );

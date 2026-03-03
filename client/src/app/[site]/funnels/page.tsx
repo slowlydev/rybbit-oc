@@ -16,6 +16,7 @@ import { useSetPageTitle } from "../../../hooks/useSetPageTitle";
 import { SubHeader } from "../components/SubHeader/SubHeader";
 import { CreateFunnelDialog } from "./components/CreateFunnel";
 import { FunnelRow } from "./components/FunnelRow";
+import Link from "next/link";
 
 // Skeleton for the funnel row component
 const FunnelRowSkeleton = () => (
@@ -125,7 +126,7 @@ export default function FunnelsPage() {
           <NothingFound
             icon={<Funnel className="w-10 h-10" />}
             title={t("No funnels yet")}
-            description={t("Create your first funnel to track conversions through your site's user journey")}
+            description={<span>{t("Create your first funnel to track conversions through your site's user journey.")} <Link href="https://rybbit.com/docs/funnels" className="text-blue-500 hover:underline" target="_blank">{t("Learn more")}</Link></span>}
             action={<CreateFunnelDialog />}
           />
         )}

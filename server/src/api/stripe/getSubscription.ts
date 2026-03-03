@@ -24,6 +24,7 @@ export async function getSubscriptionInner(_organizationId: string) {
     monthlyEventCount: 0,
     interval: "month",
     cancelAtPeriodEnd: false,
+    memberLimit: Infinity,
   };
 }
 

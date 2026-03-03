@@ -1,42 +1,42 @@
 "use client";
 
-import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthError } from "@/components/auth/AuthError";
-import { AuthInput } from "@/components/auth/AuthInput";
-import { SocialButtons } from "@/components/auth/SocialButtons";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Used for disabled signup view
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { useExtracted } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useState } from "react";
 import { addSite } from "../../api/admin/endpoints";
 import { RybbitLogo, RybbitTextLogo } from "../../components/RybbitLogo";
-import { SpinningGlobe } from "../../components/SpinningGlobe";
+
 import { useSetPageTitle } from "../../hooks/useSetPageTitle";
 import { authClient } from "../../lib/auth";
 import { useConfigs } from "../../lib/configs";
 import { userStore } from "../../lib/userStore";
 import { cn, isValidDomain, normalizeDomain } from "../../lib/utils";
+import { EVENT_TIERS, findPriceForTier } from "../subscribe/components/utils";
+import { AccountStep } from "./components/AccountStep";
+import { PlanStep } from "./components/PlanStep";
+import { SetupStep } from "./components/SetupStep";
 
 function SignupPageContent() {
   const { configs, isLoading: isLoadingConfigs } = useConfigs();
   useSetPageTitle("Signup");
   const t = useExtracted();
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [stepParam] = useQueryState("step", parseAsInteger);
+  const maxStep = 2;
+  const [stepParam, setStepParam] = useQueryState("step", parseAsInteger);
+  const [currentStep, setCurrentStepRaw] = useState(
+    stepParam && stepParam >= 1 && stepParam <= maxStep ? stepParam : 1
+  );
 
-  // Sync URL step param with local state on mount
-  useEffect(() => {
-    if (stepParam && stepParam >= 1 && stepParam <= 3) {
-      setCurrentStep(stepParam);
-    }
-  }, [stepParam]);
+  // Wrap setCurrentStep to also update the URL param
+  const setCurrentStep = (step: number) => {
+    setCurrentStepRaw(step);
+    setStepParam(step);
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const router = useRouter();
@@ -45,15 +45,20 @@ function SignupPageContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Step 2: Organization creation
+  // Plan selection (cloud step 2)
+  const [eventLimitIndex, setEventLimitIndex] = useState(0);
+  const [isAnnual, setIsAnnual] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState<"basic" | "standard" | "pro">("pro");
+  const [checkoutClientSecret, setCheckoutClientSecret] = useState<string | null>(null);
+
+  // Setup: Organization + website
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
 
   // Step 3: Website addition
-  const [organizationId, setOrganizationId] = useState("");
+  const [referralSource, setReferralSource] = useState("");
   const [domain, setDomain] = useState("");
 
-  // Handle organization name change and generate slug
   const handleOrgNameChange = (value: string) => {
     setOrgName(value);
     if (value) {
@@ -71,18 +76,14 @@ function SignupPageContent() {
     setError("");
 
     try {
-      const { data, error } = await authClient.signUp.email(
-        {
-          email,
-          name: email.split("@")[0], // Use email prefix as default name
-          password,
-        },
-      );
+      const { data, error } = await authClient.signUp.email({
+        email,
+        name: email.split("@")[0],
+        password,
+      });
 
       if (data?.user) {
-        userStore.setState({
-          user: data.user,
-        });
+        userStore.setState({ user: data.user });
         setCurrentStep(2);
       }
 
@@ -96,12 +97,21 @@ function SignupPageContent() {
     }
   };
 
-  // Step 2: Organization creation submission
-  const handleOrganizationSubmit = async () => {
+  // Step 2: Setup submission — create org + site, then advance (cloud) or redirect (self-hosted)
+  const [siteId, setSiteId] = useState<number | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+
+  const handleSetupSubmit = async () => {
     setIsLoading(true);
     setError("");
 
     try {
+      if (!isValidDomain(domain)) {
+        setError(t("Invalid domain format. Must be a valid domain like example.com or sub.example.com"));
+        setIsLoading(false);
+        return;
+      }
+
       // Create organization
       const { data, error } = await authClient.organization.create({
         name: orgName,
@@ -116,14 +126,13 @@ function SignupPageContent() {
         throw new Error(t("No organization ID returned"));
       }
 
-      // Set as active organization
-      await authClient.organization.setActive({
-        organizationId: data.id,
-      });
+      await authClient.organization.setActive({ organizationId: data.id });
 
-      setOrganizationId(data.id);
+      // Add website
+      const normalizedDomain = normalizeDomain(domain);
+      const response = await addSite(normalizedDomain, normalizedDomain, data.id);
 
-      setCurrentStep(3);
+      router.push(`/${response.siteId}`);
     } catch (error) {
       setError(String(error));
     } finally {
@@ -131,16 +140,19 @@ function SignupPageContent() {
     }
   };
 
-  // Step 3: Website addition submission
-  const handleWebsiteSubmit = async () => {
+  // Step 3 (cloud): Create checkout session and open modal
+  const handleSubscribe = async () => {
     setIsLoading(true);
     setError("");
 
     try {
-      // Validate domain
-      if (!isValidDomain(domain)) {
-        setError(t("Invalid domain format. Must be a valid domain like example.com or sub.example.com"));
-        setIsLoading(false);
+      const eventLimit = EVENT_TIERS[eventLimitIndex];
+      if (eventLimit === "Custom") return;
+
+      const selectedTierPrice = findPriceForTier(eventLimit, isAnnual ? "year" : "month", selectedPlan);
+
+      if (!selectedTierPrice) {
+        setError("Could not find a matching plan. Please try a different selection.");
         return;
       }
 
@@ -158,123 +170,51 @@ function SignupPageContent() {
     }
   };
 
-  // Render the content based on current step
+  const steps = [
+    { step: 1, label: t("Account") },
+    { step: 2, label: t("Add site") },
+  ];
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">{t("Signup")}</h2>
-            <div className="space-y-4">
-              <SocialButtons onError={setError} callbackURL="/signup?step=2" mode="signup" />
-              <AuthInput
-                id="email"
-                label={t("Email")}
-                type="email"
-                placeholder="email@example.com"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-              />
-              <AuthInput
-                id="password"
-                label={t("Password")}
-                type="password"
-                placeholder="••••••••"
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
-              <AuthButton
-                isLoading={isLoading}
-                loadingText={t("Creating account...")}
-                onClick={handleAccountSubmit}
-                type="button"
-                className="mt-6 transition-all duration-300 h-11"
-                disabled={isLoading}
-              >
-                {t("Continue")}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </AuthButton>
-              <div className="text-center text-sm">
-                {t("Already have an account?")}{" "}
-                <Link
-                  href="/login"
-                  className="underline underline-offset-4 hover:text-emerald-400 transition-colors duration-300"
-                >
-                  {t("Log in")}
-                </Link>
-              </div>
-            </div>
-          </div>
+          <AccountStep
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            isLoading={isLoading}
+            onSubmit={handleAccountSubmit}
+            setError={setError}
+          />
         );
       case 2:
         return (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">{t("Create your organization")}</h2>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="orgName">{t("Organization Name")}</Label>
-                <Input
-                  id="orgName"
-                  type="text"
-                  placeholder="Acme Inc."
-                  value={orgName}
-                  onChange={e => handleOrgNameChange(e.target.value)}
-                  required
-                  className="h-10 transition-all bg-neutral-100 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700"
-                />
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <Button
-                  className="w-full transition-all duration-300 h-11 bg-emerald-600 hover:bg-emerald-500 text-white"
-                  onClick={handleOrganizationSubmit}
-                  disabled={isLoading || !orgName || !orgSlug}
-                  variant="success"
-                >
-                  {t("Continue")}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button className="w-full transition-all duration-300 h-11" onClick={() => router.push("/")}>
-                  {t("I'm joining someone else's organization")}
-                </Button>
-              </div>
-            </div>
-          </div>
+          <SetupStep
+            domain={domain}
+            setDomain={setDomain}
+            orgName={orgName}
+            orgSlug={orgSlug}
+            handleOrgNameChange={handleOrgNameChange}
+            referralSource={referralSource}
+            setReferralSource={setReferralSource}
+            isLoading={isLoading}
+            onSubmit={handleSetupSubmit}
+          />
         );
       case 3:
         return (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">{t("Add your site")}</h2>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="domain">{t("Website Domain")}</Label>
-                <Input
-                  id="domain"
-                  type="text"
-                  placeholder="example.com or sub.example.com"
-                  value={domain}
-                  onChange={e => setDomain(e.target.value.toLowerCase())}
-                  required
-                  className="h-10 transition-all bg-neutral-100 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700"
-                />
-                <p className="text-xs text-muted-foreground">{t("Enter the domain of the website you want to track")}</p>
-              </div>
-
-              <div className="flex justify-between">
-                <Button
-                  className="w-full transition-all duration-300 h-11 bg-emerald-600 hover:bg-emerald-500 text-white"
-                  onClick={handleWebsiteSubmit}
-                  disabled={isLoading || !domain || !isValidDomain(domain)}
-                  variant="success"
-                >
-                  {t("Continue")}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
+          <PlanStep
+            eventLimitIndex={eventLimitIndex}
+            setEventLimitIndex={setEventLimitIndex}
+            isAnnual={isAnnual}
+            setIsAnnual={setIsAnnual}
+            selectedPlan={selectedPlan}
+            setSelectedPlan={setSelectedPlan}
+            onSubscribe={handleSubscribe}
+            isLoading={isLoading}
+          />
         );
       default:
         return null;
@@ -310,10 +250,9 @@ function SignupPageContent() {
   }
 
   return (
-    <div className="flex h-dvh w-full">
-      {/* Left panel - signup form */}
-      <div className="w-full lg:w-[550px] flex flex-col p-6 lg:p-10">
-        {/* Logo at top left */}
+    <div className="flex h-dvh w-full justify-center">
+      <div className="w-full max-w-[550px] flex flex-col p-6 lg:p-10">
+        {/* Logo */}
         <div className="mb-8">
           <a href="https://rybbit.com" target="_blank" className="inline-block">
             <RybbitTextLogo />
@@ -321,15 +260,16 @@ function SignupPageContent() {
         </div>
 
         <div className="flex-1 flex flex-col justify-center w-full max-w-[550px] mx-auto">
-          <h1 className="text-lg text-neutral-600 dark:text-neutral-300 mb-6">{t("Get started with Rybbit")}</h1>
+          <div className="mb-8">
+            <h1 className="text-3xl font-medium">{t("Get started with Rybbit")}</h1>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-3">
+              {t("Start collecting analytics in minutes")}
+            </p>
+          </div>
 
           {/* Horizontal step indicator */}
           <div className="flex items-center w-full mb-8">
-            {[
-              { step: 1, label: t("Account") },
-              { step: 2, label: t("Organization") },
-              { step: 3, label: t("Website") },
-            ].map(({ step, label }, index) => (
+            {steps.map(({ step, label }, index, arr) => (
               <React.Fragment key={step}>
                 <div className="flex flex-col items-center gap-2">
                   <div
@@ -355,7 +295,7 @@ function SignupPageContent() {
                     {label}
                   </span>
                 </div>
-                {index < 2 && (
+                {index < arr.length - 1 && (
                   <div
                     className={cn(
                       "flex-1 h-0.5 mx-3 mb-6 transition-all duration-300 rounded-full",
@@ -386,11 +326,6 @@ function SignupPageContent() {
             </a>
           </div>
         }
-      </div>
-
-      {/* Right panel - globe (hidden on mobile/tablet) */}
-      <div className="hidden lg:block lg:w-[calc(100%-500px)] relative m-3 rounded-2xl overflow-hidden">
-        <SpinningGlobe />
       </div>
     </div>
   );

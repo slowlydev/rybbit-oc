@@ -28,6 +28,7 @@ import { Funnels } from "@/components/Cards/Funnels";
 import { RealTimeAnalytics } from "@/components/Cards/RealTimeAnalytics";
 import { SessionReplay } from "@/components/Cards/SessionReplay";
 import { UserSessions } from "@/components/Cards/UserSessions";
+import { LandingPricing } from "@/components/LandingPricing";
 
 // FAQ Structured Data
 const faqSchema = {
@@ -399,6 +400,9 @@ export function LandingPageTemplate({
           </div>
         </div>
       </section>
+
+      {/* Pricing Section */}
+      <LandingPricing />
 
       <CTASection />
     </>

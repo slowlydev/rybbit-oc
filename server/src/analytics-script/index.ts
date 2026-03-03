@@ -45,6 +45,26 @@ declare global {
     return;
   }
 
+  // Expose stub API immediately to queue calls made before config is ready
+  type QueueEntry = [string, any[]];
+  const earlyQueue: QueueEntry[] = [];
+  const queueMethod = (method: string) =>
+    (...args: any[]) => { earlyQueue.push([method, args]); };
+
+  window[namespace] = {
+    pageview: queueMethod("pageview"),
+    event: queueMethod("event"),
+    error: queueMethod("error"),
+    trackOutbound: queueMethod("trackOutbound"),
+    identify: queueMethod("identify"),
+    setTraits: queueMethod("setTraits"),
+    clearUserId: queueMethod("clearUserId"),
+    getUserId: () => null,
+    startSessionReplay: queueMethod("startSessionReplay"),
+    stopSessionReplay: queueMethod("stopSessionReplay"),
+    isSessionReplayActive: () => false,
+  };
+
   // Parse configuration (now async to fetch from API)
   const config = await parseScriptConfig(scriptTag);
   if (!config) {
@@ -187,6 +207,12 @@ declare global {
     stopSessionReplay: () => tracker.stopSessionReplay(),
     isSessionReplayActive: () => tracker.isSessionReplayActive(),
   };
+
+  // Replay any calls made during initialization
+  const api = window[config.namespace];
+  for (const [method, args] of earlyQueue) {
+    (api[method] as Function)(...args);
+  }
 
   // Initialize
   setupEventListeners();

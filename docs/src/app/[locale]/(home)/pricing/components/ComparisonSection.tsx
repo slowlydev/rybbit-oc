@@ -315,7 +315,7 @@ export function ComparisonSection({ isAnnual }: { isAnnual: boolean }) {
                   href="https://app.rybbit.io/signup"
                   className="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  {t("Get started")}
+                  {t("Start for $0")}
                 </AppLink>
               </div>
               <div className="flex flex-col items-center justify-center px-4 border-r border-neutral-400/50 dark:border-neutral-700/50">
@@ -327,7 +327,7 @@ export function ComparisonSection({ isAnnual }: { isAnnual: boolean }) {
                   href="https://app.rybbit.io/signup"
                   className="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  {t("Get started")}
+                  {t("Start for $0")}
                 </AppLink>
               </div>
               <div className="flex flex-col items-center justify-center px-4 border-r border-neutral-400/50 dark:border-neutral-700/50">
@@ -339,7 +339,7 @@ export function ComparisonSection({ isAnnual }: { isAnnual: boolean }) {
                   href="https://app.rybbit.io/signup"
                   className="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  {t("Get started")}
+                  {t("Start for $0")}
                 </AppLink>
               </div>
               <div className="flex flex-col items-center justify-center px-4">

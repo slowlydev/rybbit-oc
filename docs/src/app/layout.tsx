@@ -76,18 +76,20 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
   return (
     <html lang={locale} suppressHydrationWarning>
-      <Script src="https://demo.rybbit.com/api/script.js" data-site-id="21" />
-      <Script
-        src="https://demo.rybbit.com/api/script.js?ns=demo"
-        data-site-id="3b023d1a7895"
-        data-namespace="rybbit_demo"
-      />
-      <Script id="rewardful-queue" strategy="beforeInteractive">
-        {`(function(w,r){w._rwq=r;w[r]=w[r]||function(){(w[r].q=w[r].q||[]).push(arguments)}})(window,'rewardful');`}
-      </Script>
-      <Script src="https://r.wdfl.co/rw.js" data-rewardful="fc3780" strategy="afterInteractive" />
+      <head>
+        <Script id="rewardful-queue" strategy="beforeInteractive">
+          {`(function(w,r){w._rwq=r;w[r]=w[r]||function(){(w[r].q=w[r].q||[]).push(arguments)}})(window,'rewardful');`}
+        </Script>
+      </head>
       <body className={`flex flex-col min-h-screen ${inter.variable} font-sans`}>
         {children}
+        <Script src="https://demo.rybbit.com/api/script.js" data-site-id="21" />
+        <Script
+          src="https://demo.rybbit.com/api/script.js?ns=demo"
+          data-site-id="3b023d1a7895"
+          data-namespace="rybbit_demo"
+        />
+        <Script src="https://r.wdfl.co/rw.js" data-rewardful="fc3780" strategy="afterInteractive" />
       </body>
     </html>
   );

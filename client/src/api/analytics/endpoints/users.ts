@@ -46,6 +46,8 @@ export type UserInfo = {
   operating_system_version: string;
   screen_height: number;
   screen_width: number;
+  referrer: string;
+  channel: string;
   last_seen: string;
   first_seen: string;
   pageviews: number;

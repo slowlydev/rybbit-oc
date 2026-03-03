@@ -20,6 +20,8 @@ type GetMetricResponse = {
   value: string;
   // title is only used for pathname
   title?: string;
+  // hostname from ClickHouse events data
+  hostname?: string;
   // count means sessions where this page was the entry/exit
   count: number;
   percentage: number;
@@ -35,6 +37,7 @@ type MetricItem = {
   value: string;
   title?: string;
   pathname?: string;
+  hostname?: string;
   count: number;
   percentage: number;
   pageviews?: number;
@@ -209,6 +212,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
           SELECT
               session_id,
               pathname,
+              hostname,
               timestamp,
               pageviews_in_session,
               leadInFrame(timestamp) OVER (PARTITION BY session_id ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) as next_timestamp,
@@ -219,6 +223,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
           SELECT
               session_id,
               pathname,
+              hostname,
               timestamp,
               next_timestamp,
               row_num,
@@ -234,6 +239,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
       PathStats AS (
           SELECT
               pathname,
+              anyHeavy(hostname) as top_hostname,
               count(DISTINCT session_id) as unique_sessions,
               count() as visits,
               avg(if(time_diff_seconds < 0, 0, if(time_diff_seconds > 1800, 1800, time_diff_seconds))) as avg_time_on_page_seconds,
@@ -255,6 +261,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
     WITH ${baseCteQuery}
     SELECT
         pathname as value,
+        top_hostname as hostname,
         unique_sessions as count,
         round((unique_sessions / sum(unique_sessions) OVER ()) * 100, 2) as percentage,
         visits as pageviews,
@@ -284,6 +291,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
           SELECT
               e.session_id,
               e.pathname,
+              e.hostname,
               e.timestamp,
               spc.pageviews_in_session,
               leadInFrame(e.timestamp) OVER (PARTITION BY e.session_id ORDER BY e.timestamp ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) as next_timestamp
@@ -299,6 +307,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
           SELECT
               session_id,
               pathname,
+              hostname,
               timestamp,
               next_timestamp,
               pageviews_in_session,
@@ -308,6 +317,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
       PathStats AS (
           SELECT
               pathname,
+              anyHeavy(hostname) as top_hostname,
               count() as visits,
               count(DISTINCT session_id) as unique_sessions,
               avg(if(time_diff_seconds < 0, 0, if(time_diff_seconds > 1800, 1800, time_diff_seconds))) as avg_time_on_page_seconds,
@@ -326,6 +336,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
     WITH ${baseCteQuery}
     SELECT
         pathname as value,
+        top_hostname as hostname,
         unique_sessions as count,
         round((unique_sessions / sum(unique_sessions) OVER ()) * 100, 2) as percentage,
         visits as pageviews,

@@ -1,6 +1,5 @@
 import { authClient } from "@/lib/auth";
 import { AlertTriangle, ArrowRight } from "lucide-react";
-import { DateTime } from "luxon";
 import { useExtracted } from "next-intl";
 import { useRouter } from "next/navigation";
 import { DEFAULT_EVENT_LIMIT } from "../../lib/subscription/constants";
@@ -19,10 +18,6 @@ export function AppSumoPlan() {
 
   // Get the active organization ID
   const organizationId = activeOrg?.id;
-
-  // Get last 30 days of data for the chart
-  const endDate = DateTime.now().toISODate();
-  const startDate = DateTime.now().minus({ days: 30 }).toISODate();
 
   if (!subscription) return null;
 
@@ -80,7 +75,7 @@ export function AppSumoPlan() {
               </div>
             </div>
 
-            {organizationId && <UsageChart organizationId={organizationId} startDate={startDate} endDate={endDate} />}
+            {organizationId && <UsageChart organizationId={organizationId} />}
           </div>
         </CardContent>
         <CardFooter>

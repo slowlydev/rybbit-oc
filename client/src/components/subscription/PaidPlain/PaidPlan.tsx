@@ -1,8 +1,7 @@
-import { Shield } from "lucide-react";
+import { Clock, Shield } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
-import { DateTime } from "luxon";
-import { Alert } from "../../ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "../../ui/alert";
 import { Button } from "../../ui/button";
 import { Card, CardContent } from "../../ui/card";
 import { Progress } from "../../ui/progress";
@@ -18,17 +17,14 @@ export function PaidPlan() {
   const { data: activeSubscription, isLoading, error: subscriptionError, refetch } = useStripeSubscription();
 
   const { data: activeOrg } = authClient.useActiveOrganization();
-
-  // Get the active organization ID
   const organizationId = activeOrg?.id;
-
-  // Get last 30 days of data for the chart
-  const endDate = DateTime.now().toISODate();
-  const startDate = DateTime.now().minus({ days: 30 }).toISODate();
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [showPlanDialog, setShowPlanDialog] = useState(false);
+
+  const isTrial = !!activeSubscription?.isTrial;
+  const trialDaysRemaining = activeSubscription?.trialDaysRemaining || 0;
 
   const eventLimit = activeSubscription?.eventLimit || 0;
   const currentUsage = activeSubscription?.monthlyEventCount || 0;
@@ -45,35 +41,6 @@ export function PaidPlan() {
       name: planType,
       price: `$${stripePlan?.price}`,
       interval: stripePlan?.interval,
-      description: planType === "Pro"
-        ? "Premium features for professional teams"
-        : planType === "Basic"
-          ? "Core analytics for personal projects"
-          : "Advanced analytics for growing projects",
-      features: planType === "Pro"
-        ? [
-          "5+ year data retention",
-          "Session replays",
-          "Unlimited team members",
-          "Unlimited websites",
-          "Priority support",
-        ]
-        : planType === "Basic"
-          ? [
-            "1 website",
-            "1 team member",
-            "Web analytics dashboard",
-            "Goals & custom events",
-            "2 year data retention",
-            "Email support",
-          ]
-          : ["2 year data retention", "Up to 5 websites", "Up to 3 team members", "Email support"],
-      color: planType === "Pro"
-        ? "bg-linear-to-br from-purple-50 to-indigo-100 dark:from-purple-800 dark:to-indigo-800"
-        : planType === "Basic"
-          ? "bg-linear-to-br from-blue-50 to-sky-100 dark:from-blue-800 dark:to-sky-800"
-          : "bg-linear-to-br from-green-50 to-emerald-100 dark:from-green-800 dark:to-emerald-800",
-      icon: <Shield className="h-5 w-5" />,
     }
     : null;
 
@@ -134,6 +101,9 @@ export function PaidPlan() {
 
     if (activeSubscription.cancelAtPeriodEnd) {
       return `Cancels on ${formattedDate}`;
+    }
+    if (activeSubscription.status === "trialing") {
+      return `Trial ends on ${formattedDate}`;
     }
     if (activeSubscription.status === "active") {
       return isAnnualPlan ? `Renews annually on ${formattedDate}` : `Renews monthly on ${formattedDate}`;
@@ -208,9 +178,23 @@ export function PaidPlan() {
               </div>
             </div>
 
-            {organizationId && <UsageChart organizationId={organizationId} startDate={startDate} endDate={endDate} />}
+            {organizationId && <UsageChart organizationId={organizationId} />}
 
-            {isAnnualPlan && (
+            {isTrial && (
+              <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                <Clock className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                <AlertTitle>Trial Status</AlertTitle>
+                <AlertDescription>
+                  {trialDaysRemaining > 0 ? (
+                    <>Your trial ends in <strong>{trialDaysRemaining} days</strong> on {formatDate(activeSubscription.currentPeriodEnd)}.</>
+                  ) : (
+                    <>Your trial ends today. Upgrade to continue tracking.</>
+                  )}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {isAnnualPlan && !isTrial && (
               <div className="pt-2 pb-0 px-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-md border border-emerald-100 dark:border-emerald-800">
                 <p className="text-sm text-emerald-700 dark:text-emerald-300 py-2">
                   <strong>Annual Billing:</strong> You're on annual billing which saves you money compared to monthly
@@ -228,7 +212,7 @@ export function PaidPlan() {
                 size="sm"
                 className="dark:hover:bg-red-700/60"
               >
-                Cancel Subscription
+                {isTrial ? "Cancel Trial" : "Cancel Subscription"}
               </Button>
             </div>
           </div>

@@ -49,6 +49,10 @@ const pluginList = [
             type: "string",
             required: false,
           },
+          customPlan: {
+            type: "string",
+            required: false,
+          },
         },
       },
     },

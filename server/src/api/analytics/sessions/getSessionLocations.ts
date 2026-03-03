@@ -1,8 +1,8 @@
 import { FilterParams } from "@rybbit/shared";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { clickhouse } from "../../db/clickhouse/clickhouse.js";
-import { getTimeStatement, processResults } from "./utils/utils.js";
-import { getFilterStatement } from "./utils/getFilterStatement.js";
+import { clickhouse } from "../../../db/clickhouse/clickhouse.js";
+import { getTimeStatement, processResults } from "../utils/utils.js";
+import { getFilterStatement } from "../utils/getFilterStatement.js";
 
 export async function getSessionLocations(
   req: FastifyRequest<{

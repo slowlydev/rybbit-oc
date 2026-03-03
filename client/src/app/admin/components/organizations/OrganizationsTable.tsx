@@ -54,7 +54,7 @@ export function OrganizationsTable({ organizations, isLoading, searchQuery }: Or
 
   const formatSubscriptionStatus = (subscription: AdminOrganizationData["subscription"]) => {
     const statusColor =
-      subscription.status === "active" ? "default" : subscription.status === "canceled" ? "destructive" : "secondary";
+      subscription.status === "active" || subscription.status === "trialing" ? "default" : subscription.status === "canceled" ? "destructive" : "secondary";
     return <Badge variant={statusColor}>{subscription.planName}</Badge>;
   };
 
@@ -265,9 +265,9 @@ export function OrganizationsTable({ organizations, isLoading, searchQuery }: Or
           data={
             table.getRowModel().rows.length > 0
               ? {
-                  items: table.getRowModel().rows,
-                  total: table.getRowModel().rows.length,
-                }
+                items: table.getRowModel().rows,
+                total: table.getRowModel().rows.length,
+              }
               : undefined
           }
           pagination={pagination}

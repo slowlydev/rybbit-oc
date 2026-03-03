@@ -161,7 +161,7 @@ export function CreateOrganizationDialog({ open, onOpenChange, onSuccess, trigge
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            {subscription?.status === "active" && (
+            {subscription?.status === "active" || subscription?.status === "trialing" && (
               <Alert variant="warning">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>{t("Subscription Will Not Carry Over")}</AlertTitle>

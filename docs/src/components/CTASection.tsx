@@ -24,7 +24,7 @@ export function CTASection({
   const t = useExtracted();
   const resolvedTitle = title ?? t("Ready for better analytics?");
   const resolvedDescription = description ?? t("Powerful insights without the complexity. Privacy-focused analytics that just works.");
-  const resolvedPrimaryButtonText = primaryButtonText ?? t("Get started");
+  const resolvedPrimaryButtonText = primaryButtonText ?? t("Start for $0");
   const resolvedSecondaryButtonText = secondaryButtonText ?? t("Live demo");
 
   return (
@@ -66,7 +66,7 @@ export function CTASection({
                 href={primaryButtonHref}
                 eventName="signup"
                 eventProps={{ location: eventLocation, button_text: resolvedPrimaryButtonText }}
-                className="w-full whitespace-nowrap sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 cursor-pointer"
+                className="w-full whitespace-nowrap sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 rounded-lg shadow-lg shadow-emerald-900/20 transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:ring-opacity-50 cursor-pointer"
               >
                 {resolvedPrimaryButtonText}
               </TrackedButton>
@@ -83,7 +83,7 @@ export function CTASection({
             </div>
 
             <p className="text-neutral-500 text-sm">
-              {t("30 day money-back guarantee. No credit card required.")}
+              {t("7-day free trial")}
             </p>
           </div>
         </div>

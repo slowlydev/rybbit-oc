@@ -49,7 +49,10 @@ export function Pages() {
               getValue={e => e.value}
               getKey={e => e.value}
               getLabel={e => truncateString(e.value, 50) || t("Other")}
-              getLink={e => `https://${siteMetadata?.domain}${e.value}`}
+              getLink={e => {
+                const host = e.hostname || siteMetadata?.domain;
+                return host ? `https://${host}${e.value}` : "#";
+              }}
               expanded={expanded}
               close={close}
             />
@@ -77,7 +80,10 @@ export function Pages() {
               getValue={e => e.value}
               getKey={e => e.value}
               getLabel={e => e.value || t("Other")}
-              getLink={e => `https://${siteMetadata?.domain}${e.value}`}
+              getLink={e => {
+                const host = e.hostname || siteMetadata?.domain;
+                return host ? `https://${host}${e.value}` : "#";
+              }}
               expanded={expanded}
               close={close}
             />
@@ -89,7 +95,10 @@ export function Pages() {
               getValue={e => e.value}
               getKey={e => e.value}
               getLabel={e => e.value || t("Other")}
-              getLink={e => `https://${siteMetadata?.domain}${e.value}`}
+              getLink={e => {
+                const host = e.hostname || siteMetadata?.domain;
+                return host ? `https://${host}${e.value}` : "#";
+              }}
               expanded={expanded}
               close={close}
             />

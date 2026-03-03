@@ -2,6 +2,7 @@ export const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL === "http://localhost:3001"
     ? "http://localhost:3001/api"
     : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+export const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
 export const IS_CLOUD = process.env.NEXT_PUBLIC_CLOUD === "true";
 export const IS_UNLOCKED = true; // Always true in this fork — unlocks all analytics features
 
