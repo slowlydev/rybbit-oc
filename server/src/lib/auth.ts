@@ -146,6 +146,9 @@ export const auth = betterAuth({
     },
   },
   hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      // No member limit enforcement in unlocked mode
+    }),
     after: createAuthMiddleware(async ctx => {
       // Handle invitation acceptance - copy site access from invitation to member
       if (ctx.path === "/organization/accept-invitation") {

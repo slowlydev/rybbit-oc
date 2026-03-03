@@ -52,12 +52,12 @@ function SignupPageContent() {
   const [checkoutClientSecret, setCheckoutClientSecret] = useState<string | null>(null);
 
   // Setup: Organization + website
-  const [orgName, setOrgName] = useState("");
-  const [orgSlug, setOrgSlug] = useState("");
 
   // Step 3: Website addition
   const [referralSource, setReferralSource] = useState("");
   const [domain, setDomain] = useState("");
+  const [orgName, setOrgName] = useState("");
+  const [orgSlug, setOrgSlug] = useState("");
 
   const handleOrgNameChange = (value: string) => {
     setOrgName(value);
@@ -97,7 +97,7 @@ function SignupPageContent() {
     }
   };
 
-  // Step 2: Setup submission — create org + site, then advance (cloud) or redirect (self-hosted)
+  // Step 2: Setup submission — create org + site, then redirect
   const [siteId, setSiteId] = useState<number | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
 
