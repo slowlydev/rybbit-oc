@@ -141,34 +141,7 @@ function SignupPageContent() {
   };
 
   // Step 3 (cloud): Create checkout session and open modal
-  const handleSubscribe = async () => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const eventLimit = EVENT_TIERS[eventLimitIndex];
-      if (eventLimit === "Custom") return;
-
-      const selectedTierPrice = findPriceForTier(eventLimit, isAnnual ? "year" : "month", selectedPlan);
-
-      if (!selectedTierPrice) {
-        setError("Could not find a matching plan. Please try a different selection.");
-        return;
-      }
-
-      try {
-        const normalizedDomain = normalizeDomain(domain);
-        const response = await addSite(normalizedDomain, normalizedDomain, organizationId);
-        router.push(`/${response.siteId}`);
-      } catch (error) {
-        setError(String(error));
-      }
-    } catch (error) {
-      setError(String(error));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleSubscribe = async () => {};
 
   const steps = [
     { step: 1, label: t("Account") },
