@@ -30,6 +30,8 @@ const UNLIMITED_SUBSCRIPTION: SubscriptionData = {
   eventLimit: Infinity,
   interval: "lifetime",
   cancelAtPeriodEnd: false,
+  memberLimit: Infinity,
+  siteLimit: Infinity,
 };
 
 export function useStripeSubscription(): Pick<
