@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { clickhouse } from "../../../db/clickhouse/clickhouse.js";
-import { processResults, getTimeStatement } from "../utils/utils.js";
+import { enrichWithTraits, processResults, getTimeStatement } from "../utils/utils.js";
 import { FilterParams } from "@rybbit/shared";
 import { getFilterStatement } from "../utils/getFilterStatement.js";
 
@@ -115,7 +115,8 @@ export async function getEvents(
       });
 
       const events = await processResults<GetEventsResponse[number]>(result);
-      return res.send({ data: events });
+      const eventsWithTraits = await enrichWithTraits(events, Number(siteId));
+      return res.send({ data: eventsWithTraits });
     }
 
     // Mode B: Cursor-based pagination (initial load or scrolling back)
@@ -155,10 +156,10 @@ export async function getEvents(
     });
 
     const events = await processResults<GetEventsResponse[number]>(result);
-
+    const eventsWithTraits = await enrichWithTraits(events, Number(siteId));
 
     return res.send({
-      data: events,
+      data: eventsWithTraits,
       cursor: {
         hasMore: events.length === limit,
         oldestTimestamp:

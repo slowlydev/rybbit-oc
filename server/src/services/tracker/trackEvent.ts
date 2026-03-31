@@ -3,6 +3,8 @@ import { isbot } from "isbot";
 import { z, ZodError } from "zod";
 import { createServiceLogger } from "../../lib/logger/logger.js";
 import { siteConfig } from "../../lib/siteConfig.js";
+import { detectBot } from "./botDetection.js";
+import { CLIENT_BOT_SCORE_THRESHOLD } from "./const.js";
 import { sessionsService } from "../sessions/sessionsService.js";
 import { usageService } from "../usageService.js";
 import { pageviewQueue } from "./pageviewQueue.js";
@@ -21,8 +23,10 @@ const baseEventFields = {
   page_title: z.string().max(512).optional(),
   referrer: z.string().max(2048).optional(),
   user_id: z.string().max(255).optional(),
+  tag: z.string().max(256).optional(),
   ip_address: z.string().ip().optional(),
   user_agent: z.string().max(512).optional(),
+  _bs: z.number().int().min(0).max(10).optional(),
 };
 
 // Default event_name and properties used by pageview and performance
@@ -275,7 +279,50 @@ export async function trackEvent(request: FastifyRequest, reply: FastifyReply) {
         logger.info({ siteId: validatedPayload.site_id, userAgent }, "Bot request filtered");
         return reply.status(200).send({
           success: true,
-          message: "Event not tracked - bot detected",
+          message: "Event not tracked - bot detected using isbot",
+        });
+      }
+
+      // Layer 1: Header heuristic bot detection
+      const detection = detectBot(request, userAgent || "");
+      if (detection.isBot) {
+        logger.info(
+          { siteId: validatedPayload.site_id, userAgent, reason: detection.reason, score: detection.score },
+          "Bot request filtered (heuristics)"
+        );
+        return reply.status(200).send({
+          success: true,
+          message: "Event not tracked - bot detected using header heuristics",
+        });
+      }
+
+      // Client-side bot signal score check
+      const clientBotScore = validatedPayload._bs;
+      if (typeof clientBotScore === "number" && clientBotScore >= CLIENT_BOT_SCORE_THRESHOLD) {
+        logger.info(
+          { siteId: validatedPayload.site_id, clientBotScore },
+          "Bot request filtered (client signals)"
+        );
+        return reply.status(200).send({
+          success: true,
+          message: "Event not tracked - bot detected using client signals",
+        });
+      }
+
+      // Desktop 800x600 detection — Puppeteer default viewport, near-zero real desktop usage
+      if (
+        validatedPayload.screenWidth === 800 &&
+        validatedPayload.screenHeight === 600 &&
+        userAgent &&
+        /Windows NT|Macintosh|X11/.test(userAgent)
+      ) {
+        logger.info(
+          { siteId: validatedPayload.site_id, userAgent },
+          "Bot request filtered (desktop 800x600)"
+        );
+        return reply.status(200).send({
+          success: true,
+          message: "Event not tracked - bot detected using desktop 800x600",
         });
       }
     }

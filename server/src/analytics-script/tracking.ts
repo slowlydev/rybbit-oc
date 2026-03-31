@@ -1,6 +1,7 @@
 import { BasePayload, ScriptConfig, TrackingPayload, WebVitalsData, SessionReplayBatch, ButtonClickProperties, CopyProperties, FormSubmitProperties, InputChangeProperties } from "./types.js";
 import { findMatchingPattern } from "./utils.js";
 import { SessionReplayRecorder } from "./sessionReplay.js";
+import { getBotScore } from "./botSignals.js";
 
 export class Tracker {
   private config: ScriptConfig;
@@ -8,7 +9,6 @@ export class Tracker {
   private sessionReplayRecorder?: SessionReplayRecorder;
   private errorDedupeCache: Map<string, number> = new Map();
   private errorDedupeLastCleanup = 0;
-
   constructor(config: ScriptConfig) {
     this.config = config;
     this.loadUserId();
@@ -87,10 +87,15 @@ export class Tracker {
       language: navigator.language,
       page_title: document.title,
       referrer: document.referrer,
+      _bs: getBotScore(),
     };
 
     if (this.customUserId) {
       payload.user_id = this.customUserId;
+    }
+
+    if (this.config.tag) {
+      payload.tag = this.config.tag;
     }
 
     return payload;

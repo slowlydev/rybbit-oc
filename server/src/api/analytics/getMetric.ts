@@ -352,6 +352,7 @@ const getQuery = (request: FastifyRequest<GetMetricRequest>, isCountQuery: boole
 
   // Default case for other parameters
   const sqlParam = getSqlParam(parameter);
+
   if (isCountQuery) {
     return `
     SELECT COUNT(DISTINCT ${sqlParam}) as totalCount

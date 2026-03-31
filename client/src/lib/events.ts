@@ -46,7 +46,15 @@ export interface EventLike {
 export function getEventDisplayName(item: EventLike, t?: TranslationFunction): string {
   if (item.event_name) return item.event_name;
 
-  const translate = t || ((key: string) => key);
+  const translate = (key: string, values?: Record<string, string>) => {
+    const translated = t ? t(key, values) : key;
+    if (!values) return translated;
+
+    return Object.entries(values).reduce(
+      (result, [placeholder, value]) => result.replaceAll(`{${placeholder}}`, () => value),
+      translated
+    );
+  };
 
   switch (item.type) {
     case "outbound":

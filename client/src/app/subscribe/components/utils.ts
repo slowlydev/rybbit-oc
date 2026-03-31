@@ -1,11 +1,11 @@
 // Common utility functions and constants for subscription components
 
 import { BASIC_SITE_LIMIT, BASIC_TEAM_LIMIT, FREE_SITE_LIMIT, STANDARD_SITE_LIMIT, STANDARD_TEAM_LIMIT } from "../../../lib/const";
-import { getStripePrices, STRIPE_TIERS } from "../../../lib/stripe";
 
 import { FeatureItem } from "@/components/pricing/PricingCard";
 
-export const EVENT_TIERS = [...STRIPE_TIERS.map(tier => tier.events), "Custom"];
+// Re-export shared utils from canonical location
+export { EVENT_TIERS, findPriceForTier, formatEventTier } from "../../../lib/subscription/planUtils";
 
 export const BASIC_FEATURES = [
   `${BASIC_SITE_LIMIT} website`,
@@ -64,47 +64,3 @@ export const FREE_FEATURES: FeatureItem[] = [
   { feature: "Advanced features", included: false },
   { feature: "Email support", included: false },
 ];
-
-const stripePrices = getStripePrices();
-
-// Find the appropriate price for a tier at current event limit
-export function findPriceForTier(
-  eventLimit: number | string,
-  interval: "month" | "year",
-  planType: "basic" | "standard" | "pro" = "standard"
-) {
-  // Check if we have a custom tier
-  if (eventLimit === "Custom") {
-    return null;
-  }
-
-  // Convert eventLimit to number to ensure type safety
-  const eventLimitValue = Number(eventLimit);
-
-  // Determine if we need to look for annual plans
-  const isAnnual = interval === "year";
-
-  // Filter plans by name pattern (with or without -annual suffix) and interval
-  const plans = stripePrices.filter(
-    plan =>
-      (isAnnual
-        ? plan.name.startsWith(planType) && plan.name.includes("-annual")
-        : plan.name.startsWith(planType) && !plan.name.includes("-annual")) && plan.interval === interval
-  );
-
-  // Find a plan that matches or exceeds the event limit
-  const matchingPlan = plans.find(plan => plan.events >= eventLimitValue);
-  const selectedPlan = matchingPlan || plans[plans.length - 1] || null;
-
-  // Return the matching plan or the highest tier available
-  return selectedPlan;
-}
-
-// Format event tier for display
-export function formatEventTier(tier: number | string): string {
-  if (typeof tier === "string") {
-    return tier;
-  }
-
-  return tier >= 1_000_000 ? `${tier / 1_000_000}M` : `${tier / 1_000}k`;
-}

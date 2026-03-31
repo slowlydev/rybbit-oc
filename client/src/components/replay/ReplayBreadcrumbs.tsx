@@ -27,12 +27,13 @@ import {
 import { DateTime, Duration } from "luxon";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useShallow } from "zustand/react/shallow";
 import { useGetSessionReplayEvents } from "@/api/analytics/hooks/sessionReplay/useGetSessionReplayEvents";
 import { Avatar } from "@/components/Avatar";
 import { IdentifiedBadge } from "@/components/IdentifiedBadge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { getTimezone } from "@/lib/store";
 import { cn, getUserDisplayName } from "@/lib/utils";
 import { useReplayStore } from "./replayStore";
@@ -150,11 +151,37 @@ const getEventColor = (event: any) => {
   return eventInfo?.color || "text-neutral-400";
 };
 
+interface EventGroup {
+  events: any[];
+  type: string;
+  subType?: number;
+  startTime: number;
+  endTime: number;
+  count: number;
+}
+
+function getGroupDescription(group: EventGroup): string {
+  const firstEvent = group.events[0];
+  const baseDescription = getEventDescription(firstEvent);
+
+  if (group.count > 1) {
+    return `${baseDescription} (×${group.count})`;
+  }
+
+  return baseDescription;
+}
+
 export function ReplayBreadcrumbs() {
   const t = useExtracted();
   const params = useParams();
   const siteId = Number(params.site);
-  const { sessionId, player, setCurrentTime } = useReplayStore();
+  const { sessionId, player, setCurrentTime } = useReplayStore(
+    useShallow(s => ({
+      sessionId: s.sessionId,
+      player: s.player,
+      setCurrentTime: s.setCurrentTime,
+    }))
+  );
 
   const { data, isLoading, error } = useGetSessionReplayEvents(siteId, sessionId);
 
@@ -162,16 +189,9 @@ export function ReplayBreadcrumbs() {
   const groupedEvents = useMemo(() => {
     if (!data?.events) return [];
 
-    const groups: Array<{
-      events: any[];
-      type: string;
-      subType?: number;
-      startTime: number;
-      endTime: number;
-      count: number;
-    }> = [];
+    const groups: EventGroup[] = [];
 
-    let currentGroup: (typeof groups)[0] | null = null;
+    let currentGroup: EventGroup | null = null;
 
     data.events.forEach(event => {
       const eventTypeStr = String(event.type);
@@ -220,16 +240,37 @@ export function ReplayBreadcrumbs() {
     return timestamp - (firstTimestamp ?? 0);
   };
 
-  const handleEventClick = (timestamp: number) => {
-    if (!player || !firstTimestamp) return;
+  const handleEventClick = useCallback(
+    (timestamp: number) => {
+      if (!player || !firstTimestamp) return;
 
-    const timeInMs = timestamp - firstTimestamp;
-    const timeInSeconds = timeInMs / 1000;
+      const timeInMs = timestamp - firstTimestamp;
 
-    // Seek to the specific time
-    player.goto(timeInMs);
-    setCurrentTime(timeInSeconds);
-  };
+      // Seek to the specific time
+      player.goto(timeInMs);
+      setCurrentTime(timeInMs);
+    },
+    [player, firstTimestamp, setCurrentTime]
+  );
+
+  const handleGroupClick = useCallback(
+    (group: EventGroup) => {
+      // Jump to the middle of the group
+      const middleIndex = Math.floor(group.events.length / 2);
+      const middleEvent = group.events[middleIndex];
+      handleEventClick(middleEvent.timestamp);
+    },
+    [handleEventClick]
+  );
+
+  // Virtualization
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: groupedEvents.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 40,
+    overscan: 20,
+  });
 
   if (isLoading || !data?.events) {
     return (
@@ -238,24 +279,6 @@ export function ReplayBreadcrumbs() {
       </div>
     );
   }
-
-  const getGroupDescription = (group: (typeof groupedEvents)[0]) => {
-    const firstEvent = group.events[0];
-    const baseDescription = getEventDescription(firstEvent);
-
-    if (group.count > 1) {
-      return `${baseDescription} (×${group.count})`;
-    }
-
-    return baseDescription;
-  };
-
-  const handleGroupClick = (group: (typeof groupedEvents)[0]) => {
-    // Jump to the middle of the group
-    const middleIndex = Math.floor(group.events.length / 2);
-    const middleEvent = group.events[middleIndex];
-    handleEventClick(middleEvent.timestamp);
-  };
 
   // Calculate display name based on identification status
   const isIdentified = !!data.metadata.identified_user_id;
@@ -287,9 +310,13 @@ export function ReplayBreadcrumbs() {
         <div className="p-2 border-b border-neutral-100 dark:border-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 shrink-0">
           {t("{count} events captured ({groupCount} groups)", { count: String(data.events.length), groupCount: String(groupedEvents.length) })}
         </div>
-        <ScrollArea className="flex-1 rounded-lg">
-          <div className="overflow-x-hidden">
-            {groupedEvents.map((group, index) => {
+        <div ref={scrollContainerRef} className="flex-1 overflow-auto rounded-lg">
+          <div
+            className="overflow-x-hidden relative"
+            style={{ height: `${virtualizer.getTotalSize()}px` }}
+          >
+            {virtualizer.getVirtualItems().map(virtualRow => {
+              const group = groupedEvents[virtualRow.index];
               const firstEvent = group.events[0];
               const Icon = getEventIcon(firstEvent);
               const color = getEventColor(firstEvent);
@@ -300,12 +327,15 @@ export function ReplayBreadcrumbs() {
 
               return (
                 <div
-                  key={`${group.startTime}-${index}`}
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
                   className={cn(
                     "p-2 border-b border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900",
                     "hover:bg-neutral-50 dark:hover:bg-neutral-800/80 transition-colors cursor-pointer",
-                    "flex items-center gap-2 group"
+                    "flex items-center gap-2 group absolute left-0 right-0"
                   )}
+                  style={{ top: `${virtualRow.start}px` }}
                   onClick={() => handleGroupClick(group)}
                 >
                   <div className="text-xs text-neutral-600 dark:text-neutral-400 w-10">
@@ -331,7 +361,7 @@ export function ReplayBreadcrumbs() {
               );
             })}
           </div>
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );

@@ -34,6 +34,7 @@ export type Event = {
   screen_height: number;
   device_type: string;
   type: string;
+  traits?: Record<string, unknown> | null;
 };
 
 // Response types for cursor-based API

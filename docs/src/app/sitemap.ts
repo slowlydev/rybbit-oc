@@ -36,6 +36,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  // Comparison pages
+  const competitors = [
+    "google-analytics",
+    "plausible",
+    "posthog",
+    "umami",
+    "fathom",
+    "simpleanalytics",
+    "matomo",
+    "cloudflare-analytics",
+  ];
+  const comparisonPages = [
+    {
+      url: `${baseUrl}/compare`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
+    ...competitors.map(slug => ({
+      url: `${baseUrl}/compare/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
+  ];
+
   // Static pages
   const staticPages = [
     {
@@ -70,5 +96,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticPages, ...toolPages, ...docPages, ...blogPosts];
+  return [...staticPages, ...comparisonPages, ...toolPages, ...docPages, ...blogPosts];
 }

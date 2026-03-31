@@ -110,6 +110,7 @@
     const sessionReplaySlimDOMOptions = slimDOMAttr ? parseJsonSafely(slimDOMAttr, {}) : void 0;
     const sampleRateAttr = scriptTag.getAttribute("data-replay-sample-rate");
     const sessionReplaySampleRate = sampleRateAttr ? Math.min(100, Math.max(0, parseInt(sampleRateAttr, 10))) : void 0;
+    const tag = scriptTag.getAttribute("data-tag") || "";
     const defaultConfig = {
       namespace,
       analyticsHost,
@@ -131,6 +132,7 @@
       trackButtonClicks: false,
       trackCopy: false,
       trackFormInteractions: false,
+      tag,
       // rrweb session replay options (undefined means use rrweb defaults)
       sessionReplayBlockClass,
       sessionReplayBlockSelector,
@@ -378,6 +380,49 @@
     }
   };
 
+  // botSignals.ts
+  function getBotScore() {
+    let score = 0;
+    try {
+      if (navigator.webdriver === true) {
+        score++;
+      }
+      if (window.outerHeight === 0 || window.outerWidth === 0) {
+        score++;
+      }
+      if (navigator.connection?.rtt === 0) {
+        score++;
+      }
+      if (!window.chrome && /Chrome\//.test(navigator.userAgent)) {
+        score++;
+      }
+      try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        if (gl) {
+          const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+          if (debugInfo) {
+            const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            if (typeof renderer === "string" && renderer.includes("SwiftShader")) {
+              score++;
+            }
+          }
+        }
+      } catch (e2) {
+      }
+      if (navigator.plugins.length === 0 && /Chrome\//.test(navigator.userAgent)) {
+        score++;
+      }
+      try {
+        if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+        }
+      } catch (e2) {
+      }
+    } catch (e2) {
+    }
+    return score;
+  }
+
   // tracking.ts
   var Tracker = class {
     constructor(config) {
@@ -450,10 +495,14 @@
         screenHeight: screen.height,
         language: navigator.language,
         page_title: document.title,
-        referrer: document.referrer
+        referrer: document.referrer,
+        _bs: getBotScore()
       };
       if (this.customUserId) {
         payload.user_id = this.customUserId;
+      }
+      if (this.config.tag) {
+        payload.tag = this.config.tag;
       }
       return payload;
     }

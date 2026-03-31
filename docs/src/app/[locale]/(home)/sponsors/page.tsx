@@ -81,6 +81,24 @@ const sponsors: Sponsor[] = [
     url: "https://arkhq.io",
     amount: 10,
   },
+  {
+    name: "Kaashosting",
+    logo: "/sponsors/kaashosting.png",
+    url: "https://www.kaashosting.nl/",
+    amount: 10,
+  },
+  {
+    name: "MVPS.net",
+    logo: "/sponsors/mvps.png",
+    url: "https://www.mvps.net/",
+    amount: 10,
+  },
+  {
+    name: "Sayfone",
+    logo: "/sponsors/sayfone.svg",
+    url: "https://sayfone.com/",
+    amount: 10,
+  },
 ];
 
 export default function SponsorsPage() {
@@ -119,7 +137,7 @@ export default function SponsorsPage() {
       <section className="py-12 w-full max-w-5xl mx-auto px-4 z-10">
         <div className="bg-neutral-200/40 dark:bg-neutral-900/40 p-2 rounded-3xl border border-neutral-300 dark:border-neutral-800">
           <div className="bg-neutral-50 dark:bg-neutral-900 backdrop-blur-sm rounded-2xl border border-neutral-300 dark:border-neutral-800 p-8">
-            <div className="flex gap-6">
+            <div className="flex gap-6 flex-wrap justify-start">
               {sponsors.map(sponsor => {
                 const tier = getTier(sponsor.amount);
                 return (

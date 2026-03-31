@@ -9,11 +9,12 @@ export function getPageImage(page: Page) {
   };
 }
 
-export function createOGImageUrl(title: string, description?: string) {
+export function createOGImageUrl(title: string, description?: string, label?: string) {
   const params = new URLSearchParams({ title });
   if (description) params.set('description', description);
+  if (label) params.set('label', label);
   return {
-    url: `/og-image?${params.toString()}`,
+    url: `/og/image.png?${params.toString()}`,
     width: 1200,
     height: 630,
   };

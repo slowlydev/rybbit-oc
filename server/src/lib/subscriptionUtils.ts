@@ -27,7 +27,6 @@ function getStartOfMonth(): string {
 
 /**
  * Unlocked self-hosted: every org gets unlimited
- */
 export async function getBestSubscription(
   organizationId: string,
   stripeCustomerId: string | null

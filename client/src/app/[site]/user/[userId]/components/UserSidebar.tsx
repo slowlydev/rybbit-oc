@@ -18,6 +18,8 @@ import { VisitCalendar } from "./Calendar";
 import { EventIcon, PageviewIcon } from "../../../../../components/EventIcons";
 import { UserInfo, UserSessionCountResponse } from "../../../../../api/analytics/endpoints";
 import { DeviceIcon } from "../../../components/shared/icons/Device";
+import { useConfigs } from "../../../../../lib/configs";
+import { UserLocationMap } from "./UserLocationMap";
 
 interface UserSidebarProps {
   data: UserInfo | undefined;
@@ -87,6 +89,7 @@ function StatCard({
 export function UserSidebar({ data, isLoading, sessionCount, getRegionName }: UserSidebarProps) {
   const t = useExtracted();
   const { formatRelative } = useDateTimeFormat();
+  const { configs } = useConfigs();
   const isIdentified = !!data?.identified_user_id;
 
   // Filter custom traits (exclude username, name, email)
@@ -275,6 +278,17 @@ export function UserSidebar({ data, isLoading, sessionCount, getRegionName }: Us
             ))}
           </div>
         </SidebarCard>
+      )}
+
+      {/* Location Map */}
+      {configs?.mapboxToken && data?.country && (
+        <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-100 dark:border-neutral-850 aspect-square overflow-hidden">
+          <UserLocationMap
+            country={data.country}
+            region={data.region}
+            city={data.city}
+          />
+        </div>
       )}
 
       {/* Linked Devices (identified users only) */}

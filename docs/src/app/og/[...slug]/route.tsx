@@ -25,18 +25,34 @@ async function loadInterFont(
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ slug: string[] }> },
 ) {
   const { slug } = await params;
+  const { searchParams } = new URL(req.url);
 
   // Strip trailing "image.png" segment if present
   const pageSlug = slug[slug.length - 1] === 'image.png'
     ? slug.slice(0, -1)
     : slug;
 
-  const page = source.getPage(pageSlug.length > 0 ? pageSlug : undefined);
-  if (!page) notFound();
+  let title: string;
+  let description: string | undefined;
+  let label: string | undefined;
+
+  if (searchParams.has('title')) {
+    // Marketing pages: data from query params
+    title = searchParams.get('title')!;
+    description = searchParams.get('description') ?? undefined;
+    label = searchParams.get('label') ?? undefined;
+  } else {
+    // Docs pages: data from source
+    const page = source.getPage(pageSlug.length > 0 ? pageSlug : undefined);
+    if (!page) notFound();
+    title = page.data.title;
+    description = page.data.description;
+    label = 'Docs';
+  }
 
   const [interRegular, interBoldFont, logoSrc] = await Promise.all([
     loadInterFont(400),
@@ -46,10 +62,10 @@ export async function GET(
 
   return new ImageResponse(
     generateOGImage({
-      title: page.data.title,
-      description: page.data.description,
+      title,
+      description,
       logoSrc,
-      label: 'Docs',
+      label,
     }),
     {
       width: 1200,

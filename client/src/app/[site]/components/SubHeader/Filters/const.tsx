@@ -163,6 +163,11 @@ export const FilterOptions: {
     icon: <Tag className="h-4 w-4" />,
   },
   {
+    label: "Tag",
+    value: "tag",
+    icon: <Tag className="h-4 w-4" />,
+  },
+  {
     label: "Lat",
     value: "lat",
     icon: <MapPin className="h-4 w-4" />,

@@ -14,7 +14,7 @@ import CreateGoalButton from "./components/CreateGoalButton";
 import GoalsList from "./components/GoalsList";
 import { Target } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
+import { ExternalLink } from "../../../components/ExternalLink";
 
 // Goal card skeleton component
 const GoalCardSkeleton = () => (
@@ -23,11 +23,12 @@ const GoalCardSkeleton = () => (
       {/* Left section skeleton */}
       <div className="flex-1 pr-4">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-neutral-200 dark:bg-neutral-800 rounded-full"></div>
+          <div className="w-4 h-4 bg-neutral-200 dark:bg-neutral-800 rounded"></div>
           <div className="h-5 bg-neutral-200 dark:bg-neutral-800 rounded w-36"></div>
         </div>
-        <div className="mt-2">
-          <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-48 mt-1"></div>
+        <div className="flex items-center gap-1 mt-2">
+          <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-12"></div>
+          <div className="h-5 bg-neutral-200 dark:bg-neutral-800 rounded w-32 px-1 py-0.5"></div>
         </div>
       </div>
 
@@ -53,8 +54,7 @@ const GoalCardSkeleton = () => (
         <div className="w-7 h-7 bg-neutral-200 dark:bg-neutral-800 rounded"></div>
       </div>
     </div>
-    <div className="bg-neutral-300 dark:bg-neutral-700 h-1.5 w-full absolute bottom-0 left-0"></div>
-    <div className="bg-neutral-200 dark:bg-neutral-800 h-1.5 w-1/3 absolute bottom-0 left-0"></div>
+    <div className="bg-neutral-100 dark:bg-neutral-700 h-1.5 w-full"></div>
   </div>
 );
 
@@ -166,7 +166,7 @@ export default function GoalsPage() {
           <NothingFound
             icon={<Target className="w-10 h-10" />}
             title={t("No goals found")}
-            description={<span>{t("Create your first conversion goal to start tracking important user actions.")} <Link href="https://rybbit.com/docs/goals" className="text-blue-500 hover:underline" target="_blank">{t("Learn more")}</Link></span>}
+            description={<span>{t("Create your first conversion goal to start tracking important user actions.")} <ExternalLink href="https://rybbit.com/docs/goals">{t("Learn more")}</ExternalLink></span>}
             action={<CreateGoalButton siteId={Number(site)} />}
           />
         ) : filteredGoals.length === 0 ? (

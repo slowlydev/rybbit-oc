@@ -4,14 +4,16 @@ import { toast } from "@/components/ui/sonner";
 import { Alert, AlertDescription, AlertTitle } from "../../ui/alert";
 import { Button } from "../../ui/button";
 import { Card, CardContent } from "../../ui/card";
-import { Progress } from "../../ui/progress";
 import { BACKEND_URL } from "../../../lib/const";
 import { getPlanType, getStripePrices } from "../../../lib/stripe";
 import { formatDate } from "../../../lib/subscription/planUtils";
 import { useStripeSubscription } from "../../../lib/subscription/useStripeSubscription";
 import { UsageChart } from "../../UsageChart";
 import { authClient } from "@/lib/auth";
-import { PlanDialog } from "./PlanDialog";
+import { InvoicesCard } from "../components/InvoicesCard";
+import { UsageCards } from "../components/UsageCards";
+import { CancellationDialog } from "./CancellationDialog";
+import { PlanDialog } from "../components/PlanDialog";
 
 export function PaidPlan() {
   const { data: activeSubscription, isLoading, error: subscriptionError, refetch } = useStripeSubscription();
@@ -22,13 +24,13 @@ export function PaidPlan() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [showPlanDialog, setShowPlanDialog] = useState(false);
+  const [showCancellationDialog, setShowCancellationDialog] = useState(false);
 
   const isTrial = !!activeSubscription?.isTrial;
   const trialDaysRemaining = activeSubscription?.trialDaysRemaining || 0;
 
   const eventLimit = activeSubscription?.eventLimit || 0;
   const currentUsage = activeSubscription?.monthlyEventCount || 0;
-  const usagePercentage = eventLimit > 0 ? Math.min((currentUsage / eventLimit) * 100, 100) : 0;
   const isAnnualPlan = activeSubscription?.interval === "year";
 
   const stripePlan = getStripePrices().find(p => p.name === activeSubscription?.planName);
@@ -87,8 +89,7 @@ export function PaidPlan() {
   };
 
   const handleChangePlan = () => setShowPlanDialog(true);
-  const handleViewSubscription = () => createPortalSession();
-  const handleCancelSubscription = () => createPortalSession("subscription_cancel");
+  const handleCancelSubscription = () => setShowCancellationDialog(true);
 
   const getFormattedPrice = () => {
     if (!currentPlanDetails) return "$0/month";
@@ -124,6 +125,16 @@ export function PaidPlan() {
         currentPlanName={activeSubscription?.planName}
         hasActiveSubscription={!!activeSubscription}
       />
+      {activeSubscription && organizationId && (
+        <CancellationDialog
+          open={showCancellationDialog}
+          onOpenChange={setShowCancellationDialog}
+          subscription={activeSubscription}
+          organizationId={organizationId}
+          onProceedToStripe={() => createPortalSession("subscription_cancel")}
+          onChangePlan={handleChangePlan}
+        />
+      )}
       <Card>
         <CardContent>
           <div className="space-y-6 mt-3 p-2">
@@ -141,42 +152,31 @@ export function PaidPlan() {
                 <p className="text-neutral-400 text-sm">{formatRenewalDate()}</p>
               </div>
               <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => createPortalSession("payment_method_update")}
+                  disabled={isProcessing}
+                >
+                  Manage Payment Details
+                </Button>
                 <Button variant="success" onClick={handleChangePlan}>
                   Change Plan
                 </Button>
-                <Button variant="outline" onClick={handleViewSubscription} disabled={isProcessing}>
-                  View Details
-                </Button>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <h3 className="font-medium mb-2">Usage this month</h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">Events</span>
-                    <span className="text-sm">
-                      {currentUsage.toLocaleString()} / {eventLimit.toLocaleString()}
-                    </span>
-                  </div>
-                  <Progress value={usagePercentage} />
+            {currentUsage >= eventLimit && (
+              <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    <strong>Usage limit reached!</strong> You've exceeded your plan's event limit.
+                  </p>
+                  <Button variant="success" size="sm" onClick={handleChangePlan}>
+                    Upgrade Plan
+                  </Button>
                 </div>
-
-                {currentUsage >= eventLimit && (
-                  <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-800">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-amber-700 dark:text-amber-300">
-                        <strong>Usage limit reached!</strong> You've exceeded your plan's event limit.
-                      </p>
-                      <Button variant="success" size="sm" onClick={handleChangePlan}>
-                        Upgrade Plan
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
+            )}
+            <UsageCards />
 
             {organizationId && <UsageChart organizationId={organizationId} />}
 
@@ -218,6 +218,7 @@ export function PaidPlan() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      <InvoicesCard />
+    </div >
   );
 }

@@ -1,3 +1,4 @@
+import cluster from "node:cluster";
 import cors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
 import { toNodeHandler } from "better-auth/node";
@@ -9,6 +10,8 @@ import {
   getAdminOrganizations,
   getAdminServiceEventCount,
   getAdminSites,
+  getClickhouseStats,
+  getClickhouseQueryLog,
 } from "./api/admin/index.js";
 import {
   createFunnel,
@@ -63,6 +66,7 @@ import {
   selectGSCProperty,
 } from "./api/gsc/index.js";
 import { updateInvitationSiteAccess, updateMemberSiteAccess } from "./api/memberAccess/index.js";
+import { listTeams, createTeam, updateTeam, deleteTeam } from "./api/teams/index.js";
 import {
   deleteSessionReplay,
   getSessionReplayEvents,
@@ -90,11 +94,8 @@ import {
 } from "./api/sites/index.js";
 import {
   addUserToOrganization,
-  createApiKey,
-  deleteApiKey,
   getMyOrganizations,
   getUserOrganizations,
-  listApiKeys,
   listOrganizationMembers,
   oneClickUnsubscribeMarketing,
   unsubscribeMarketing,
@@ -114,9 +115,11 @@ import {
 } from "./lib/auth-middleware.js";
 import { mapHeaders } from "./lib/auth-utils.js";
 import { auth } from "./lib/auth.js";
+import { sessionsService } from "./services/sessions/sessionsService.js";
 import { telemetryService } from "./services/telemetryService.js";
 import { handleIdentify } from "./services/tracker/identifyService.js";
 import { trackEvent } from "./services/tracker/trackEvent.js";
+import { usageService } from "./services/usageService.js";
 
 // Pre-composed middleware chains for common auth patterns
 // Cast as any to work around Fastify's type inference limitations with preHandler
@@ -297,7 +300,7 @@ async function organizationsRoutes(fastify: FastifyInstance) {
   fastify.get("/organizations/:organizationId/sites", orgMember, getSitesFromOrg);
   fastify.post("/organizations/:organizationId/sites", orgAdminParams, addSite);
   fastify.get("/organizations/:organizationId/members", orgMember, listOrganizationMembers);
-  fastify.post("/organizations/:organizationId/members", orgMember, addUserToOrganization);
+  fastify.post("/organizations/:organizationId/members", authOnly, addUserToOrganization);
 
   // Member site access management (admin/owner only)
   fastify.put("/organizations/:organizationId/members/:memberId/sites", orgAdminParams, updateMemberSiteAccess);
@@ -310,6 +313,14 @@ async function organizationsRoutes(fastify: FastifyInstance) {
   );
 }
 
+async function teamsRoutes(fastify: FastifyInstance) {
+  // Teams
+  fastify.get("/organizations/:organizationId/teams", orgMember, listTeams);
+  fastify.post("/organizations/:organizationId/teams", orgAdminParams, createTeam);
+  fastify.put("/organizations/:organizationId/teams/:teamId", orgAdminParams, updateTeam);
+  fastify.delete("/organizations/:organizationId/teams/:teamId", orgAdminParams, deleteTeam);
+}
+
 async function userRoutes(fastify: FastifyInstance) {
   // User
   fastify.get("/config", getConfig); // Public - returns app config
@@ -319,9 +330,6 @@ async function userRoutes(fastify: FastifyInstance) {
   fastify.post("/user/unsubscribe-marketing", authOnly, unsubscribeMarketing);
   fastify.get("/user/unsubscribe-marketing-oneclick", oneClickUnsubscribeMarketing); // Public - for link clicks
   fastify.post("/user/unsubscribe-marketing-oneclick", oneClickUnsubscribeMarketing); // Public - for List-Unsubscribe header
-  fastify.get("/user/api-keys", authOnly, listApiKeys);
-  fastify.post("/user/api-keys", authOnly, createApiKey);
-  fastify.delete("/user/api-keys/:keyId", authOnly, deleteApiKey);
 }
 
 async function gscRoutes(fastify: FastifyInstance) {
@@ -335,6 +343,10 @@ async function gscRoutes(fastify: FastifyInstance) {
 }
 
 async function adminRoutes(fastify: FastifyInstance) {
+  // ClickHouse stats (available for all admins)
+  fastify.get("/admin/clickhouse-stats", adminOnly, getClickhouseStats);
+  fastify.get("/admin/clickhouse-query-log", adminOnly, getClickhouseQueryLog);
+
   // Admin Routes (always available)
   fastify.get("/admin/sites", adminOnly, getAdminSites);
   fastify.get("/admin/organizations", adminOnly, getAdminOrganizations);
@@ -348,6 +360,7 @@ async function apiRoutes(fastify: FastifyInstance) {
   await fastify.register(sessionReplayRoutes);
   await fastify.register(sitesRoutes);
   await fastify.register(organizationsRoutes);
+  await fastify.register(teamsRoutes);
   await fastify.register(userRoutes);
   await fastify.register(gscRoutes);
   await fastify.register(adminRoutes);
@@ -364,13 +377,31 @@ server.register(apiRoutes, { prefix: "/api" });
 
 const start = async () => {
   try {
-    await Promise.all([initializeClickhouse(), initPostgres()]);
+    // When running as a cluster worker, the primary process already initialized the databases
+    if (!cluster.isWorker) {
+      await Promise.all([initializeClickhouse(), initPostgres()]);
+    }
 
-    telemetryService.startTelemetryCron();
+    // Cron jobs should only run on the primary process (or in single-process mode)
+    if (!cluster.isWorker) {
+      telemetryService.startTelemetryCron();
+      sessionsService.startCleanupCron();
+      usageService.startUsageCheckCron();
+    }
 
     // Start the server first
     await server.listen({ port: 3001, host: "0.0.0.0" });
-    server.log.info("Server is listening on http://0.0.0.0:3001");
+    server.log.info(`Server is listening on http://0.0.0.0:3001 (PID: ${process.pid})`);
+
+    // Listen for IPC messages from the cluster primary process
+    if (cluster.isWorker) {
+      process.on("message", (message: { type: string; siteIds: number[] }) => {
+        if (message?.type === "sites-over-limit") {
+          usageService.setSitesOverLimit(new Set(message.siteIds));
+          server.log.debug(`Received ${message.siteIds.length} sites-over-limit from primary`);
+        }
+      });
+    }
 
     // if (process.env.NODE_ENV === "production") {
     //   // Initialize uptime monitoring service in the background (non-blocking)

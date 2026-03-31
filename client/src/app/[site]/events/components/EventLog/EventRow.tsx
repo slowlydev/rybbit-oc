@@ -37,6 +37,7 @@ export function EventRow({ event, site, onClick }: EventRowProps) {
   const displayName = getUserDisplayName({
     identified_user_id: event.identified_user_id || undefined,
     user_id: event.user_id,
+    traits: event.traits,
   });
 
   return (

@@ -30,6 +30,7 @@ export interface ScriptConfig {
   trackButtonClicks: boolean;
   trackCopy: boolean;
   trackFormInteractions: boolean;
+  tag: string;
 }
 
 export interface BasePayload {
@@ -43,6 +44,8 @@ export interface BasePayload {
   page_title: string;
   referrer: string;
   user_id?: string;
+  tag?: string;
+  _bs?: number; // Client-side bot detection score
 }
 
 export interface TrackingPayload extends BasePayload {
@@ -55,6 +58,7 @@ export interface TrackingPayload extends BasePayload {
   inp?: number | null;
   fcp?: number | null;
   ttfb?: number | null;
+  tag?: string;
 }
 
 export interface ButtonClickProperties {

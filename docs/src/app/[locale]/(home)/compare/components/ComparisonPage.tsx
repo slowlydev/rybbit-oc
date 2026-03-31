@@ -1,13 +1,20 @@
 import { BackgroundGrid } from "@/components/BackgroundGrid";
 import { CTASection } from "@/components/CTASection";
-import { DEFAULT_EVENT_LIMIT } from "@/lib/const";
-import { CheckCircle, CircleMinus } from "lucide-react";
+import { SectionBadge } from "@/components/SectionBadge";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
+import { ArrowRight, CheckCircle, CircleMinus } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { Tilt_Warp } from "next/font/google";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 import { TrackedButton } from "@/components/TrackedButton";
-import { cn } from "@/lib/utils";
 
 const tilt_wrap = Tilt_Warp({
   subsets: ["latin"],
@@ -25,14 +32,56 @@ export interface ComparisonSection {
   features: ComparisonFeature[];
 }
 
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+export interface PricingInfo {
+  name: string;
+  model: string;
+  startingPrice: string;
+  highlights: string[];
+}
+
+export interface RelatedResource {
+  title: string;
+  href: string;
+  description: string;
+}
+
 export interface ComparisonPageProps {
   competitorName: string;
   sections: ComparisonSection[];
   comparisonContent?: React.ReactNode;
+  subtitle?: string;
+  introHeading?: string;
+  introParagraphs?: string[];
+  chooseRybbit?: string[];
+  chooseCompetitor?: string[];
+  rybbitPricing?: PricingInfo;
+  competitorPricing?: PricingInfo;
+  faqItems?: FAQItem[];
+  relatedResources?: RelatedResource[];
 }
 
-export function ComparisonPage({ competitorName, sections, comparisonContent }: ComparisonPageProps) {
+export function ComparisonPage({
+  competitorName,
+  sections,
+  comparisonContent,
+  subtitle,
+  introHeading,
+  introParagraphs,
+  chooseRybbit,
+  chooseCompetitor,
+  rybbitPricing,
+  competitorPricing,
+  faqItems,
+  relatedResources,
+}: ComparisonPageProps) {
   const t = useExtracted();
+
+  const hasNewSections = !!chooseRybbit;
 
   const renderFeatureValue = (value: string | boolean) => {
     if (typeof value === "boolean") {
@@ -60,7 +109,9 @@ export function ComparisonPage({ competitorName, sections, comparisonContent }: 
           {t("Rybbit vs {competitor}", { competitor: competitorName })}
         </h1>
         <h2 className="relative z-10 text-base md:text-xl pt-4 md:pt-6 px-4 tracking-tight max-w-4xl text-center text-neutral-600 dark:text-neutral-300 font-light">
-          {t("Compare the key features of Rybbit and {competitor}.", { competitor: competitorName })}
+          {subtitle
+            ? subtitle
+            : t("Compare the key features of Rybbit and {competitor}.", { competitor: competitorName })}
         </h2>
 
         <div className="relative z-10 flex flex-col items-center my-8 md:my-10">
@@ -86,38 +137,72 @@ export function ComparisonPage({ competitorName, sections, comparisonContent }: 
           </div>
           <p className="text-neutral-500 dark:text-neutral-400 text-xs md:text-sm flex items-center justify-center gap-2 mt-6">
             <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
-            {t("7-day free trial")}
+            {t("7-day free trial. Cancel anytime.")}
           </p>
         </div>
       </div>
 
-      {/* <div className="relative w-full max-w-[1300px] mb-10 px-4">
-        <div className="absolute top-0 left-0 w-[550px] h-[550px] bg-emerald-500/40 rounded-full blur-[80px] opacity-70"></div>
-        <div className="absolute top-20 left-20 w-[400px] h-[400px] bg-emerald-600/30 rounded-full blur-[70px] opacity-50"></div>
+      {/* Intro paragraphs */}
+      {introHeading && introParagraphs && introParagraphs.length > 0 && (
+        <section className="w-full max-w-5xl mx-auto px-4 z-10 pb-4">
+          <h2 className="text-2xl md:text-3xl font-semibold mb-6">
+            {introHeading}
+          </h2>
+          <div className="space-y-4">
+            {introParagraphs.map((paragraph, index) => (
+              <p key={index} className="text-neutral-600 dark:text-neutral-300 leading-relaxed font-light">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
 
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/40 rounded-full blur-[80px] opacity-60"></div>
-        <div className="absolute bottom-40 right-20 w-[350px] h-[350px] bg-indigo-500/30 rounded-full blur-[75px] opacity-50"></div>
-
-        <div className="absolute top-1/4 right-0 w-[320px] h-[320px] bg-purple-500/40 rounded-full blur-[70px] opacity-50"></div>
-        <div className="absolute top-1/3 right-20 w-[250px] h-[250px] bg-violet-500/30 rounded-full blur-[65px] opacity-40"></div>
-
-        <div className="absolute bottom-1/3 left-0 w-[320px] h-[320px] bg-emerald-400/30 rounded-full blur-[70px] opacity-60"></div>
-        <div className="absolute bottom-1/4 left-20 w-[240px] h-[240px] bg-teal-400/25 rounded-full blur-[65px] opacity-50"></div>
-
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-indigo-400/30 rounded-full blur-[80px] opacity-50"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/3 -translate-y-1/3 w-[350px] h-[350px] bg-sky-400/20 rounded-full blur-[75px] opacity-40"></div>
-
-        <div className="relative z-10 rounded-lg overflow-hidden border-8 border-neutral-100/5 shadow-2xl shadow-emerald-900/10">
-          <iframe
-            src={demoUrl}
-            width="1300"
-            height="750"
-            className="w-full h-[600px] md:h-[700px] lg:h-[750px]"
-            style={{ border: "none" }}
-            title="Rybbit Analytics Demo"
-          ></iframe>
-        </div>
-      </div> */}
+      {/* Which is right for you? */}
+      {chooseRybbit && chooseCompetitor && (
+        <section className="py-12 w-full max-w-5xl mx-auto px-4 z-10">
+          <div className="mb-8">
+            <SectionBadge>{t("Comparison")}</SectionBadge>
+            <h2 className="text-2xl md:text-3xl font-semibold mt-4">
+              {t("Which is right for you?")}
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Choose Rybbit */}
+            <div className="bg-neutral-200/40 dark:bg-neutral-900/40 p-2 rounded-3xl border border-emerald-500/30 dark:border-emerald-500/20">
+              <div className="bg-neutral-50 dark:bg-neutral-900 backdrop-blur-sm rounded-2xl border border-emerald-500/20 dark:border-emerald-500/10 p-6 h-full">
+                <h3 className="text-lg font-semibold text-emerald-600 dark:text-emerald-400 mb-4">
+                  {t("Choose Rybbit if...")}
+                </h3>
+                <ul className="space-y-3">
+                  {chooseRybbit.map((item, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-neutral-700 dark:text-neutral-300 text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            {/* Choose Competitor */}
+            <div className="bg-neutral-200/40 dark:bg-neutral-900/40 p-2 rounded-3xl border border-neutral-300 dark:border-neutral-800">
+              <div className="bg-neutral-50 dark:bg-neutral-900 backdrop-blur-sm rounded-2xl border border-neutral-300 dark:border-neutral-800 p-6 h-full">
+                <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300 mb-4">
+                  {t("Choose {competitor} if...", { competitor: competitorName })}
+                </h3>
+                <ul className="space-y-3">
+                  {chooseCompetitor.map((item, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-neutral-400 dark:text-neutral-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-neutral-700 dark:text-neutral-300 text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className="w-full max-w-5xl mx-auto mt-12 px-4 z-10">
         <h2 className="text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-left">
@@ -156,7 +241,7 @@ export function ComparisonPage({ competitorName, sections, comparisonContent }: 
                 {sections.map((section, sectionIndex) => (
                   <React.Fragment key={sectionIndex}>
                     <tr>
-                      <td colSpan={3} className="px-6 py-4 bg-neutral-200/70 dark:bg-neutral-900/70">
+                      <td colSpan={3} className="px-6 py-4 bg-neutral-200/70 dark:bg-neutral-800/50">
                         <span className="text-neutral-600 dark:text-neutral-400 text-sm font-medium">
                           {section.title}
                         </span>
@@ -188,14 +273,117 @@ export function ComparisonPage({ competitorName, sections, comparisonContent }: 
         </div>
       </section>
 
-      {comparisonContent && (
+      {/* Pricing Comparison */}
+      {rybbitPricing && competitorPricing && (
+        <section className="py-12 w-full max-w-5xl mx-auto px-4 z-10">
+          <div className="mb-8">
+            <SectionBadge>{t("Pricing")}</SectionBadge>
+            <h2 className="text-2xl md:text-3xl font-semibold mt-4">
+              {t("Pricing comparison")}
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Rybbit Pricing */}
+            <div className="bg-neutral-200/40 dark:bg-neutral-900/40 p-2 rounded-3xl border border-emerald-500/30 dark:border-emerald-500/20">
+              <div className="bg-neutral-50 dark:bg-neutral-900 backdrop-blur-sm rounded-2xl border border-emerald-500/20 dark:border-emerald-500/10 p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold">{rybbitPricing.name}</h3>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{rybbitPricing.model}</p>
+                </div>
+                <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-6">{rybbitPricing.startingPrice}</p>
+                <ul className="space-y-3">
+                  {rybbitPricing.highlights.map((highlight, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-neutral-700 dark:text-neutral-300 text-sm">{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            {/* Competitor Pricing */}
+            <div className="bg-neutral-200/40 dark:bg-neutral-900/40 p-2 rounded-3xl border border-neutral-300 dark:border-neutral-800">
+              <div className="bg-neutral-50 dark:bg-neutral-900 backdrop-blur-sm rounded-2xl border border-neutral-300 dark:border-neutral-800 p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold">{competitorPricing.name}</h3>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{competitorPricing.model}</p>
+                </div>
+                <p className="text-3xl font-bold text-neutral-700 dark:text-neutral-300 mb-6">{competitorPricing.startingPrice}</p>
+                <ul className="space-y-3">
+                  {competitorPricing.highlights.map((highlight, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-neutral-400 dark:text-neutral-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-neutral-700 dark:text-neutral-300 text-sm">{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Old comparison content - only if new sections not provided */}
+      {!hasNewSections && comparisonContent && (
         <section className="py-12 md:py-16 w-full max-w-3xl mx-auto px-4">
           <div className="prose prose-invert prose-neutral max-w-none">{comparisonContent}</div>
         </section>
       )}
 
+      {/* FAQ Section */}
+      {faqItems && faqItems.length > 0 && (
+        <section className="py-12 w-full max-w-5xl mx-auto px-4 z-10">
+          <div className="mb-8">
+            <SectionBadge>{t("FAQ")}</SectionBadge>
+            <h2 className="text-2xl md:text-3xl font-semibold mt-4">
+              {t("Frequently asked questions")}
+            </h2>
+          </div>
+          <div className="bg-neutral-100/50 dark:bg-neutral-800/20 backdrop-blur-sm border border-neutral-300/50 dark:border-neutral-800/50 rounded-xl overflow-hidden">
+            <Accordion type="single" collapsible className="w-full">
+              {faqItems.map((faq, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`item-${index}`}
+                  className={index === faqItems.length - 1 ? "border-b-0" : ""}
+                >
+                  <AccordionTrigger className="md:text-lg">{faq.question}</AccordionTrigger>
+                  <AccordionContent>{faq.answer}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
+      )}
+
+      {/* Related Resources */}
+      {relatedResources && relatedResources.length > 0 && (
+        <section className="py-12 w-full max-w-5xl mx-auto px-4 z-10">
+          <div className="mb-8">
+            <SectionBadge>{t("Resources")}</SectionBadge>
+            <h2 className="text-2xl md:text-3xl font-semibold mt-4">
+              {t("Related resources")}
+            </h2>
+          </div>
+          <ul className="space-y-3">
+            {relatedResources.map((resource, index) => (
+              <li key={index}>
+                <Link
+                  href={resource.href}
+                  className="group flex items-center gap-2 text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+                >
+                  <ArrowRight className="w-4 h-4 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                  <span className="font-medium">{resource.title}</span>
+                  <span className="text-sm text-neutral-500 dark:text-neutral-500">&mdash; {resource.description}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <CTASection
-        title="It's time to switch to analytics that's made for you"
+        title="Switch to analytics that's made for you"
         eventLocation="comparison_bottom_cta"
       />
     </div>

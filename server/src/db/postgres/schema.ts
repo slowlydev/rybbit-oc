@@ -178,6 +178,7 @@ export const invitation = pgTable("invitation", {
   // Site access restriction for the invited member
   hasRestrictedSiteAccess: boolean("has_restricted_site_access").default(false).notNull(),
   siteIds: jsonb("site_ids").default([]).$type<number[]>(), // Array of site IDs to grant access to
+  teamId: text().references(() => team.id, { onDelete: "set null" }),
 });
 
 // Member site access junction table - stores which sites a member has access to
@@ -202,6 +203,43 @@ export const memberSiteAccess = pgTable(
   ]
 );
 
+// Team table (BetterAuth)
+export const team = pgTable("team", {
+  id: text().primaryKey(),
+  name: text().notNull(),
+  organizationId: text().notNull().references(() => organization.id, { onDelete: "cascade" }),
+  createdAt: timestamp({ mode: "string" }).notNull(),
+  updatedAt: timestamp({ mode: "string" }),
+});
+
+// Team member table (BetterAuth)
+export const teamMember = pgTable("teamMember", {
+  id: text().primaryKey(),
+  teamId: text().notNull().references(() => team.id, { onDelete: "cascade" }),
+  userId: text().notNull().references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp({ mode: "string" }),
+});
+
+// Team site access junction table - stores which sites belong to a team
+export const teamSiteAccess = pgTable(
+  "team_site_access",
+  {
+    id: serial("id").primaryKey().notNull(),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => team.id, { onDelete: "cascade" }),
+    siteId: integer("site_id")
+      .notNull()
+      .references(() => sites.siteId, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("team_site_access_unique").on(table.teamId, table.siteId),
+    index("team_site_access_team_idx").on(table.teamId),
+    index("team_site_access_site_idx").on(table.siteId),
+  ]
+);
+
 // Session table (BetterAuth)
 export const session = pgTable(
   "session",
@@ -218,6 +256,7 @@ export const session = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     impersonatedBy: text(),
     activeOrganizationId: text(),
+    activeTeamId: text(),
   },
   table => [unique("session_token_unique").on(table.token)]
 );
@@ -229,7 +268,7 @@ export const apiKey = pgTable("apikey", {
   start: text(),
   prefix: text(),
   key: text().notNull(),
-  userId: text()
+  referenceId: text()
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   refillInterval: integer(),
@@ -245,6 +284,7 @@ export const apiKey = pgTable("apikey", {
   expiresAt: timestamp({ mode: "string" }),
   createdAt: timestamp({ mode: "string" }).notNull(),
   updatedAt: timestamp({ mode: "string" }).notNull(),
+  configId: text(),
   permissions: text(),
   metadata: jsonb(),
 });
@@ -606,6 +646,21 @@ export const userAliases = pgTable(
     index("user_aliases_anon_idx").on(table.siteId, table.anonymousId),
   ]
 );
+
+// Cancellation feedback for churn reduction
+export const cancellationFeedback = pgTable("cancellation_feedback", {
+  id: serial("id").primaryKey().notNull(),
+  organizationId: text("organization_id").notNull(),
+  userId: text("user_id").notNull(),
+  reason: text("reason").notNull(),
+  reasonDetails: text("reason_details"),
+  retentionOfferShown: text("retention_offer_shown"),
+  retentionOfferAccepted: boolean("retention_offer_accepted").default(false),
+  outcome: text("outcome").notNull(),
+  planNameAtCancellation: text("plan_name_at_cancellation"),
+  monthlyEventCountAtCancellation: integer("monthly_event_count_at_cancellation"),
+  createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+});
 
 export const importPlatforms = ["umami", "simple_analytics"] as const;
 

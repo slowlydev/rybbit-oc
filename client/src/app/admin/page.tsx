@@ -7,6 +7,7 @@ import { Sites } from "./components/sites/Sites";
 import { Users } from "./components/users/Users";
 import { Organizations } from "./components/organizations/Organizations";
 import { AdminLayout } from "./components/shared/AdminLayout";
+import { Database } from "./components/database/Database";
 import { AppSidebar } from "../../components/AppSidebar";
 
 import { usePathname } from "next/navigation";
@@ -63,10 +64,10 @@ export default function AdminPage() {
           <div className="text-2xl font-bold mb-4">{t("Admin Dashboard")}</div>
           <Tabs defaultValue="organizations" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
-              <TabsTrigger value="organizations">{t("Organizations")}</TabsTrigger>
-              <TabsTrigger value="sites">{t("Sites")}</TabsTrigger>
-              <TabsTrigger value="users">{t("Users")}</TabsTrigger>
-              <TabsTrigger value="settings">{t("Settings")}</TabsTrigger>
+              <TabsTrigger value="organizations">Organizations</TabsTrigger>
+              <TabsTrigger value="sites">Sites</TabsTrigger>
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="settings">Database</TabsTrigger>
             </TabsList>
 
             <TabsContent value="users">
@@ -82,10 +83,7 @@ export default function AdminPage() {
             </TabsContent>
 
             <TabsContent value="settings">
-              <div className="p-4 border border-neutral-100 dark:border-neutral-800 rounded-md">
-                <h2 className="text-xl font-bold mb-4">{t("Admin Settings")}</h2>
-                <p className="text-muted-foreground">{t("Settings panel coming soon...")}</p>
-              </div>
+              <Database />
             </TabsContent>
           </Tabs>
         </AdminLayout>

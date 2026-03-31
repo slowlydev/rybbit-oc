@@ -88,6 +88,7 @@ export function EventDetailsSheet({ open, onOpenChange, event, site }: EventDeta
                       {getUserDisplayName({
                         identified_user_id: event.identified_user_id || undefined,
                         user_id: event.user_id,
+                        traits: event.traits,
                       })}
                     </Link>
                   </div>

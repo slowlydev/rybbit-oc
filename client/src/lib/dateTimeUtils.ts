@@ -184,7 +184,10 @@ export const formatChartDateTime = (dt: DateTime, bucket: TimeBucket, locale = u
  * @param timestamp - UTC timestamp string from the server
  * @returns DateTime object in user's selected timezone
  */
-export const parseUtcTimestamp = (timestamp: string): DateTime => {
+export const parseUtcTimestamp = (timestamp: string | Date): DateTime => {
+  if (timestamp instanceof Date) {
+    return DateTime.fromJSDate(timestamp, { zone: "utc" }).setZone(getTimezone());
+  }
   return DateTime.fromSQL(timestamp, { zone: "utc" }).setZone(getTimezone());
 };
 

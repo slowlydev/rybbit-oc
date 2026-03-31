@@ -72,6 +72,7 @@ export function FilterComponent({
       case "utm_term": return t("UTM Term");
       case "lat": return t("Lat");
       case "lon": return t("Lon");
+      case "tag": return t("Tag");
       case "timezone": return t("Timezone");
       case "vpn": return t("VPN");
       case "crawler": return t("Crawler");

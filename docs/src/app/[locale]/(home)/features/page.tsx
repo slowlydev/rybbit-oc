@@ -49,10 +49,10 @@ export const metadata: Metadata = createMetadata({
   description:
     "Powerful, privacy-friendly analytics features to help you understand your audience and grow your business. Real-time data, session replay, web vitals, and more.",
   openGraph: {
-    images: [createOGImageUrl("Features - Rybbit Analytics", "Powerful, privacy-friendly analytics features to help you understand your audience and grow your business.")],
+    images: [createOGImageUrl("Features - Rybbit Analytics", "Powerful, privacy-friendly analytics features to help you understand your audience and grow your business.", "Features")],
   },
   twitter: {
-    images: [createOGImageUrl("Features - Rybbit Analytics", "Powerful, privacy-friendly analytics features to help you understand your audience and grow your business.")],
+    images: [createOGImageUrl("Features - Rybbit Analytics", "Powerful, privacy-friendly analytics features to help you understand your audience and grow your business.", "Features")],
   },
 });
 
@@ -70,7 +70,7 @@ interface FeatureGridProps {
 function FeatureGrid({ title, description, features }: FeatureGridProps) {
   return (
     <section className="py-12 md:py-16 w-full relative z-10">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-[1200px] mx-auto px-4">
         <div className="mb-12">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{title}</h2>
           <p className="text-lg text-neutral-600 dark:text-neutral-400">{description}</p>
@@ -357,7 +357,7 @@ export default function FeaturesPage() {
             </div>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm flex items-center justify-center gap-2 mt-6">
               <CheckCircle className="w-4 h-4" />
-              {t("7-day free trial")}
+              {t("7-day free trial. Cancel anytime.")}
             </p>
           </div>
         </div>

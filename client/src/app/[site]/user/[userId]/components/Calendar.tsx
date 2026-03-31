@@ -1,4 +1,3 @@
-import { getTimezone } from "@/lib/store";
 import { ResponsiveTimeRange } from "@nivo/calendar";
 import _ from "lodash";
 import { DateTime } from "luxon";
@@ -12,14 +11,14 @@ export const VisitCalendar = ({ sessionCount }: { sessionCount: UserSessionCount
   const t = useExtracted();
   const { resolvedTheme } = useTheme();
   const nivoTheme = useNivoTheme();
+
   const data = sessionCount
     .map(e => ({
       value: e.sessions,
-      day: DateTime.fromSQL(e.date ?? 0, { zone: "utc" })
-        .setZone(getTimezone())
-        .toFormat("y-LL-dd"),
+      day: DateTime.fromSQL(e.date ?? 0).toFormat("y-LL-dd"),
     }))
     .reverse();
+
 
   const maxValue = _.get(_.sortBy(data, "value")[Math.floor(data.length * 0.95)], "value");
 
@@ -27,7 +26,7 @@ export const VisitCalendar = ({ sessionCount }: { sessionCount: UserSessionCount
     return null;
   }
 
-  const toDate = DateTime.now().toFormat("y-LL-dd");
+  const toDate = DateTime.now().plus({ days: 1 }).toFormat("y-LL-dd");
   const fromDate = DateTime.now().minus({ days: 120 }).toFormat("y-LL-dd");
 
   return (

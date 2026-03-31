@@ -28,6 +28,7 @@ import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import { Skeleton } from "../../../../components/ui/skeleton";
 import { cn, formatter, getUserDisplayName } from "../../../../lib/utils";
+import { useShallow } from "zustand/react/shallow";
 import { useReplayStore } from "@/components/replay/replayStore";
 
 interface SessionReplayListItem {
@@ -55,7 +56,13 @@ interface SessionReplayListItem {
 export function ReplayCard({ replay }: { replay: SessionReplayListItem }) {
   const t = useExtracted();
   const { formatRelative } = useDateTimeFormat();
-  const { sessionId, setSessionId, resetPlayerState } = useReplayStore();
+  const { sessionId, setSessionId, resetPlayerState } = useReplayStore(
+    useShallow(s => ({
+      sessionId: s.sessionId,
+      setSessionId: s.setSessionId,
+      resetPlayerState: s.resetPlayerState,
+    }))
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const deleteSessionReplay = useDeleteSessionReplay();
   const startTime = DateTime.fromSQL(replay.start_time, {

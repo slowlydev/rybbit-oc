@@ -1,11 +1,10 @@
 import { ComparisonPage } from "../components/ComparisonPage";
-import { cloudflareAnalyticsComparisonData } from "./comparison-data";
-import { CloudflareAnalyticsComparisonContent } from "./ComparisonContent";
+import { cloudflareAnalyticsComparisonData, cloudflareAnalyticsExtendedData } from "./comparison-data";
 import type { Metadata } from "next";
 import { createOGImageUrl } from "@/lib/metadata";
 
 export const metadata: Metadata = {
-  title: "Rybbit vs Cloudflare Analytics: Full Comparison 2025",
+  title: "Rybbit vs Cloudflare Analytics: Full-Featured Alternative",
   description:
     "Compare Rybbit and Cloudflare Web Analytics. While Cloudflare is free and basic, Rybbit offers advanced features like session replay, funnels, and custom events.",
   openGraph: {
@@ -13,13 +12,13 @@ export const metadata: Metadata = {
     description: "Cloudflare is free but limited. Rybbit offers the full analytics experience. Compare features.",
     type: "website",
     url: "https://rybbit.com/compare/cloudflare-analytics",
-    images: [createOGImageUrl("Rybbit vs Cloudflare Analytics: Basic vs Full-Featured", "Cloudflare is free but limited. Rybbit offers the full analytics experience. Compare features.")],
+    images: [createOGImageUrl("Rybbit vs Cloudflare Analytics: Basic vs Full-Featured", "Cloudflare is free but limited. Rybbit offers the full analytics experience. Compare features.", "Compare")],
   },
   twitter: {
     card: "summary_large_image",
     title: "Rybbit vs Cloudflare Analytics",
     description: "Free basic analytics vs full-featured platform. See the difference.",
-    images: [createOGImageUrl("Rybbit vs Cloudflare Analytics", "Free basic analytics vs full-featured platform. See the difference.")],
+    images: [createOGImageUrl("Rybbit vs Cloudflare Analytics", "Free basic analytics vs full-featured platform. See the difference.", "Compare")],
   },
   alternates: {
     canonical: "https://rybbit.com/compare/cloudflare-analytics",
@@ -46,26 +45,42 @@ const structuredData = {
       mainEntity: [
         {
           "@type": "Question",
-          name: "Is Rybbit better than Cloudflare Analytics?",
+          name: "Why is Cloudflare Analytics data inaccurate?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Rybbit offers significantly more features than Cloudflare Web Analytics including session replay, funnels, custom events, user journeys, and conversion tracking. Cloudflare is free but limited to basic pageview metrics.",
+            text: "Cloudflare Analytics samples only about 10% of your traffic and extrapolates the rest. This means visitor counts are often significantly overcounted and you can't trust the exact numbers. Rybbit processes 100% of your events with no sampling.",
           },
         },
         {
           "@type": "Question",
-          name: "What features does Rybbit have that Cloudflare doesn't?",
+          name: "Do I need Cloudflare CDN to use Cloudflare Analytics?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Rybbit includes session replay, funnel analysis, custom event tracking, user journey visualization, Web Vitals monitoring, error tracking, goals and conversions, and public dashboards. Cloudflare only provides basic traffic metrics.",
+            text: "Yes. Cloudflare Analytics requires routing your DNS through Cloudflare. Rybbit works with any website regardless of CDN or hosting provider. Just add a single script tag.",
           },
         },
         {
           "@type": "Question",
-          name: "Should I switch from Cloudflare Analytics to Rybbit?",
+          name: "What features does Cloudflare Analytics lack?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "If you need more than basic pageview data, yes. Rybbit provides actionable insights with session replay, conversion tracking, and user behavior analysis that Cloudflare doesn't offer.",
+            text: "Cloudflare Analytics doesn't support custom events, conversion goals, UTM campaign tracking, session replay, funnels, user journeys, bounce rate, visit duration, entry/exit pages, or an API. It only provides basic traffic metrics with sampled data.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "How long does Cloudflare keep my data?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Cloudflare retains analytics data for only 6 months. Rybbit retains data for 2-5+ years depending on your plan, and you can export your data at any time.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Can I use Rybbit alongside Cloudflare Analytics?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes. Many teams add Rybbit for detailed analytics while keeping Cloudflare for basic CDN-level traffic monitoring. Just add Rybbit's script tag to your site, and it works alongside any other analytics tool.",
           },
         },
       ],
@@ -80,7 +95,15 @@ export default function CloudflareAnalytics() {
       <ComparisonPage
         competitorName="Cloudflare Analytics"
         sections={cloudflareAnalyticsComparisonData}
-        comparisonContent={<CloudflareAnalyticsComparisonContent />}
+        subtitle={cloudflareAnalyticsExtendedData.subtitle}
+        introHeading={cloudflareAnalyticsExtendedData.introHeading}
+        introParagraphs={cloudflareAnalyticsExtendedData.introParagraphs}
+        chooseRybbit={cloudflareAnalyticsExtendedData.chooseRybbit}
+        chooseCompetitor={cloudflareAnalyticsExtendedData.chooseCompetitor}
+        rybbitPricing={cloudflareAnalyticsExtendedData.rybbitPricing}
+        competitorPricing={cloudflareAnalyticsExtendedData.competitorPricing}
+        faqItems={cloudflareAnalyticsExtendedData.faqItems}
+        relatedResources={cloudflareAnalyticsExtendedData.relatedResources}
       />
     </>
   );

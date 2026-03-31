@@ -10,7 +10,7 @@ export function Footer() {
     <footer className="border-t border-neutral-200 dark:border-neutral-800">
       <div className="max-w-[1200px] mx-auto px-4 py-12">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {/* Company Info */}
           <div className="space-y-4">
             <Image src="/rybbit/horizontal_white.svg" alt="Rybbit" width={140} height={0} style={{ height: "auto" }}
@@ -116,6 +116,68 @@ export function Footer() {
               <li>
                 <Link href="/compare/posthog" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
                   {t("vs PostHog")}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Features */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold">{t("Features")}</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/features/web-analytics" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Web Analytics")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/session-replay" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Session Replay")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/funnels" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Funnels")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/user-journeys" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("User Journeys")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/goals" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Goals")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/custom-events" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Custom Events")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/sessions" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Sessions")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/retention" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Retention")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/web-vitals" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Web Vitals")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/error-tracking" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("Error Tracking")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/user-profiles" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  {t("User Profiles")}
                 </Link>
               </li>
             </ul>

@@ -1,112 +1,21 @@
+import { PlanRow } from "@/components/subscription/components/PlanRow";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { ArrowRight } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { useEffect } from "react";
 
 import { cn } from "../../../lib/utils";
-import { EVENT_TIERS, findPriceForTier, formatEventTier } from "../../subscribe/components/utils";
+import { EVENT_TIERS, formatEventTier } from "../../subscribe/components/utils";
 
 interface PlanStepProps {
   eventLimitIndex: number;
   setEventLimitIndex: (v: number) => void;
   isAnnual: boolean;
   setIsAnnual: (v: boolean) => void;
-  selectedPlan: "basic" | "standard" | "pro";
-  setSelectedPlan: (v: "basic" | "standard" | "pro") => void;
+  selectedPlan: "standard" | "pro";
+  setSelectedPlan: (v: "standard" | "pro") => void;
   onSubscribe: () => void;
   isLoading: boolean;
-}
-
-function PlanRow({
-  plan,
-  label,
-  description,
-  eventLimit,
-  isAnnual,
-  selectedPlan,
-  onSelect,
-  disabled,
-  disabledReason,
-}: {
-  plan: "basic" | "standard" | "pro";
-  label: string;
-  description: string;
-  eventLimit: number | string;
-  isAnnual: boolean;
-  selectedPlan: string;
-  onSelect: () => void;
-  disabled?: boolean;
-  disabledReason?: string;
-}) {
-  const price =
-    eventLimit !== "Custom"
-      ? findPriceForTier(eventLimit, isAnnual ? "year" : "month", plan)
-      : null;
-  const displayPrice = price
-    ? isAnnual
-      ? Math.round(price.price / 12)
-      : price.price
-    : 0;
-
-  return (
-    <button
-      onClick={disabled ? undefined : onSelect}
-      className={cn(
-        "w-full rounded-2xl p-1.5 transition-all text-left",
-        disabled
-          ? "opacity-50 cursor-not-allowed"
-          : "cursor-pointer",
-        !disabled && selectedPlan === plan
-          ? "bg-emerald-500/10 border border-emerald-500/30"
-          : "bg-neutral-200/20 dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800"
-      )}
-    >
-      <div
-        className={cn(
-          "flex items-center justify-between p-3 rounded-xl border",
-          !disabled && selectedPlan === plan
-            ? "border-emerald-500 bg-neutral-50 dark:bg-neutral-800/60"
-            : "border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900",
-          !disabled && selectedPlan !== plan && "hover:border-neutral-300 dark:hover:border-neutral-700"
-        )}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-              !disabled && selectedPlan === plan
-                ? "border-emerald-500"
-                : "border-neutral-300 dark:border-neutral-600"
-            )}
-          >
-            {!disabled && selectedPlan === plan && (
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            )}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{label}</span>
-              {disabled && disabledReason && (
-                <span className="text-[10px] text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded">
-                  {disabledReason}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              {description}
-            </p>
-          </div>
-        </div>
-        <div className="text-right">
-          <span className="font-semibold">${displayPrice}</span>
-          <span className="text-sm text-neutral-500 dark:text-neutral-400">
-            /mo
-          </span>
-        </div>
-      </div>
-    </button>
-  );
 }
 
 export function PlanStep({
@@ -121,13 +30,6 @@ export function PlanStep({
 }: PlanStepProps) {
   const t = useExtracted();
   const eventLimit = EVENT_TIERS[eventLimitIndex];
-  const basicAvailable = typeof eventLimit === "number" && eventLimit <= 250_000;
-
-  useEffect(() => {
-    if (!basicAvailable && selectedPlan === "basic") {
-      setSelectedPlan("standard");
-    }
-  }, [basicAvailable, selectedPlan]);
 
   return (
     <div>
@@ -197,17 +99,6 @@ export function PlanStep({
         {/* Plan rows */}
         {eventLimit !== "Custom" ? (
           <div className="space-y-2">
-            <PlanRow
-              plan="basic"
-              label={t("Basic")}
-              description={t("1 site, 1 team member, basic features")}
-              eventLimit={basicAvailable ? eventLimit : 250_000}
-              isAnnual={isAnnual}
-              selectedPlan={selectedPlan}
-              onSelect={() => setSelectedPlan("basic")}
-              disabled={!basicAvailable}
-              disabledReason={!basicAvailable ? "Up to 250k events" : undefined}
-            />
             <PlanRow
               plan="standard"
               label={t("Standard")}

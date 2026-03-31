@@ -6,13 +6,21 @@ import { NothingFound } from "../../../../components/NothingFound";
 import { ReplayCard, ReplayCardSkeleton } from "./ReplayCard";
 import { useGetSessionReplays } from "../../../../api/analytics/hooks/sessionReplay/useGetSessionReplays";
 import { SessionReplayListItem } from "../../../../api/analytics/endpoints";
+import { useShallow } from "zustand/react/shallow";
 import { useReplayStore } from "@/components/replay/replayStore";
 import { ScrollArea } from "../../../../components/ui/scroll-area";
 import { Input } from "../../../../components/ui/input";
 
 export function ReplayList() {
   const t = useExtracted();
-  const { sessionId, setSessionId, minDuration, setMinDuration } = useReplayStore();
+  const { sessionId, setSessionId, minDuration, setMinDuration } = useReplayStore(
+    useShallow(s => ({
+      sessionId: s.sessionId,
+      setSessionId: s.setSessionId,
+      minDuration: s.minDuration,
+      setMinDuration: s.setMinDuration,
+    }))
+  );
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useGetSessionReplays({
     minDuration,

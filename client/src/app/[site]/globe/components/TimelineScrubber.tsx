@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TimelineSlider } from "../../../../components/ui/timeline-slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../../components/ui/tooltip";
 import { useStore } from "../../../../lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { useTimelineStore, useActiveSessions } from "../timelineStore";
 import { formatTimelineTime, generateTimeWindows, getSessionCountsPerWindow } from "../timelineUtils";
 import { MAX_PAGES, PAGE_SIZE } from "../3d/hooks/timelineLayer/timelineLayerConstants";
@@ -12,7 +13,17 @@ import { MAX_PAGES, PAGE_SIZE } from "../3d/hooks/timelineLayer/timelineLayerCon
 export function TimelineScrubber() {
   const t = useExtracted();
   const { currentTime, timeRange, windowSize, setCurrentTime, allSessions, isLoading, hasMoreData } =
-    useTimelineStore();
+    useTimelineStore(
+      useShallow(s => ({
+        currentTime: s.currentTime,
+        timeRange: s.timeRange,
+        windowSize: s.windowSize,
+        setCurrentTime: s.setCurrentTime,
+        allSessions: s.allSessions,
+        isLoading: s.isLoading,
+        hasMoreData: s.hasMoreData,
+      }))
+    );
   const activeSessions = useActiveSessions();
   // Use reactive timezone from useStore
   const storeTimezone = useStore(state => state.timezone);

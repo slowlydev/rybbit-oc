@@ -3,9 +3,15 @@
 import { useState, useMemo } from "react";
 import { useAdminOrganizations } from "@/api/admin/hooks/useAdminOrganizations";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DateTime } from "luxon";
-import { SearchInput } from "../shared/SearchInput";
 import { ErrorAlert } from "../shared/ErrorAlert";
 import { AdminLayout } from "../shared/AdminLayout";
 import { GrowthChart } from "../shared/GrowthChart";
@@ -22,6 +28,7 @@ export function Organizations() {
   const { data: organizations, isLoading, isError } = useAdminOrganizations();
   const t = useExtracted();
 
+  const [activeTab, setActiveTab] = useState("growth");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter states
@@ -74,13 +81,18 @@ export function Organizations() {
 
   return (
     <AdminLayout>
-      <Tabs defaultValue="growth" className="mb-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <TabsList>
-            <TabsTrigger value="growth">{t("Organization Growth")}</TabsTrigger>
-            <TabsTrigger value="usage">{t("Service Usage")}</TabsTrigger>
-            <TabsTrigger value="subscriptions">{t("Subscription Tiers")}</TabsTrigger>
-          </TabsList>
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="growth">{t("Organization Growth")}</SelectItem>
+              <SelectItem value="usage">{t("Service Usage")}</SelectItem>
+              <SelectItem value="subscriptions">{t("Subscription Tiers")}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <TabsContent value="growth">
           <GrowthChart data={organizations} color="#8b5cf6" title={t("Organizations")} />
@@ -131,12 +143,9 @@ export function Organizations() {
         </TabsContent>
       </Tabs>
       <div className="space-y-2">
-        <SearchInput
-          placeholder={t("Search by name, slug, domain, or member email...")}
-          value={searchQuery}
-          onChange={setSearchQuery}
-        />
         <OrganizationFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
           showZeroEvents={showZeroEvents}
           setShowZeroEvents={setShowZeroEvents}
           showOnlyOverLimit={showOnlyOverLimit}

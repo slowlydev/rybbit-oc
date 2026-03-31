@@ -1,31 +1,28 @@
 "use client";
 
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { getCalApi } from "@calcom/embed-react";
 import { useExtracted } from "next-intl";
-import { useEffect, useState } from "react";
-import { BASIC_SITE_LIMIT, BASIC_TEAM_LIMIT, FREE_SITE_LIMIT, STANDARD_SITE_LIMIT, STANDARD_TEAM_LIMIT } from "../lib/const";
+import { useEffect, useState, useCallback } from "react";
+import { STANDARD_SITE_LIMIT, STANDARD_TEAM_LIMIT } from "../lib/const";
 import { PricingCard } from "./PricingCard";
 
 // Available event tiers for the slider
-const EVENT_TIERS = [100_000, 250_000, 500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000, 20_000_000, "Custom"];
+const EVENT_TIERS = [100_000, 250_000, 500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000, 20_000_000, 30_000_000, 40_000_000, 50_000_000, "Custom"];
 
 export const formatter = Intl.NumberFormat("en", {
   notation: "compact",
 }).format;
 
 // Format price with dollar sign for Basic, Standard, and Pro
-function getFormattedPrice(eventLimit: number | string, planType: "basic" | "standard" | "pro") {
+function getFormattedPrice(eventLimit: number | string, planType: "standard" | "pro") {
   // Monthly prices
   let monthlyPrice;
   if (typeof eventLimit === "string") return { custom: true }; // Custom pricing
 
-  if (planType === "basic") {
-    if (eventLimit <= 100_000) monthlyPrice = 14;
-    else if (eventLimit <= 250_000) monthlyPrice = 24;
-    else return { custom: true };
-  } else if (planType === "standard") {
+  if (planType === "standard") {
     // Standard tier prices
     if (eventLimit <= 100_000) monthlyPrice = 19;
     else if (eventLimit <= 250_000) monthlyPrice = 29;
@@ -35,6 +32,9 @@ function getFormattedPrice(eventLimit: number | string, planType: "basic" | "sta
     else if (eventLimit <= 5_000_000) monthlyPrice = 149;
     else if (eventLimit <= 10_000_000) monthlyPrice = 249;
     else if (eventLimit <= 20_000_000) monthlyPrice = 399;
+    else if (eventLimit <= 30_000_000) monthlyPrice = 549;
+    else if (eventLimit <= 40_000_000) monthlyPrice = 699;
+    else if (eventLimit <= 50_000_000) monthlyPrice = 849;
     else return { custom: true };
   } else {
     // Pro tier prices (roughly double)
@@ -46,6 +46,9 @@ function getFormattedPrice(eventLimit: number | string, planType: "basic" | "sta
     else if (eventLimit <= 5_000_000) monthlyPrice = 299;
     else if (eventLimit <= 10_000_000) monthlyPrice = 499;
     else if (eventLimit <= 20_000_000) monthlyPrice = 799;
+    else if (eventLimit <= 30_000_000) monthlyPrice = 1099;
+    else if (eventLimit <= 40_000_000) monthlyPrice = 1399;
+    else if (eventLimit <= 50_000_000) monthlyPrice = 1699;
     else return { custom: true };
   }
 
@@ -61,16 +64,18 @@ function getFormattedPrice(eventLimit: number | string, planType: "basic" | "sta
 export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, setIsAnnual: (isAnnual: boolean) => void }) {
   const t = useExtracted();
   const [eventLimitIndex, setEventLimitIndex] = useState(0); // Default to 100k (index 0)
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [slideCount, setSlideCount] = useState(0);
 
-  const BASIC_FEATURES = [
-    t("{count} website", { count: String(BASIC_SITE_LIMIT) }),
-    t("{count} team member", { count: String(BASIC_TEAM_LIMIT) }),
-    t("Web analytics dashboard"),
-    t("Goals"),
-    t("Custom events"),
-    t("2 year data retention"),
-    t("Email support"),
-  ];
+  useEffect(() => {
+    if (!carouselApi) return;
+    setSlideCount(carouselApi.scrollSnapList().length);
+    setCurrentSlide(carouselApi.selectedScrollSnap());
+    carouselApi.on("select", () => {
+      setCurrentSlide(carouselApi.selectedScrollSnap());
+    });
+  }, [carouselApi]);
 
   const STANDARD_FEATURES = [
     t("Up to {count} websites", { count: String(STANDARD_SITE_LIMIT) }),
@@ -112,19 +117,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
     t("Slack/live chat support"),
   ];
 
-  const FREE_FEATURES = [
-    { feature: t("1 user"), included: true },
-    { feature: t("{count} website", { count: String(FREE_SITE_LIMIT) }), included: true },
-    { feature: t("Web analytics dashboard"), included: true },
-    { feature: t("Custom events"), included: true },
-    { feature: t("6 month data retention"), included: true },
-    { feature: t("Advanced features"), included: false },
-    { feature: t("Email support"), included: false },
-  ];
-
   const eventLimit = EVENT_TIERS[eventLimitIndex];
-  const basicPrices = getFormattedPrice(eventLimit, "basic");
-  const isBasicAvailable = typeof eventLimit === "number" && eventLimit <= 250_000;
   const standardPrices = getFormattedPrice(eventLimit, "standard");
   const proPrices = getFormattedPrice(eventLimit, "pro");
 
@@ -187,7 +180,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
                 >
                   {t("Annual")}
                 </button>
-                <div className="text-xs text-white absolute top-0 right-0 -translate-y-3 translate-x-1/2 bg-emerald-500 dark:bg-emerald-500 rounded-full px-2 py-0.5">
+                <div className="text-xs text-white absolute top-0 right-0 -translate-y-3 bg-emerald-500 dark:bg-emerald-500 rounded-full px-2 py-0.5 whitespace-nowrap">
                   {t("4 months free")}
                 </div>
               </div>
@@ -208,7 +201,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
             {EVENT_TIERS.map((tier, index) => (
               <span key={index} className={cn(eventLimitIndex === index && "font-bold text-emerald-400")}>
                 {index === EVENT_TIERS.length - 1
-                  ? "20M+"
+                  ? "50M+"
                   : typeof tier === "number" && tier >= 1_000_000
                     ? `${tier / 1_000_000}M`
                     : typeof tier === "number"
@@ -219,90 +212,103 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
           </div>
         </div>
 
-        {/* Pricing cards layout */}
-        <div className="grid min-[1100px]:grid-cols-4 min-[700px]:grid-cols-2 min-[400px]:grid-cols-1 gap-4 mx-auto justify-center items-stretch">
-          {/* Basic Plan Card */}
-          <div className={cn("h-full", !isBasicAvailable && "opacity-60")}>
+        {/* Pricing cards - carousel on mobile, grid on desktop */}
+        {(() => {
+          const standardCard = (
             <PricingCard
-              title={t("Basic")}
-              description={t("For personal projects and small sites")}
+              title={t("Standard")}
+              description={t("Everything you need to get started as a small business")}
               priceDisplay={
-                !isBasicAvailable ? (
-                  <div className="text-3xl font-bold">-</div>
-                ) : basicPrices.custom ? (
+                standardPrices.custom ? (
                   <div className="text-3xl font-bold">{t("Custom")}</div>
                 ) : (
                   <div>
                     <span className="text-3xl font-bold">
-                      ${isAnnual ? Math.round(basicPrices.annual! / 12) : basicPrices.monthly}
+                      ${isAnnual ? Math.round(standardPrices.annual! / 12) : standardPrices.monthly}
                     </span>
                     <span className="ml-1 text-neutral-400">{t("/month")}</span>
                   </div>
                 )
               }
-              buttonText={!isBasicAvailable ? t("Up to 250k only") : t("Start for $0")}
-              buttonHref={!isBasicAvailable ? undefined : "https://app.rybbit.io/signup"}
-              features={BASIC_FEATURES}
-              disabled={!isBasicAvailable}
-              eventLocation={isBasicAvailable ? "basic" : undefined}
+              buttonText={standardPrices.custom ? t("Contact us") : t("Start for $0")}
+              buttonHref={standardPrices.custom ? "https://www.rybbit.com/contact" : "https://app.rybbit.io/signup"}
+              features={STANDARD_FEATURES}
+              eventLocation={standardPrices.custom ? undefined : "standard"}
             />
-          </div>
+          );
 
-          {/* Standard Plan Card */}
-          <PricingCard
-            title={t("Standard")}
-            description={t("Everything you need to get started as a small business")}
-            priceDisplay={
-              standardPrices.custom ? (
-                <div className="text-3xl font-bold">{t("Custom")}</div>
-              ) : (
-                <div>
-                  <span className="text-3xl font-bold">
-                    ${isAnnual ? Math.round(standardPrices.annual! / 12) : standardPrices.monthly}
-                  </span>
-                  <span className="ml-1 text-neutral-400">{t("/month")}</span>
+          const proCard = (
+            <PricingCard
+              title={t("Pro")}
+              description={t("Advanced features for professional teams")}
+              priceDisplay={
+                proPrices.custom ? (
+                  <div className="text-3xl font-bold">{t("Custom")}</div>
+                ) : (
+                  <div>
+                    <span className="text-3xl font-bold">
+                      ${isAnnual ? Math.round(proPrices.annual! / 12) : proPrices.monthly}
+                    </span>
+                    <span className="ml-1 text-neutral-400">{t("/month")}</span>
+                  </div>
+                )
+              }
+              buttonText={proPrices.custom ? t("Contact us") : t("Start for $0")}
+              buttonHref={proPrices.custom ? "https://www.rybbit.com/contact" : "https://app.rybbit.io/signup"}
+              features={PRO_FEATURES}
+              eventLocation={proPrices.custom ? undefined : "pro"}
+              recommended={true}
+            />
+          );
+
+          const enterpriseCard = (
+            <PricingCard
+              title={t("Enterprise")}
+              description={t("Advanced features for enterprise teams")}
+              priceDisplay={<div className="text-3xl font-bold">{t("Custom")}</div>}
+              features={ENTERPRISE_FEATURES}
+              buttonText={t("Contact us")}
+              buttonHref={"https://www.rybbit.com/contact"}
+            />
+          );
+
+          return (
+            <>
+              {/* Mobile carousel */}
+              <div className="min-[700px]:hidden">
+                <Carousel setApi={setCarouselApi} opts={{ startIndex: 1 }}>
+                  <CarouselContent>
+                    <CarouselItem>{standardCard}</CarouselItem>
+                    <CarouselItem>{proCard}</CarouselItem>
+                    <CarouselItem>{enterpriseCard}</CarouselItem>
+                  </CarouselContent>
+                </Carousel>
+                {/* Dot indicators */}
+                <div className="flex justify-center gap-2 mt-4">
+                  {Array.from({ length: slideCount }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => carouselApi?.scrollTo(i)}
+                      className={cn(
+                        "w-2 h-2 rounded-full transition-colors cursor-pointer",
+                        currentSlide === i
+                          ? "bg-emerald-500"
+                          : "bg-neutral-400 dark:bg-neutral-600"
+                      )}
+                    />
+                  ))}
                 </div>
-              )
-            }
-            buttonText={standardPrices.custom ? t("Contact us") : t("Start for $0")}
-            buttonHref={standardPrices.custom ? "https://www.rybbit.com/contact" : "https://app.rybbit.io/signup"}
-            features={STANDARD_FEATURES}
-            eventLocation={standardPrices.custom ? undefined : "standard"}
-          />
+              </div>
 
-          {/* Pro Plan Card */}
-          <PricingCard
-            title={t("Pro")}
-            description={t("Advanced features for professional teams")}
-            priceDisplay={
-              proPrices.custom ? (
-                <div className="text-3xl font-bold">{t("Custom")}</div>
-              ) : (
-                <div>
-                  <span className="text-3xl font-bold">
-                    ${isAnnual ? Math.round(proPrices.annual! / 12) : proPrices.monthly}
-                  </span>
-                  <span className="ml-1 text-neutral-400">{t("/month")}</span>
-                </div>
-              )
-            }
-            buttonText={proPrices.custom ? t("Contact us") : t("Start for $0")}
-            buttonHref={proPrices.custom ? "https://www.rybbit.com/contact" : "https://app.rybbit.io/signup"}
-            features={PRO_FEATURES}
-            eventLocation={proPrices.custom ? undefined : "pro"}
-            recommended={true}
-          />
-
-          {/* Enterprise Plan Card */}
-          <PricingCard
-            title={t("Enterprise")}
-            description={t("Advanced features for enterprise teams")}
-            priceDisplay={<div className="text-3xl font-bold">{t("Custom")}</div>}
-            features={ENTERPRISE_FEATURES}
-            buttonText={t("Contact us")}
-            buttonHref={"https://www.rybbit.com/contact"}
-          />
-        </div>
+              {/* Desktop grid */}
+              <div className="hidden min-[700px]:grid min-[1100px]:grid-cols-3 min-[700px]:grid-cols-2 gap-4 mx-auto justify-center items-stretch">
+                {standardCard}
+                {proCard}
+                {enterpriseCard}
+              </div>
+            </>
+          );
+        })()}
       </div>
     </section>
   );

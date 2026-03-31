@@ -38,19 +38,6 @@ const CONFIRM_THRESHOLD = 100 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = ["text/csv"];
 const ALLOWED_EXTENSIONS = [".csv"];
 
-function validateFile(file: File | null, t: (key: string) => string): string {
-  if (!file) {
-    return t("Please select a file");
-  }
-
-  const extension = "." + file.name.split(".").pop()?.toLowerCase();
-  if (!ALLOWED_EXTENSIONS.includes(extension) && !ALLOWED_FILE_TYPES.includes(file.type)) {
-    return t("Only CSV files are accepted");
-  }
-
-  return "";
-}
-
 function formatFileSize(bytes: number): string {
   const sizeInMB = bytes / 1024 / 1024;
   const sizeInGB = bytes / 1024 / 1024 / 1024;
@@ -80,6 +67,19 @@ export function ImportManager({ siteId, disabled }: ImportManagerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const workerManagerRef = useRef<CsvParser | null>(null);
 
+  function validateFile(file: File | null): string {
+    if (!file) {
+      return t("Please select a file");
+    }
+
+    const extension = "." + file.name.split(".").pop()?.toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(extension) && !ALLOWED_FILE_TYPES.includes(file.type)) {
+      return t("Only CSV files are accepted");
+    }
+
+    return "";
+  }
+
   const { data, isLoading, error } = useGetSiteImports(siteId);
   const createImportMutation = useCreateSiteImport(siteId);
   const deleteMutation = useDeleteSiteImport(siteId);
@@ -93,7 +93,7 @@ export function ImportManager({ siteId, disabled }: ImportManagerProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setSelectedFile(file);
-    setFileError(validateFile(file, t));
+    setFileError(validateFile(file));
   };
 
   const onSubmit = (e: React.FormEvent) => {
